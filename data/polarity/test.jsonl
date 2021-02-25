@@ -1,0 +1,2012 @@
+{"sentence": "Pen is to write.", "polarity": 1, "predicate": "HasSubevent"}
+{"sentence": "Pen is not to write.", "polarity": 0, "predicate": "HasSubevent"}
+{"sentence": "123 is made of troll.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "123 is not made of troll.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Atom has neurons protons.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Atom has not neurons protons.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Blood is made of haemogloin.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Blood is not made of haemogloin.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "A boat can be made of fiber.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "A boat cannot be made of fiber.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "A bowl is made of steel.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "A bowl is not made of steel.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Chopsticks can be made of bamboo.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Chopsticks cannot be made of bamboo.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "A duvet can be made of cotton.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "A duvet cannot be made of cotton.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Internet is made of Noobs.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Internet is not made of Noobs.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Keyboard is made of plastic.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Keyboard is not made of plastic.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Paper can be made of wood.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Paper cannot be made of wood.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Rhetoric is made of words.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Rhetoric is not made of words.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "A set is made of members.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "A set is not made of members.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "State is made of counties.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "State is not made of counties.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "A submarine is made of steel.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "A submarine is not made of steel.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Table is a type of wood.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Table is not a type of wood.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Twitter is made of tweets.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Twitter is not made of tweets.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Vinyl is made of polymers.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Vinyl is not made of polymers.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "A witch is made of wood.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "A witch is not made of wood.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Achievement requires effort.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Achievement does not require effort.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Analysing something requires caring.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Analysing something does not require caring.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Cat requires meat.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Cat does not require meat.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Celebrating requires food.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Celebrating does not require food.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Celebrating requires an occassion.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Celebrating does not require an occassion.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Coding requires thinking.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Coding does not require thinking.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Communicating requires laugh.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Communicating does not require laugh.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Contemplating requires attention.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Contemplating does not require attention.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Diving requires courage.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Diving does not require courage.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Diving requires swimming skill.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Diving does not require swimming skill.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Entertaining someone requires creativity.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Entertaining someone does not require creativity.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Dance is musical exercise.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Dance is not musical exercise.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Exercising requires motivation.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Exercising does not require motivation.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Fiddling requires practice.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Fiddling does not require practice.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Forgiving someone requires sympathy.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Forgiving someone does not require sympathy.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Grooming requires personality.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Grooming does not require personality.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Hearing requires vibration.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Hearing does not require vibration.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Hiking requires feet.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Hiking does not require feet.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Judging someone requires ignorance.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Judging someone does not require ignorance.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Killing requires justification.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Killing does not require justification.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Kissing someone requires trust.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Kissing someone does not require trust.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Lying requires a plan.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Lying does not require a plan.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Procreating requires mating.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Procreating does not require mating.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Procreation requires sex.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Procreation does not require sex.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Punch is to hit.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Punch is not to hit.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Reproduction requires a plan.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Reproduction does not require a plan.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Thanking someone requires compassion.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Thanking someone does not require compassion.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Typing requires practice.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Typing does not require practice.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Urinating requires fluid.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Urinating does not require fluid.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Woodworking requires tools.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Woodworking does not require tools.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Wrestling requires a helmet.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Wrestling does not require a helmet.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Writing requires patience.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Writing does not require patience.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Dance is fun.", "polarity": 1, "predicate": "MotivatedByGoal"}
+{"sentence": "Dance is not fun.", "polarity": 0, "predicate": "MotivatedByGoal"}
+{"sentence": "Surprise is a reaction.", "polarity": 1, "predicate": "MotivatedByGoal"}
+{"sentence": "Surprise is not a reaction.", "polarity": 0, "predicate": "MotivatedByGoal"}
+{"sentence": "Door has knob hinges.", "polarity": 1, "predicate": "AtLocation"}
+{"sentence": "Door has not knob hinges.", "polarity": 0, "predicate": "AtLocation"}
+{"sentence": "Staples are office supplies.", "polarity": 1, "predicate": "AtLocation"}
+{"sentence": "Staples are not office supplies.", "polarity": 0, "predicate": "AtLocation"}
+{"sentence": "Democracy is government.", "polarity": 1, "predicate": "AtLocation"}
+{"sentence": "Democracy is not government.", "polarity": 0, "predicate": "AtLocation"}
+{"sentence": "Referee is football umpire.", "polarity": 1, "predicate": "AtLocation"}
+{"sentence": "Referee is not football umpire.", "polarity": 0, "predicate": "AtLocation"}
+{"sentence": "Column has spreadsheet.", "polarity": 1, "predicate": "AtLocation"}
+{"sentence": "Column has not spreadsheet.", "polarity": 0, "predicate": "AtLocation"}
+{"sentence": "Country is boundary.", "polarity": 1, "predicate": "AtLocation"}
+{"sentence": "Country is not boundary.", "polarity": 0, "predicate": "AtLocation"}
+{"sentence": "Iron is an ore.", "polarity": 1, "predicate": "AtLocation"}
+{"sentence": "Iron is not an ore.", "polarity": 0, "predicate": "AtLocation"}
+{"sentence": "Cry is sadness action.", "polarity": 1, "predicate": "CausesDesire"}
+{"sentence": "Cry is not sadness action.", "polarity": 0, "predicate": "CausesDesire"}
+{"sentence": "A hacksaw is a type of tool.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "A hacksaw is not a type of tool.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "IBM is a type of computer.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "IBM is not a type of computer.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Humans are stupids.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Humans are not stupids.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Ginseng is a plant.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Ginseng is not a plant.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Ostriches are animals.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Ostriches are not animals.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Hemoglobin is a pigment.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Hemoglobin is not a pigment.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Pepsi is a beverage.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Pepsi is not a beverage.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Turpentine is flamable.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Turpentine is not flamable.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Acting is an art.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Acting is not an art.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Procrastination is a type of behaviour.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Procrastination is not a type of behaviour.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Bush is american president.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Bush is not american president.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Alabaster is a stone.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Alabaster is not a stone.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "A beluga is a type of whale.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "A beluga is not a type of whale.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Jogging is a hobby.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Jogging is not a hobby.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Ceremony is ancient ritual.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Ceremony is not ancient ritual.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Hardtack is a type of flatbread.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Hardtack is not a type of flatbread.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Hot is an adjective.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Hot is not an adjective.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Sheep are mammals .", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Sheep are not mammals .", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Striving is achievement.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Striving is not achievement.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Human is biped.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Human is not biped.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "The world is everything.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "The world is not everything.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "GNH is an ideal.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "GNH is not an ideal.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Sand is plentifull.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Sand is not plentifull.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Popeye is a sailorman.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Popeye is not a sailorman.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Partygoers are people.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Partygoers are not people.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Rabbit is pet.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Rabbit is not pet.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Birthday is birth celebration.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Birthday is not birth celebration.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Vise is tool.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Vise is not tool.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "A rabbit is game.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "A rabbit is not game.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Felines are carnivores.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Felines are not carnivores.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "LSD is a hallucinogen.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "LSD is not a hallucinogen.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Michaelangelo was an artist.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Michaelangelo was not an artist.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Nietzsche was a preacher.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Nietzsche was not a preacher.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Turmeric is a spice.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Turmeric is not a spice.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Bar is drink establishment.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Bar is not drink establishment.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Swaying is a type of motion.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Swaying is not a type of motion.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Hans is an herbalist.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Hans is not an herbalist.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Ignorants is bliss.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Ignorants is not bliss.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Apple is a friut.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Apple is not a friut.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Disagreement is quarrel.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Disagreement is not quarrel.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Gordita is a type of flatbread.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Gordita is not a type of flatbread.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Tablespoon is a type of measurement.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Tablespoon is not a type of measurement.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Parfin is a type of wax.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Parfin is not a type of wax.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Division is math operation.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Division is not math operation.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "LINUX is free.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "LINUX is not free.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Kennedy was assasinated.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Kennedy was not assasinated.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Cocain is snorted.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Cocain is not snorted.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Cyprus is a country.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Cyprus is not a country.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Resonation is communication.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Resonation is not communication.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Milk is constipating.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Milk is not constipating.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Colorado is a place.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Colorado is not a place.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Some watches are multifunctional.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Some watches are not multifunctional.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Some people are grocers.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Some people are not grocers.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Joy is a dog.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Joy is not a dog.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Svg is a type of xml.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Svg is not a type of xml.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Bob is an individual.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Bob is not an individual.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Box is a noun.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Box is not a noun.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Vultures are scavengers.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Vultures are not scavengers.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Experience is unsimulatable.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Experience is not unsimulatable.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Clarinet is instrument.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Clarinet is not instrument.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Information is a type of abstraction.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Information is not a type of abstraction.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Sedum is a groundcover.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Sedum is not a groundcover.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Casper is a ghost.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Casper is not a ghost.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Einstein was a physicist.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Einstein was not a physicist.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Harvard is a college.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Harvard is not a college.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "A resolution is a type of decision.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "A resolution is not a type of decision.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Ark is zoo boat.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Ark is not zoo boat.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Lemons are yelloow.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Lemons are not yelloow.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "A point is dimensionless.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "A point is not dimensionless.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Shutome is a type of swordfish.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Shutome is not a type of swordfish.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Denim is a fabric.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Denim is not a fabric.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Ubuntu is a type of Linux.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Ubuntu is not a type of Linux.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Time is a mystery.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Time is not a mystery.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Customers are people.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Customers are not people.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "A beagle is a type of dog.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "A beagle is not a type of dog.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Sulphur is a chalcogen.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Sulphur is not a chalcogen.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Maine is a place.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Maine is not a place.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Some politicians are puppets.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Some politicians are not puppets.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "A retriever is a type of pet.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "A retriever is not a type of pet.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Pythons are snakes.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Pythons are not snakes.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Trees are perennials.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Trees are not perennials.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Jesus was a Jew.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Jesus was not a Jew.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "England is a monarchy.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "England is not a monarchy.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Fionacat is an alias.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Fionacat is not an alias.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Wyoming is a state.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Wyoming is not a state.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Hosta is a perrenial.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Hosta is not a perrenial.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Ashley is a university.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Ashley is not a university.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Wolfram is a metal.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Wolfram is not a metal.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Mega is a prefix.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Mega is not a prefix.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Mine is a type of weapon.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Mine is not a type of weapon.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Number is two.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Number is not two.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Alcohol is a depressant.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Alcohol is not a depressant.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "A mechanic is a type of tradesman.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "A mechanic is not a type of tradesman.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Squash is a sport.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Squash is not a sport.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Spice is seasoning.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Spice is not seasoning.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Cut is skin laceration.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Cut is not skin laceration.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Doctor is medical expert.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Doctor is not medical expert.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Bird is a eagle.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Bird is not a eagle.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Albania is a country.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Albania is not a country.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Engines are motors.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Engines are not motors.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Swiss chard is a type of vegetable.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Swiss chard is not a type of vegetable.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Revolver is a type of gun.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Revolver is not a type of gun.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Interferon is a protein.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Interferon is not a protein.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Estrogen is a steroid.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Estrogen is not a steroid.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Kindness is a virtue.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Kindness is not a virtue.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Some politicians are puppets.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Some politicians are not puppets.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Bacteria are Prokaryotic.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Bacteria are not Prokaryotic.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "A nutdriver is a type of tool.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "A nutdriver is not a type of tool.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Well is water pit.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Well is not water pit.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Nirvana is a band.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Nirvana is not a band.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Remembering is an action.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Remembering is not an action.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "A brooch is a type of jewelry.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "A brooch is not a type of jewelry.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Cockroaches are insects.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Cockroaches are not insects.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Pie is a desseret.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Pie is not a desseret.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Sartre was an Existentialist.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Sartre was not an Existentialist.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Fish are purdy.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Fish are not purdy.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "DMT is a psychedelic.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "DMT is not a psychedelic.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Golf is a passtime.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Golf is not a passtime.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Indica is a type of marijuana.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Indica is not a type of marijuana.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Darts are arrows.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Darts are not arrows.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Weaver is a bird.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Weaver is not a bird.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Some doors are archways.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Some doors are not archways.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Factory is a type of company.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Factory is not a type of company.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Grebe is a bird.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Grebe is not a bird.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Rakes are tools.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Rakes are not tools.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Taman is a peninsula.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Taman is not a peninsula.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Hono is a type of flatbread.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Hono is not a type of flatbread.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Er is a suffix.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Er is not a suffix.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Archery is sport.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Archery is not sport.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Star is a type of shape.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Star is not a type of shape.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Snowflakes are fractal.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Snowflakes are not fractal.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Some pagans are witches.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Some pagans are not witches.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Donkeys are equines.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Donkeys are not equines.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Carrie wants sex.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "Carrie does not want sex.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "A cat wants control.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "A cat does not want control.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "Charles needs sex.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "Charles does not need sex.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "Child wants love.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "Child does not want love.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "Harry needs sex.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "Harry does not need sex.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "Jim wants sex.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "Jim does not want sex.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "Kirstin wants sex.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "Kirstin does not want sex.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "Ming  wants guineia.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "Ming  does not want guineia.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "Pedobear wants cake.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "Pedobear does not want cake.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "People can explore space.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "People cannot explore space.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "A person wants acknowledgement.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "A person does not want acknowledgement.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "Name is person identity.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "Name is not person identity.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "Person wants light.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "Person does not want light.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "Rich wants sex.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "Rich does not want sex.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "A teacher wants attention.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "A teacher does not want attention.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "Terrorist wants to violence.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "Terrorist does not want to violence.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "We like to camp.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "We do not like to camp.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "Willy needs sex.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "Willy does not need sex.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "Alchohol can be injested.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Alchohol cannot be injested.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Alcohol can burn.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Alcohol cannot burn.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Animals can be gay.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Animals cannot be gay.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Birds can grow.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Birds cannot grow.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Buttons can explode.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Buttons cannot explode.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Cancer can kill.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Cancer cannot kill.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Ceiling can leak.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Ceiling cannot leak.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Children can be enjoyed.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Children cannot be enjoyed.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Children can skip.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Children cannot skip.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "A Christian can stumble.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "A Christian cannot stumble.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Computers can multitask.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Computers cannot multitask.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Contribution is a gift.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Contribution is not a gift.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Dogs can defend.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Dogs cannot defend.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Edges can hurt.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Edges cannot hurt.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Elastic  can recoil.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Elastic  cannot recoil.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "The FBI can investigate.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "The FBI cannot investigate.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Fear can confuse.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Fear cannot confuse.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Fishermen can catch fish.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Fishermen cannot catch fish.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Frogs can hop.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Frogs cannot hop.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Grandma can welcome me.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Grandma cannot welcome me.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "A gundog can find.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "A gundog cannot find.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Guns can break.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Guns cannot break.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Gyms can be clubs.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Gyms cannot be clubs.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Happiness can spread.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Happiness cannot spread.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Heat can sterilize.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Heat cannot sterilize.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Horses can trot.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Horses cannot trot.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Humans can heal.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Humans cannot heal.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Humans can be tickled.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Humans cannot be tickled.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Kids can be distracting.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Kids cannot be distracting.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Kindness can be neverending.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Kindness cannot be neverending.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Music can be beutifull.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Music cannot be beutifull.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Music can irritate.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Music cannot irritate.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "A name can change.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "A name cannot change.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "A newspaper can educate.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "A newspaper cannot educate.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "A penis can ejaculate.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "A penis cannot ejaculate.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Peole can dance.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Peole cannot dance.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "People can err.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "People cannot err.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Plans can fail.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Plans cannot fail.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Plastic can burn.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Plastic cannot burn.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Programs can compute.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Programs cannot compute.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Rats can bite.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Rats cannot bite.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Wind is running air.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Wind is not running air.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "A student can fart.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "A student cannot fart.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "TNT can explode.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "TNT cannot explode.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Torpedo can explode.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Torpedo cannot explode.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "War can escalate.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "War cannot escalate.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Wax can be moulded.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Wax cannot be moulded.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Yogurt can spoil.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Yogurt cannot spoil.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Bandung is part of Java.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Bandung is not part of Java.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Belt is part of outfit.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Belt is not part of outfit.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Creativity is part of innovation.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Creativity is not part of innovation.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Eritrea is part of Africa.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Eritrea is not part of Africa.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Farmland is part of state.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Farmland is not part of state.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Navy is fleet.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Navy is not fleet.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Illusion is part of magic.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Illusion is not part of magic.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Lebanon is part of asia.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Lebanon is not part of asia.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Cliff is high ledge.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Cliff is not high ledge.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Jar has a lid.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Jar has not a lid.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Longreach is part of Queensland.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Longreach is not part of Queensland.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Petroleum is part of asphalt.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Petroleum is not part of asphalt.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Seam is dress line.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Seam is not dress line.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "SIPB is part of MIT.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "SIPB is not part of MIT.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Sorrow is part of life.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Sorrow is not part of life.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Spine is part of skeleton.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Spine is not part of skeleton.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "A spring is part of watch.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "A spring is not part of watch.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Study is part of education.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Study is not part of education.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Sword is part of armoury.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Sword is not part of armoury.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Synapse is part of brain.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Synapse is not part of brain.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Vowel is part of speech.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Vowel is not part of speech.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Yukon territory is part of canada.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Yukon territory is not part of canada.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "The abdomen contains organs.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "The abdomen does not contain organs.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Animals have bodies.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Animals have not bodies.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Ants have an exoskeleten.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Ants have not an exoskeleten.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Arizona has deserts.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Arizona has not deserts.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "A backyard has grass.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "A backyard has not grass.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Bananas have potassium.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Bananas have not potassium.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Banks have ATMs.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Banks have not ATMs.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Bicycles have spokes.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Bicycles have not spokes.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Some birds have bills.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Some birds have not bills.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "They both have shells.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "They both have not shells.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Cars have windscreens.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Cars have not windscreens.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Cats have bones.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Cats have not bones.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Cigarretts have tobacco.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Cigarretts have not tobacco.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Coconuts have milk.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Coconuts have not milk.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "A company has assets.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "A company has not assets.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "A courthouse has rooms.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "A courthouse has not rooms.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Some destinations have popularity.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Some destinations have not popularity.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Dogs have claws.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Dogs have not claws.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Doors often have handles.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Doors often have not handles.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Ducks have bones.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Ducks have not bones.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Everyone has a childhood.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Everyone has not a childhood.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Name is for everyone.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Name is not for everyone.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Fights have violence.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Fights have not violence.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "A fork has prongs.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "A fork has not prongs.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Forks have tines.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Forks have not tines.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Houses have a foundation.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Houses have not a foundation.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Humans have genes.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Humans have not genes.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Jamaca has beaches.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Jamaca has not beaches.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "John has kids.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "John has not kids.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Kitchens have stoves.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Kitchens have not stoves.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Leopards have fur.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Leopards have not fur.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Limes have seeds.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Limes have not seeds.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "An oak has leaves.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "An oak has not leaves.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Onions have a skin.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Onions have not a skin.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "A passageway has doors.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "A passageway has not doors.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Pianos have keyboards.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Pianos have not keyboards.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Pigs have snouts.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Pigs have not snouts.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Rich has kids.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Rich has not kids.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Rollerblades have wheels.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Rollerblades have not wheels.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Some schools have cafeterias.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Some schools have not cafeterias.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Steve has kids.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Steve has not kids.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Main is street name.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Main is not street name.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Tortoises have shells.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Tortoises have not shells.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "TVs have antennae.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "TVs have not antennae.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Vertebrates have spines.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Vertebrates have not spines.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Villi contains microvilli.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Villi does not contain microvilli.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Some vines have flowers.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Some vines have not flowers.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "We have toes.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "We have not toes.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Will have chopsticks.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Will have not chopsticks.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Willy has kids.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Willy has not kids.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Woodchucks have to cautious.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Woodchucks have not to cautious.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Procreating is for fun.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Procreating is not for fun.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Cake has sweet celebration.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Cake has not sweet celebration.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Fiddling is for masterbation.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Fiddling is not for masterbation.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Studying is for contemplation.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Studying is not for contemplation.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Skiing is a type of sport.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Skiing is not a type of sport.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Reproducing is for replicating.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Reproducing is not for replicating.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Thinking is for articulating.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Thinking is not for articulating.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Eye has vision.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Eye has not vision.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Dancing is for performing.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Dancing is not for performing.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Lying is for liars.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Lying is not for liars.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Spoon is for flinging.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Spoon is not for flinging.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Dreaming is for visualizing.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Dreaming is not for visualizing.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Exercising is for training.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Exercising is not for training.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Flirting is for dating.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Flirting is not for dating.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Sand is for sandboxes.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Sand is not for sandboxes.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Remembering is for relating.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Remembering is not for relating.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Wheat is for eating.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Wheat is not for eating.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Fencing is for defense.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Fencing is not for defense.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Paper is writing pad.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Paper is not writing pad.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Cotton is for bedding.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Cotton is not for bedding.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Captain is a type of leadership.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Captain is not a type of leadership.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Clippers can cut hair.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Clippers cannot cut hair.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Living is for existing.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Living is not for existing.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Contemplating is for introspection.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Contemplating is not for introspection.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Socialising is for parties.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Socialising is not for parties.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Skating is for relaxation.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Skating is not for relaxation.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Intestine is for digestion.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Intestine is not for digestion.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Diving is for working.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Diving is not for working.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Sex is for procresation.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Sex is not for procresation.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Skiing is for excitement.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Skiing is not for excitement.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Literature is for pleasure.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Literature is not for pleasure.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Painting is for recreation.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Painting is not for recreation.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Wrestling is for fun.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Wrestling is not for fun.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Saw is for sawing.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Saw is not for sawing.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Knife is slicing tool.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Knife is not slicing tool.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Leaf is a type of photosynthesis.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Leaf is not a type of photosynthesis.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Cooking is for relaxation.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Cooking is not for relaxation.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Competing is for excelling.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Competing is not for excelling.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Drinking requires a mouth.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Drinking does not require a mouth.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Boat is a type of sailing.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Boat is not a type of sailing.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "A balcony is raised.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "A balcony is not raised.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Cabinets can be opened.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Cabinets cannot be opened.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Cardboard can be recycled.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Cardboard cannot be recycled.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Checks are written.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Checks are not written.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Chicken can be chopped.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Chicken cannot be chopped.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Confidence can be shared.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Confidence cannot be shared.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Contracts are evaluated.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Contracts are not evaluated.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Cotton can be dyed.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Cotton cannot be dyed.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Doctors are overworked.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Doctors are not overworked.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Dog can be fed.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Dog cannot be fed.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Emacs can be opened.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Emacs cannot be opened.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Energy is conserved.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Energy is not conserved.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Fish can be marinated.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Fish cannot be marinated.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Flossing is recommended.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Flossing is not recommended.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Flowers can be judged.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Flowers cannot be judged.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Some glass is coated.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Some glass is not coated.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Gold can be polished.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Gold cannot be polished.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Ice can be chipped.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Ice cannot be chipped.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Water is melted ice.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Water is not melted ice.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Incomes are taxed.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Incomes are not taxed.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Lambs are eaten.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Lambs are not eaten.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Luxury is earned.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Luxury is not earned.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Movies are filmed.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Movies are not filmed.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Nerves can be severed.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Nerves cannot be severed.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Paint can be tinted.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Paint cannot be tinted.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "The past is fixed.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "The past is not fixed.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Most people are biased.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Most people are not biased.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Reputations can be tarnished.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Reputations cannot be tarnished.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Salad can be prepared.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Salad cannot be prepared.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Silica can be melted.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Silica cannot be melted.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Sound can be recorded.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Sound cannot be recorded.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Tobacco can be chewed.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Tobacco cannot be chewed.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Tones can be tuned.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Tones cannot be tuned.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Vegetables are marinated. .", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Vegetables are not marinated. .", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Victor is stumped.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Victor is not stumped.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Sometimes awaking causes alertness.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes awaking does not cause alertness.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes cogitating causes headaches.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes cogitating does not cause headaches.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes competing causes stress.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes competing does not cause stress.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes contemplating causes hesitation.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes contemplating does not cause hesitation.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes copulating causes babies.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes copulating does not cause babies.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes dreaming causes fear.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes dreaming does not cause fear.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes electricity causes electrocution.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes electricity does not cause electrocution.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes fasting causes death.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes fasting does not cause death.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes fencing causes perspiration.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes fencing does not cause perspiration.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes flirting causes anger.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes flirting does not cause anger.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Disease has germ infestation.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Disease has not germ infestation.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes God causes miracles.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes God does not cause miracles.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes grooming causes cleanliness.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes grooming does not cause cleanliness.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes jogging causes blisters.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes jogging does not cause blisters.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes kising causes illness.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes kising does not cause illness.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes kissing causes cooties.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes kissing does not cause cooties.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes laziness causes inventions.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes laziness does not cause inventions.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes learning causes pain.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes learning does not cause pain.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes listening causes fatigue.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes listening does not cause fatigue.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes living causes love.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes living does not cause love.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes love causes deaths.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes love does not cause deaths.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes lying causes unhappiness.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes lying does not cause unhappiness.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes performing causes anxiety.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes performing does not cause anxiety.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes playing causes satisfaction.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes playing does not cause satisfaction.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes pretending causes misunderstanding.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes pretending does not cause misunderstanding.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes procreating causes twins.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes procreating does not cause twins.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes relaxing causes sleepinesss.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes relaxing does not cause sleepinesss.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes remembering causes pleasure.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes remembering does not cause pleasure.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes sewing causes injury.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes sewing does not cause injury.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes shopping causes tiredness.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes shopping does not cause tiredness.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes singing causes anger.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes singing does not cause anger.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Smiling indicates happiness.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Smiling does not indicate happiness.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes snow causes avalanches.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes snow does not cause avalanches.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes studying causes fatague.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes studying does not cause fatague.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes sunburn causes cancer.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes sunburn does not cause cancer.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes talking causes headaches.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes talking does not cause headaches.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes thinking causes fatigue.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes thinking does not cause fatigue.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes tickling causes pain.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes tickling does not cause pain.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes walking causes blisters.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes walking does not cause blisters.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes wrestling causes bruises.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes wrestling does not cause bruises.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "17 is seventeen.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "17 is not seventeen.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some advertisments are reliable.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some advertisments are not reliable.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Aids can be fatal.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Aids cannot be fatal.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Albinos are white.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Albinos are not white.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Alexa is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Alexa is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "All is suffering.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "All is not suffering.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Art can be philosophical.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Art cannot be philosophical.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Beanbags are comfortable.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Beanbags are not comfortable.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Beestings are painful.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Beestings are not painful.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Biodiversity is important.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Biodiversity is not important.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Birdwatching is informational.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Birdwatching is not informational.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "The blueberry is blue.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "The blueberry is not blue.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Bones are quite hard.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Bones are not quite hard.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some boots are ugly.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some boots are not ugly.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Breezes can be gentle.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Breezes cannot be gentle.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Cajun is a .", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Cajun is not a .", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Cake is false.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Cake is not false.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Cannabis is generally good.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Cannabis is not generally good.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Cannibalism is wrong.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Cannibalism is not wrong.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A car is opaque.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A car is not opaque.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Catapillars can be itchy.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Catapillars cannot be itchy.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A catwalk is high.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A catwalk is not high.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Chips is dead.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Chips is not dead.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Chocolate is yummy.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Chocolate is not yummy.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Circle is round again.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Circle is not round again.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A column is heavy.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A column is not heavy.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Communists are bad.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Communists are not bad.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Concrete is opaque.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Concrete is not opaque.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Coneflower is a perennial.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Coneflower is not a perennial.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Any container is finite.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Any container is not finite.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Coreopsis is a perennial.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Coreopsis is not a perennial.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A corncob is yellow.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A corncob is not yellow.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "That couch is black.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "That couch is not black.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some countries are temperate.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some countries are not temperate.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Cranberries are purple.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Cranberries are not purple.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Criminals are stupid.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Criminals are not stupid.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Cruelty is bad.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Cruelty is not bad.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Cucumbers are edible.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Cucumbers are not edible.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "The curve is smooth.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "The curve is not smooth.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Cycling is fun.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Cycling is not fun.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Dandelions are edible.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Dandelions are not edible.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some designs are floral.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some designs are not floral.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Diamond is strong.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Diamond is not strong.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Dirt is opaque.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Dirt is not opaque.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Disease is deadly.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Disease is not deadly.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Dodos are extinct.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Dodos are not extinct.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Donuts are sweet.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Donuts are not sweet.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A door is opaque.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A door is not opaque.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Driving can be deadly.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Driving cannot be deadly.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A drug is useful.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A drug is not useful.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Earwigs are slim.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Earwigs are not slim.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Ed is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Ed is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Lightning is powerful electricity.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Lightning is not powerful electricity.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Elvis is dead.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Elvis is not dead.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "An eraser is analog.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "An eraser is not analog.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Erasers can be made of rubber.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Erasers cannot be made of rubber.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Everything is complex.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Everything is not complex.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Extortion is illegal.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Extortion is not illegal.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Fall is coming.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Fall is not coming.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Fashion can be extravagant.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Fashion cannot be extravagant.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some features are complex.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some features are not complex.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A flower is opaque.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A flower is not opaque.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some flowers are edible.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some flowers are not edible.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Food can be unhealthy.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Food cannot be unhealthy.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Fruit is opaque.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Fruit is not opaque.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Gambling is risky.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Gambling is not risky.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Gardening can be satisfying.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Gardening cannot be satisfying.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some genes are defective.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some genes are not defective.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "George is dying.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "George is not dying.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "God is omnibenevolent.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "God is not omnibenevolent.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Grease is sticky.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Grease is not sticky.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Handsomeness is subjective.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Handsomeness is not subjective.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Hats can be soft.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Hats cannot be soft.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Hippies are irrelevant.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Hippies are not irrelevant.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Horses can be unpredictable.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Horses cannot be unpredictable.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some houses are empty.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some houses are not empty.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Ideas are intangible.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Ideas are not intangible.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Imprisonment is harmful.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Imprisonment is not harmful.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Green ants are insects.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Green ants are not insects.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Insurance is intangible.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Insurance is not intangible.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Jelly is floppy.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Jelly is not floppy.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Kittens can be annoying.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Kittens cannot be annoying.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Larry is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Larry is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Laughing can be relaxing.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Laughing cannot be relaxing.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some leopards are black.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some leopards are not black.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some liquids are toxic.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some liquids are not toxic.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some literature is romantic.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some literature is not romantic.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "The lobby is dark.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "The lobby is not dark.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Marble is opaque.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Marble is not opaque.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Mechanics are unimaginative.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Mechanics are not unimaginative.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Merit is offensive.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Merit is not offensive.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some models are concrete.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some models are not concrete.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "The moon is cold.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "The moon is not cold.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Movies are often entertaining.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Movies are not often entertaining.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Mushrooms are yummy.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Mushrooms are not yummy.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A needlepoint is sharp.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A needlepoint is not sharp.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Nick is human.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Nick is not human.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Penguins are social.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Penguins are not social.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Pens are small.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Pens are not small.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "People can be benevolent.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "People cannot be benevolent.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Sometimes people are caring.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Sometimes people are not caring.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "PHP is free.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "PHP is not free.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Pipes are hollow.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Pipes are not hollow.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some plants are poisonous.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some plants are not poisonous.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Plastic is solid.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Plastic is not solid.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Poetry is inspiring.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Poetry is not inspiring.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Popcorn is generally salty.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Popcorn is not generally salty.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Pots are opaque.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Pots are not opaque.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Puppy is soft.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Puppy is not soft.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Radiation is toxic .", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Radiation is not toxic .", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Randy is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Randy is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Rich is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Rich is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some rifles are semiautomatic.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some rifles are not semiautomatic.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Rocks are solid.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Rocks are not solid.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Sadness is uncomfortable.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Sadness is not uncomfortable.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Skin is elastic.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Skin is not elastic.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Sneezing is involuntary.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Sneezing is not involuntary.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Snot is tasty.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Snot is not tasty.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Squash is edible.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Squash is not edible.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Steve is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Steve is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Stock is risky.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Stock is not risky.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A storm is unusual.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A storm is not unusual.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Any surplus is immoral.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Any surplus is not immoral.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "The syrup is sticky.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "The syrup is not sticky.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Talk is cheap.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Talk is not cheap.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A tampon is thin.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A tampon is not thin.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A teakettle is light.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A teakettle is not light.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Teasing is mean.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Teasing is not mean.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Telephones are cool.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Telephones are not cool.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Terrorists is dangerous.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Terrorists is not dangerous.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "The tip is glowing.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "The tip is not glowing.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Tires are circular.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Tires are not circular.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Tom is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Tom is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Tortillas are circular.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Tortillas are not circular.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some trees are evil.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some trees are not evil.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "The Truth is elusive.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "The Truth is not elusive.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Velum is translucent.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Velum is not translucent.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Weather is sunny cloudy.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Weather is not sunny cloudy.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Willy is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Willy is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Wine is generally tasty.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Wine is not generally tasty.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Winetrs are cold.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Winetrs are not cold.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Winners are happy.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Winners are not happy.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Wood can be gilded.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Wood cannot be gilded.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Work is taxing.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Work is not taxing.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Surprise is amaze shock.", "polarity": 1, "predicate": "HasSubevent"}
+{"sentence": "Surprise is not amaze shock.", "polarity": 0, "predicate": "HasSubevent"}
+{"sentence": "Bomb is made of shrapnel.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Bomb is not made of shrapnel.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Bread is from wheat.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Bread is not from wheat.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Cake is made of egg.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Cake is not made of egg.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Can is metal container.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Can is not metal container.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Goblet has fancy glass.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Goblet has not fancy glass.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Hamburger is made of wheat.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Hamburger is not made of wheat.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "House is made of wood.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "House is not made of wood.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "A kitten is made of flesh.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "A kitten is not made of flesh.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Laser is made of photons.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Laser is not made of photons.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Mountain is a type of land.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Mountain is not a type of land.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "A Panda is made of cells.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "A Panda is not made of cells.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Pepsi is made of caffeine.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Pepsi is not made of caffeine.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Salt is made of ions.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Salt is not made of ions.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Stigma is made of ignorance.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Stigma is not made of ignorance.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Sugar is made of minerals.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Sugar is not made of minerals.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Tire is rubber wheels.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Tire is not rubber wheels.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "Water is made of oxegen.", "polarity": 1, "predicate": "MadeOf"}
+{"sentence": "Water is not made of oxegen.", "polarity": 0, "predicate": "MadeOf"}
+{"sentence": "An airplane requires piloting.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "An airplane does not require piloting.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Awaking requires a stimulus.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Awaking does not require a stimulus.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Cleaning requires cleanness.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Cleaning does not require cleanness.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Cogitating requires a brain.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Cogitating does not require a brain.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Cogitating requires reason.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Cogitating does not require reason.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Competing requires effort.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Competing does not require effort.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Contemplation requires thought.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Contemplation does not require thought.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Eating requires choice.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Eating does not require choice.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "slip is near fall.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "slip is not near fall.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Farting requires an anus.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Farting does not require an anus.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Learning requires exposure.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Learning does not require exposure.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Lying requires imagination.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Lying does not require imagination.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Peeing requires drinking.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Peeing does not require drinking.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Reading requires concentration.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Reading does not require concentration.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Snoring requires nostrils.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Snoring does not require nostrils.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Socialising requires tact.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Socialising does not require tact.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Swimming requires gills.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Swimming does not require gills.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Terrorism requires hate.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Terrorism does not require hate.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Work requires thinking.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Work does not require thinking.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Working requires energh.", "polarity": 1, "predicate": "HasPrerequisite"}
+{"sentence": "Working does not require energh.", "polarity": 0, "predicate": "HasPrerequisite"}
+{"sentence": "Capital is state headquarters.", "polarity": 1, "predicate": "AtLocation"}
+{"sentence": "Capital is not state headquarters.", "polarity": 0, "predicate": "AtLocation"}
+{"sentence": "mushrooms are a fungus.", "polarity": 1, "predicate": "AtLocation"}
+{"sentence": "mushrooms are not a fungus.", "polarity": 0, "predicate": "AtLocation"}
+{"sentence": "penicillin is from fungus.", "polarity": 1, "predicate": "AtLocation"}
+{"sentence": "penicillin is not from fungus.", "polarity": 0, "predicate": "AtLocation"}
+{"sentence": "auditorium has seats.", "polarity": 1, "predicate": "AtLocation"}
+{"sentence": "auditorium has not seats.", "polarity": 0, "predicate": "AtLocation"}
+{"sentence": "Can is soup container.", "polarity": 1, "predicate": "AtLocation"}
+{"sentence": "Can is not soup container.", "polarity": 0, "predicate": "AtLocation"}
+{"sentence": "Dancer is ballet performer.", "polarity": 1, "predicate": "AtLocation"}
+{"sentence": "Dancer is not ballet performer.", "polarity": 0, "predicate": "AtLocation"}
+{"sentence": "Some buildiings are factories.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Some buildiings are not factories.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Some religions are monotheistic.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Some religions are not monotheistic.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Language is communication medium.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Language is not communication medium.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Memories are information.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Memories are not information.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Salt is a type of spice.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Salt is not a type of spice.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Sinkholes are caverns.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Sinkholes are not caverns.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "A brickmason is a type of tradesman.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "A brickmason is not a type of tradesman.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Brass is a conductor.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Brass is not a conductor.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Nitroglycerin is a vasodilator.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Nitroglycerin is not a vasodilator.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Penicillin is a type of medicine.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Penicillin is not a type of medicine.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Door is wall passageway.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Door is not wall passageway.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "KFC is a restaurant.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "KFC is not a restaurant.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Curiosity is what george.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Curiosity is not what george.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "California is a state.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "California is not a state.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Silica is a chemical.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Silica is not a chemical.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Music is a aphrodisiac.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Music is not a aphrodisiac.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "University is a type of school.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "University is not a type of school.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Oxytocin is a peptide.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Oxytocin is not a peptide.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Condoms are protection .", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Condoms are not protection .", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Diabetes is a type of disease.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Diabetes is not a type of disease.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Ice is slippy.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Ice is not slippy.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Schizophrenia is a type of insanity.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Schizophrenia is not a type of insanity.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Murder is a felony.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Murder is not a felony.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "doctor has gynecologist'.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "doctor has not gynecologist'.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "A lexus is a type of ford.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "A lexus is not a type of ford.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "automobile is truck.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "automobile is not truck.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "color is pink.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "color is not pink.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Haircloth is a fabric.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Haircloth is not a fabric.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Platter is a type of dish.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Platter is not a type of dish.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Barry was a cockateel.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Barry was not a cockateel.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Oil is a type of fluid.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Oil is not a type of fluid.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "New is a type of adjective.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "New is not a type of adjective.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Crabs are shellfish.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Crabs are not shellfish.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Candy is a snack.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Candy is not a snack.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Quakers are friends.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Quakers are not friends.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "A plumber is a type of tradesman.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "A plumber is not a type of tradesman.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Monchong is a fish.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Monchong is not a fish.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Harp is an instrument.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Harp is not an instrument.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Wrestling is a type of fighting.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Wrestling is not a type of fighting.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Ear is not mouth.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Ear is not not mouth.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Waxwing is a bird.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Waxwing is not a bird.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Hollyhock is a perrenial.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Hollyhock is not a perrenial.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Ants are animals.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Ants are not animals.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "A glock is a type of gun.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "A glock is not a type of gun.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Indonesia is an archipelago.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Indonesia is not an archipelago.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Cobalt is a colour.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Cobalt is not a colour.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Fingers are limbs.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Fingers are not limbs.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Goats are mammals.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Goats are not mammals.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Honeycomb has comb honey.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Honeycomb has not comb honey.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Muppets are puppets.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Muppets are not puppets.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Hash is a drug.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Hash is not a drug.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Emerald is a type of jewel.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Emerald is not a type of jewel.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "poison is arsenic cyanide.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "poison is not arsenic cyanide.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Cinnamon is a bark.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Cinnamon is not a bark.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Jars are containers.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Jars are not containers.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Fdsfgsdgfgsgsg is garbage.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Fdsfgsdgfgsgsg is not garbage.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Pianos are furniture.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Pianos are not furniture.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Iran is a nation.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Iran is not a nation.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Courage is virtue.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Courage is not virtue.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "A porno is a type of movie.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "A porno is not a type of movie.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Distance is a interval.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Distance is not a interval.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Toads are aphibians.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Toads are not aphibians.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Cyborgs are fantasy.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Cyborgs are not fantasy.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Horses are beuatiful.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Horses are not beuatiful.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Gannet is a bird.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Gannet is not a bird.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Coke is a type of softdrink.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Coke is not a type of softdrink.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Attributes are properties.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Attributes are not properties.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Zork is a game.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Zork is not a game.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Traveller is a type of person.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Traveller is not a type of person.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Disgust is an emotion.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Disgust is not an emotion.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "The Crips is a type of gang.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "The Crips is not a type of gang.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Confidence is an attitude.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Confidence is not an attitude.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Monday is a weekday.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Monday is not a weekday.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Hut is a type of shelter.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Hut is not a type of shelter.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Christianity is a relegion.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Christianity is not a relegion.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Fundamentalism is a type of belief.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Fundamentalism is not a type of belief.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "A bikini is a type of swimsuit.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "A bikini is not a type of swimsuit.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Sphere has round object.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "Sphere has not round object.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "COBOL is a language.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "COBOL is not a language.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "sex is copulation.", "polarity": 1, "predicate": "IsA"}
+{"sentence": "sex is not copulation.", "polarity": 0, "predicate": "IsA"}
+{"sentence": "Andrew wants sex.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "Andrew does not want sex.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "Brent wants sex.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "Brent does not want sex.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "A hobo wants pie.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "A hobo does not want pie.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "Character is witty person.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "Character is not witty person.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "Loot is pirate booty.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "Loot is not pirate booty.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "A puppy wants attention.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "A puppy does not want attention.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "Squirrel is eats nuts.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "Squirrel is not eats nuts.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "Steve needs sex.", "polarity": 1, "predicate": "Desires"}
+{"sentence": "Steve does not need sex.", "polarity": 0, "predicate": "Desires"}
+{"sentence": "Airplanes can accelerate.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Airplanes cannot accelerate.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Babies can giggle.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Babies cannot giggle.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "All birds can breathe.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "All birds cannot breathe.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Bullying can be costly.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Bullying cannot be costly.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Cans can be places.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Cans cannot be places.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "A child can breathe.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "A child cannot breathe.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "A cookie can crumble.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "A cookie cannot crumble.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Cords can bind.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Cords cannot bind.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Cynics can doubt anything.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Cynics cannot doubt anything.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "DNA can replicate.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "DNA cannot replicate.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "glass is not door.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "glass is not not door.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Ferrets can bite.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Ferrets cannot bite.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Fire can be cleansing.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Fire cannot be cleansing.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "A frisbee can fly.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "A frisbee cannot fly.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Gambling can be addicitve.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Gambling cannot be addicitve.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Gas can explode.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Gas cannot explode.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "A gate can swing.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "A gate cannot swing.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "A glass can shattering.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "A glass cannot shattering.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Grass can burn.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Grass cannot burn.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "A king can vomit.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "A king cannot vomit.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Lyrics can be poems.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Lyrics cannot be poems.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Midgets can steal.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Midgets cannot steal.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "A nose can run.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "A nose cannot run.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Organisms can die.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Organisms cannot die.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Pain can immobilize you.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Pain cannot immobilize you.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "People can count sheep.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "People cannot count sheep.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Person can be courageous.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Person cannot be courageous.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Pickle is sour cucumber.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Pickle is not sour cucumber.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Policemen can help you.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Policemen cannot help you.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Robber can steal.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Robber cannot steal.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Secretaries can type.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Secretaries cannot type.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Soliders can die.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Soliders cannot die.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "A spring can bounce.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "A spring cannot bounce.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Tea can be drank.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Tea cannot be drank.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Call is telephone ring.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Call is not telephone ring.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Terrorists can be killed.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "Terrorists cannot be killed.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "A toilet can refill.", "polarity": 1, "predicate": "CapableOf"}
+{"sentence": "A toilet cannot refill.", "polarity": 0, "predicate": "CapableOf"}
+{"sentence": "Escondido is part of california.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Escondido is not part of california.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "My face is part of me.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "My face is not part of me.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Gambia is part of africa.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Gambia is not part of africa.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Genova is part of italy.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Genova is not part of italy.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Letterkenny is part of ireland.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Letterkenny is not part of ireland.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Lobby is hotel entry.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Lobby is not hotel entry.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Norway is part of scandinavia.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Norway is not part of scandinavia.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Odessa is part of ukraine.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Odessa is not part of ukraine.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "atom has proton electron.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "atom has not proton electron.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Roma is part of italy.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Roma is not part of italy.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Sprocket is part of bike.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Sprocket is not part of bike.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Sweden is part of scandinavia.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Sweden is not part of scandinavia.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Timor is part of indonesia.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Timor is not part of indonesia.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Vacavile is part of california.", "polarity": 1, "predicate": "PartOf"}
+{"sentence": "Vacavile is not part of california.", "polarity": 0, "predicate": "PartOf"}
+{"sentence": "Artichokes have leaves.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Artichokes have not leaves.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Asim has kids.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Asim has not kids.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Atoms have mass.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Atoms have not mass.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Automobile has trunk.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Automobile has not trunk.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Baseballs have stitches.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Baseballs have not stitches.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Bodies have organs.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Bodies have not organs.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Some buildings have ballrooms.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Some buildings have not ballrooms.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Cemetaries have graveyards.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Cemetaries have not graveyards.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Some cheeses have holes.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Some cheeses have not holes.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Countries have borders.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Countries have not borders.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Danny has kids.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Danny has not kids.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "A dog has brains.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "A dog has not brains.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Dortmund has an airport.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Dortmund has not an airport.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Some entryways have steps.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Some entryways have not steps.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Humans can name everything.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Humans cannot name everything.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Fiddle is strings.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Fiddle is not strings.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Frogs have bones.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Frogs have not bones.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Fruit contains antioxidants.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Fruit does not contain antioxidants.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Gene has kids.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Gene has not kids.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Some houses have basements.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Some houses have not basements.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Jews have children.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Jews have not children.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Kim has kids.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Kim has not kids.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Kirstin has kids.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Kirstin has not kids.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Lambs have ears.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Lambs have not ears.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "A magazine contains articles.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "A magazine does not contain articles.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Monday has an evening.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Monday has not an evening.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Nick has kids.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Nick has not kids.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Ocean is salt water.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Ocean is not salt water.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Paul has kids.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Paul has not kids.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Restaurants have menus.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Restaurants have not menus.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Robert has kids.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Robert has not kids.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Rowboat has accessories.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Rowboat has not accessories.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Russian has polysyllables.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Russian has not polysyllables.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "A sea contains seawater.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "A sea does not contain seawater.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Steven has kids.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Steven has not kids.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Telemarketers have scripts.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "Telemarketers have not scripts.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "A warrior has honor.", "polarity": 1, "predicate": "HasA"}
+{"sentence": "A warrior has not honor.", "polarity": 0, "predicate": "HasA"}
+{"sentence": "Call is a type of contact.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Call is not a type of contact.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Kissing is for bonding.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Kissing is not for bonding.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Reading is for research.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Reading is not for research.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Crop is corn growing.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Crop is not corn growing.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Childhhood is for playing.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Childhhood is not for playing.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Awaking is for protection.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Awaking is not for protection.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Xanax is for anxiety.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Xanax is not for anxiety.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Swimming is for pleasure.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Swimming is not for pleasure.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Hiking is for campers.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Hiking is not for campers.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Lips is for speaking.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Lips is not for speaking.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Gold is for jewelry.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Gold is not for jewelry.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Refuse is for recycling.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Refuse is not for recycling.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Street is a type of travel.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Street is not a type of travel.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Jogging is for exersize.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Jogging is not for exersize.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Relaxing is for pleasure.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Relaxing is not for pleasure.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Quartz is for watches.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Quartz is not for watches.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Insemination is for fertilization.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Insemination is not for fertilization.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Statue is a memorial.", "polarity": 1, "predicate": "UsedFor"}
+{"sentence": "Statue is not a memorial.", "polarity": 0, "predicate": "UsedFor"}
+{"sentence": "Apples can be cooked.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Apples cannot be cooked.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Cakes are cooked.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Cakes are not cooked.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Coconuts can be eaten.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Coconuts cannot be eaten.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "The cow was eaten.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "The cow was not eaten.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Curtains are drawn.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Curtains are not drawn.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Excellence is treasured.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Excellence is not treasured.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Information can be condensed.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Information cannot be condensed.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Iron can be magnetized.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Iron cannot be magnetized.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "A labyrinth is convoluted.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "A labyrinth is not convoluted.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Lasagna can be eaten.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Lasagna cannot be eaten.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Lead can be melted.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Lead cannot be melted.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Liquids can be spilled.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Liquids cannot be spilled.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Metal can be tarnished.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Metal cannot be tarnished.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Mistakes can be forgiven.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Mistakes cannot be forgiven.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Music is sung.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Music is not sung.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Numbers can be multiplied.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Numbers cannot be multiplied.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Oranges can be squeezed.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Oranges cannot be squeezed.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Peaches can be bottled.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Peaches cannot be bottled.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "People are flawed.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "People are not flawed.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Plastic can be melted.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Plastic cannot be melted.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "A route is followed.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "A route is not followed.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Sausage can be eaten.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Sausage cannot be eaten.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Steel can be melted.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Steel cannot be melted.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Stone can be crushed.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Stone cannot be crushed.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Tapestries are woven .", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Tapestries are not woven .", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "TV can be watched.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "TV cannot be watched.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Wet is water splashed.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Wet is not water splashed.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Wheat can be harvested.", "polarity": 1, "predicate": "ReceivesAction"}
+{"sentence": "Wheat cannot be harvested.", "polarity": 0, "predicate": "ReceivesAction"}
+{"sentence": "Sometimes alcohol causes amnesia.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes alcohol does not cause amnesia.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes cleaning causes injury.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes cleaning does not cause injury.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes climbing causes blisters.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes climbing does not cause blisters.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes communicating causes progress.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes communicating does not cause progress.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes crisis causes focus.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes crisis does not cause focus.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes dancing causes fatigue.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes dancing does not cause fatigue.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes drinking causes drunkenness.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes drinking does not cause drunkenness.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes eating causes obesity.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes eating does not cause obesity.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes jealousy causes deaths.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes jealousy does not cause deaths.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes oxygen causes corrosion.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes oxygen does not cause corrosion.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes perfection causes jealousy.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes perfection does not cause jealousy.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes running causes calluses.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes running does not cause calluses.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes shoes causes blisters.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes shoes does not cause blisters.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes sleeping causes awakeness.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes sleeping does not cause awakeness.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes snoring causes resslessness.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes snoring does not cause resslessness.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes socialising causes conflicts.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes socialising does not cause conflicts.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "election is voting event.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "election is not voting event.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes war causes unrest.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes war does not cause unrest.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes working causes fatigue.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes working does not cause fatigue.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Writing is paper documentation.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Writing is not paper documentation.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "Sometimes writing causes revolutions.", "polarity": 1, "predicate": "Causes"}
+{"sentence": "Sometimes writing does not cause revolutions.", "polarity": 0, "predicate": "Causes"}
+{"sentence": "11 is eleven.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "11 is not eleven.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "20 is twenty.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "20 is not twenty.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Acid can be fun.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Acid cannot be fun.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Alians are weird.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Alians are not weird.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Alligators are carnivorous.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Alligators are not carnivorous.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Amway is scary.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Amway is not scary.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Andy is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Andy is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Archives are dangerous.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Archives are not dangerous.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Arson is sad.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Arson is not sad.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Art is abstract modern.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Art is not abstract modern.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Someone asleep is alive.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Someone asleep is not alive.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Beer is intoxicating.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Beer is not intoxicating.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Biking is fun.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Biking is not fun.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A bloodstone is red.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A bloodstone is not red.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Bobby is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Bobby is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Both are informal.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Both are not informal.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Brenda is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Brenda is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Brent is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Brent is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Buzzwords are annoying.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Buzzwords are not annoying.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Carrie is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Carrie is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Cars are opaque.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Cars are not opaque.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "The cat is thirsty.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "The cat is not thirsty.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Cats are needy.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Cats are not needy.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A cd is solid.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A cd is not solid.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Cells are microscopic.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Cells are not microscopic.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A child is playful.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A child is not playful.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Children are innocent.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Children are not innocent.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Situation: children are noisy.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Situation: children are not noisy.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Clint is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Clint is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some clothes are purple.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some clothes are not purple.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Black coffee tastes bitter.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Black coffee does not taste bitter.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Collage can be expensive.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Collage cannot be expensive.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Column is tall straight.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Column is not tall straight.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Competition is natural.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Competition is not natural.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Connie is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Connie is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Coral is living.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Coral is not living.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Cows are innocent.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Cows are not innocent.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Curry is exotic.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Curry is not exotic.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Dan is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Dan is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some demands are rational.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some demands are not rational.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Depressives are depressing.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Depressives are not depressing.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some dogs are frightening.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some dogs are not frightening.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Drano is poisonous.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Drano is not poisonous.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Electricty is cool.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Electricty is not cool.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Everyone is different.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Everyone is not different.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "His expression is dark.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "His expression is not dark.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Eyes can be brown.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Eyes cannot be brown.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Silk has smooth fabric.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Silk has not smooth fabric.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Fans are weird.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Fans are not weird.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Fear is contagious.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Fear is not contagious.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Fire is hot flame.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Fire is not hot flame.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Flower is alive.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Flower is not alive.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A gentleman is courteous.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A gentleman is not courteous.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Giardia is a parasite.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Giardia is not a parasite.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Home is comfy.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Home is not comfy.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A horse is majestic.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A horse is not majestic.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Horses run fast.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Horses do not run fast.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Intimacy is desirable.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Intimacy is not desirable.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Jason is dying.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Jason is not dying.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Jello is translucent.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Jello is not translucent.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Jim is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Jim is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Katie is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Katie is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Kim is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Kim is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Kindness is universal.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Kindness is not universal.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Lemon is sour.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Lemon is not sour.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Lens is singular.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Lens is not singular.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "The library is dark.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "The library is not dark.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Love is contagious.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Love is not contagious.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "LSD is illegal.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "LSD is not illegal.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Lying is immoral.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Lying is not immoral.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Magic is real.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Magic is not real.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Marmite is delicious.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Marmite is not delicious.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Massages can be erotic.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Massages cannot be erotic.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Menstruation is generally crampy.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Menstruation is not generally crampy.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some mice are nice.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some mice are not nice.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Money can be fake.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Money cannot be fake.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Mosquitoes are pest.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Mosquitoes are not pest.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Mozilla is cool.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Mozilla is not cool.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Nanotubes are small.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Nanotubes are not small.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Nature can be destructive.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Nature cannot be destructive.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A needle is small.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A needle is not small.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "News can be fun.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "News cannot be fun.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Sorting is fun openmind.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Sorting is not fun openmind.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Openmind is invincible.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Openmind is not invincible.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Orchids are edible.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Orchids are not edible.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A panacea is mythical.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A panacea is not mythical.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A pear is solid.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A pear is not solid.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Perry is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Perry is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A piano is solid.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A piano is not solid.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Plural is many.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Plural is not many.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Poop is smelly.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Poop is not smelly.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Poverty is generally undesirable.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Poverty is not generally undesirable.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Rain is nourishing.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Rain is not nourishing.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Religion is confusing.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Religion is not confusing.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "The ring is blue.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "The ring is not blue.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some roofs are flat.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some roofs are not flat.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "RPGs are fun.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "RPGs are not fun.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some rulers are cruel.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some rulers are not cruel.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Scamper is dead.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Scamper is not dead.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some scents are floral.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some scents are not floral.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Shadows are dark.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Shadows are not dark.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "The shy is blue.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "The shy is not blue.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Silk is organic.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Silk is not organic.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "narrow is small path.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "narrow is not small path.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Sounds can be funny.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Sounds cannot be funny.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Spanners are steel.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Spanners are not steel.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Stethoscopes are cold.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Stethoscopes are not cold.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Stone is opaque.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Stone is not opaque.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Stupidity is contagious.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Stupidity is not contagious.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Suguaros are green.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Suguaros are not green.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Swimming is relaxing.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Swimming is not relaxing.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Tarts are round.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Tarts are not round.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some things are finite.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some things are not finite.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Children like simple things.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Children do not like simple things.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Ticks are brown.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Ticks are not brown.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Tim is nuts.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Tim is not nuts.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "A typewriter is antiquated.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "A typewriter is not antiquated.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "An umbrella is lightweight.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "An umbrella is not lightweight.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Vertebrates are diverse.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Vertebrates are not diverse.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Voting is secret.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Voting is not secret.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Walking can be pleasant.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Walking cannot be pleasant.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "War can be hazardous.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "War cannot be hazardous.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "War is wasteful.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "War is not wasteful.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Wheels are round.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Wheels are not round.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Some wines are buttery.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Some wines are not buttery.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Wolves are undomesticated.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Wolves are not undomesticated.", "polarity": 0, "predicate": "HasProperty"}
+{"sentence": "Words can be thrilling.", "polarity": 1, "predicate": "HasProperty"}
+{"sentence": "Words cannot be thrilling.", "polarity": 0, "predicate": "HasProperty"}
