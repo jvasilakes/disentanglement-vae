@@ -175,7 +175,7 @@ class VariationalSeq2Seq(nn.Module):
     vae = VariationalSeq2Seq(encoder, decoder, total_latent_dim,
                              [polarity_dsc, modality_dsc], sos, eos)
     """
-    def __init__(self, encoder, decoder, latent_dim, discriminators,
+    def __init__(self, encoder, decoder, discriminators, latent_dim,
                  sos_token_idx, eos_token_idx):
         super(VariationalSeq2Seq, self).__init__()
         self._device = torch.device("cpu")
@@ -315,3 +315,43 @@ class VariationalSeq2Seq(nn.Module):
 
     def sample(self, z, max_length=30):
         raise NotImplementedError
+
+
+def build_vae(params, vocab_size, emb_matrix, label_dims, device,
+              sos_token_idx, eos_token_idx):
+    """
+    :param dict params: Dict of parameters stored in config.json
+    :param int vocab_size: Number of tokens in the vocabulary
+    :param numpy.ndarray emb_matrix: Matrix of embeddings for
+                                     each word in vocab. If None,
+                                     the model uses random initialization
+    :param dict label_dims: Dict of label_names and their dimensionality
+    :param torch.device device: Device on which to put the model
+    :param int {sos,eos}_token_idx: Index in vocab of <SOS>/<EOS> tokens
+    """
+    encoder = VariationalEncoder(
+            vocab_size, params["embedding_dim"], params["hidden_dim"],
+            params["num_rnn_layers"], dropout_rate=params["dropout"],
+            emb_matrix=emb_matrix)
+    encoder.set_device(device)
+
+    decoder = VariationalDecoder(
+            vocab_size, params["embedding_dim"], params["hidden_dim"],
+            params["num_rnn_layers"], dropout_rate=params["dropout"],
+            emb_matrix=emb_matrix)
+    decoder.set_device(device)
+
+    discriminators = []
+    for (name, outdim) in label_dims.items():
+        if name not in params["latent_dims"]:
+            continue
+        latent_dim = params["latent_dims"][name]
+        dsc = Discriminator(name, latent_dim, outdim)
+        dsc.set_device(device)
+        discriminators.append(dsc)
+
+    vae = VariationalSeq2Seq(encoder, decoder, discriminators,
+                             params["latent_dims"]["total"],
+                             sos_token_idx, eos_token_idx)
+    vae.set_device(device)
+    return vae

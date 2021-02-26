@@ -3,8 +3,6 @@ import os
 import re
 import csv
 import json
-import pickle
-import random
 import logging
 import argparse
 from datetime import datetime
@@ -152,62 +150,6 @@ def preprocess_labels(labels, label_encoders={}):
         enc_labels_by_name[label_name] = y
 
     return labels, label_encoders
-
-
-def load_glove(path):
-    """
-    Load the GLoVe embeddings from the provided path.
-    Return the embedding matrix and the embedding dimension.
-    Pickles the loaded embedding matrix for fast loading
-    in the future.
-
-    :param str path: Path to the embeddings. E.g.
-                     `glove.6B/glove.6B.100d.txt`
-    :returns: embeddings, embedding_dim
-    :rtype: Tuple(numpy.ndarray, int)
-    """
-    bn = os.path.splitext(os.path.basename(path))[0]
-    pickle_file = bn + ".pickle"
-    if os.path.exists(pickle_file):
-        logging.warning(f"Loading embeddings from pickle file {pickle_file} in current directory.")  # noqa
-        glove = pickle.load(open(pickle_file, "rb"))
-        emb_dim = list(glove.values())[0].shape[0]
-        return glove, emb_dim
-
-    vectors = []
-    words = []
-    idx = 0
-    word2idx = {}
-
-    with open(path, "rb") as inF:
-        for line in inF:
-            line = line.decode().split()
-            word = line[0]
-            words.append(word)
-            word2idx[word] = idx
-            idx += 1
-            vect = np.array(line[1:]).astype(np.float)
-            vectors.append(vect)
-    emb_dim = vect.shape[0]
-    glove = {word: np.array(vectors[word2idx[word]]) for word in words}
-    if not os.path.exists(pickle_file):
-        pickle.dump(glove, open(pickle_file, "wb"))
-    return glove, emb_dim
-
-
-def get_embedding_matrix(vocab, glove):
-    emb_dim = len(list(glove.values())[0])
-    matrix = np.zeros((len(vocab), emb_dim), dtype=np.float32)
-    found = 0
-    for (i, word) in enumerate(vocab):
-        try:
-            matrix[i] = glove[word]
-            found += 1
-        except KeyError:
-            matrix[i] = np.random.normal(scale=0.6, size=(emb_dim,))
-    logging.info(f"Found {found}/{len(vocab)} vocab words in embedding.")
-    word2idx = {word: idx for (idx, word) in enumerate(vocab)}
-    return matrix, word2idx
 
 
 def load_latest_checkpoint(model, optimizer, checkpoint_dir):
@@ -577,25 +519,32 @@ def run(params_file, verbose=False):
     train_labs, label_encoders = preprocess_labels(train_labs)
     # Read validation data
     dev_file = os.path.join(params["data_dir"], "dev.jsonl")
-    dev_sents, dev_labs = get_sentences_labels(dev_file, N=100)
+    dev_sents, dev_labs = get_sentences_labels(dev_file, N=-1)
     dev_sents = preprocess_sentences(dev_sents, SOS, EOS)
     # Use the label encoders fit on the train set
     dev_labs, _ = preprocess_labels(dev_labs, label_encoders=label_encoders)
 
-    # Get token vocabulary
-    vocab = [PAD, UNK] + \
-        list(sorted({word for doc in train_sents for word in doc}))
+    vocab_path = os.path.join(logdir, "vocab.txt")
+    if params["train"] is True:
+        # Get token vocabulary
+        vocab = [PAD, UNK] + \
+            list(sorted({word for doc in train_sents for word in doc}))
+        # Save the vocabulary for this experiment
+        with open(vocab_path, 'w') as outF:
+            for word in vocab:
+                outF.write(f"{word}\n")
+    else:
+        vocab = [word.strip() for word in open(vocab_path)]
     # word2idx/idx2word are used for encoding/decoding tokens
     word2idx = {word: idx for (idx, word) in enumerate(vocab)}
-    idx2word = {idx: word for (word, idx) in word2idx.items()}
 
     # Load glove embeddings, if specified
     # This redefines word2idx/idx2word
     emb_matrix = None
     if params["glove_path"] != "":
         logging.info(f"Loading embeddings from {params['glove_path']}")
-        glove, _ = load_glove(params["glove_path"])
-        emb_matrix, word2idx = get_embedding_matrix(vocab, glove)
+        glove, _ = utils.load_glove(params["glove_path"])
+        emb_matrix, word2idx = utils.get_embedding_matrix(vocab, glove)
         logging.info(f"Loaded embeddings with size {emb_matrix.shape}")
     idx2word = {idx: word for (word, idx) in word2idx.items()}
 
@@ -619,34 +568,11 @@ def run(params_file, verbose=False):
         dev_writer_path = os.path.join("runs", params["name"], "dev")
         dev_writer = SummaryWriter(log_dir=dev_writer_path)
 
-    emb_dim = params["embedding_dim"]
-    hidden_dim = params["hidden_dim"]
-    encoder = model.VariationalEncoder(len(vocab), emb_dim, hidden_dim,
-                                       params["num_rnn_layers"],
-                                       dropout_rate=params["dropout"],
-                                       emb_matrix=emb_matrix)
-    encoder.set_device(DEVICE)
-    decoder = model.VariationalDecoder(len(vocab), emb_dim, hidden_dim,
-                                       params["num_rnn_layers"],
-                                       dropout_rate=params["dropout"],
-                                       emb_matrix=emb_matrix)
-    decoder.set_device(DEVICE)
-
-    discriminators = []
-    for (name, outdim) in train_data.y_dims.items():
-        if name not in params["latent_dims"]:
-            continue
-        latent_dim = params["latent_dims"][name]
-        dsc = model.Discriminator(name, latent_dim, outdim)
-        dsc.set_device(DEVICE)
-        discriminators.append(dsc)
-
     sos_idx = word2idx[SOS]
     eos_idx = word2idx[EOS]
-    vae = model.VariationalSeq2Seq(
-            encoder, decoder, params["latent_dims"]["total"],
-            discriminators, sos_idx, eos_idx)
-    vae.set_device(DEVICE)
+    label_dims_dict = train_data.y_dims
+    vae = model.build_vae(params, len(vocab), emb_matrix, label_dims_dict,
+                          DEVICE, sos_idx, eos_idx)
     logging.info(vae)
 
     optimizer = torch.optim.Adam(vae.trainable_parameters(),

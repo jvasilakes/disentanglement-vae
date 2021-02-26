@@ -1,4 +1,5 @@
 import os
+import pickle
 import random
 import logging
 from collections import defaultdict
@@ -22,10 +23,10 @@ def validate_params(params):
             "name": str,
             "random_seed": int,
             "data_dir": str,
-            "lowercase": bool,
             "checkpoint_dir": str,
-            "embedding_dim": int,
             "glove_path": str,
+            "lowercase": bool,
+            "embedding_dim": int,
             "hidden_dim": int,
             "num_rnn_layers": int,
             "latent_dims": dict,
@@ -54,6 +55,62 @@ def validate_params(params):
     for key in params.keys():
         if key not in valid_params.keys():
             logging.warning(f"Ignoring unused parameter '{key}' in parameter file.")  # noqa
+
+
+def load_glove(path):
+    """
+    Load the GLoVe embeddings from the provided path.
+    Return the embedding matrix and the embedding dimension.
+    Pickles the loaded embedding matrix for fast loading
+    in the future.
+
+    :param str path: Path to the embeddings. E.g.
+                     `glove.6B/glove.6B.100d.txt`
+    :returns: embeddings, embedding_dim
+    :rtype: Tuple(numpy.ndarray, int)
+    """
+    bn = os.path.splitext(os.path.basename(path))[0]
+    pickle_file = bn + ".pickle"
+    if os.path.exists(pickle_file):
+        logging.warning(f"Loading embeddings from pickle file {pickle_file} in current directory.")  # noqa
+        glove = pickle.load(open(pickle_file, "rb"))
+        emb_dim = list(glove.values())[0].shape[0]
+        return glove, emb_dim
+
+    vectors = []
+    words = []
+    idx = 0
+    word2idx = {}
+
+    with open(path, "rb") as inF:
+        for line in inF:
+            line = line.decode().split()
+            word = line[0]
+            words.append(word)
+            word2idx[word] = idx
+            idx += 1
+            vect = np.array(line[1:]).astype(np.float)
+            vectors.append(vect)
+    emb_dim = vect.shape[0]
+    glove = {word: np.array(vectors[word2idx[word]]) for word in words}
+    if not os.path.exists(pickle_file):
+        pickle.dump(glove, open(pickle_file, "wb"))
+    return glove, emb_dim
+
+
+def get_embedding_matrix(vocab, glove):
+    emb_dim = len(list(glove.values())[0])
+    matrix = np.zeros((len(vocab), emb_dim), dtype=np.float32)
+    found = 0
+    for (i, word) in enumerate(vocab):
+        try:
+            matrix[i] = glove[word]
+            found += 1
+        except KeyError:
+            matrix[i] = np.random.normal(scale=0.6, size=(emb_dim,))
+    logging.info(f"Found {found}/{len(vocab)} vocab words in embedding.")
+    word2idx = {word: idx for (idx, word) in enumerate(vocab)}
+    return matrix, word2idx
 
 
 def pad_sequence(batch):
