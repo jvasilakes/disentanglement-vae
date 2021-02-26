@@ -41,43 +41,6 @@ def parse_args():
     return parser.parse_args()
 
 
-def load_latest_checkpoint(model, optimizer, checkpoint_dir):
-    """
-    Find the most recent (in epochs) checkpoint in checkpoint dir and load
-    it into the model and optimizer. Return the model and optimizer
-    along with the epoch the checkpoint was trained to.
-    If not checkpoint is found, return the unchanged model and optimizer,
-    and 0 for the epoch.
-    """
-    ls = os.listdir(checkpoint_dir)
-    ckpts = [fname for fname in ls if fname.endswith(".pt")]
-    if ckpts == []:
-        return model, optimizer, 0, None
-
-    latest_ckpt_idx = 0
-    latest_epoch = 0
-    for (i, ckpt) in enumerate(ckpts):
-        epoch = ckpt.replace("model_", '').replace(".pt", '')
-        epoch = int(epoch)
-        if epoch > latest_epoch:
-            latest_epoch = epoch
-            latest_ckpt_idx = i
-
-    ckpt = torch.load(os.path.join(checkpoint_dir, ckpts[latest_ckpt_idx]))
-    model.load_state_dict(ckpt["model_state_dict"])
-    optimizer.load_state_dict(ckpt["optimizer_state_dict"])
-    next_epoch = ckpt["epoch"] + 1
-    return model, optimizer, next_epoch, ckpts[latest_ckpt_idx]
-
-
-def tensor2doc(tensor, idx2word, eos_token_idx):
-    try:
-        eos = torch.where(tensor == eos_token_idx)[0][0]
-    except IndexError:
-        eos = tensor.size(0)
-    return [idx2word[i.item()] for i in tensor[:eos+1]]
-
-
 def reconstruction_loss(targets, logits, target_lengths):
     recon_loss = tx.losses.sequence_sparse_softmax_cross_entropy(
             labels=targets, logits=logits, sequence_length=target_lengths)
@@ -142,9 +105,9 @@ def compute_losses(model, model_outputs, Xbatch, Ybatch, lengths, params):
 
 
 def compute_bleu(Xbatch, pred_batch, idx2word, eos_token_idx):
-    Xtext = [[tensor2doc(X, idx2word, eos_token_idx)[1:-1]]  # RM SOS and EOS
+    Xtext = [[utils.tensor2text(X, idx2word, eos_token_idx)[1:-1]]  # RM SOS and EOS   # noqa
              for X in Xbatch.cpu().detach()]
-    pred_text = [tensor2doc(pred, idx2word, eos_token_idx)[1:-1]
+    pred_text = [utils.tensor2text(pred, idx2word, eos_token_idx)[1:-1]
                  for pred in pred_batch.cpu().detach()]
     bleu = bleu_score(pred_text, Xtext)
     return bleu
@@ -403,12 +366,13 @@ def run(params_file, verbose=False):
 
     # Read train data
     train_file = os.path.join(params["data_dir"], "train.jsonl")
-    train_sents, train_labs = data_utils.get_sentences_labels(train_file, N=100)
+    train_sents, train_labs = data_utils.get_sentences_labels(
+            train_file, N=params["num_train_examples"])
     train_sents = data_utils.preprocess_sentences(train_sents, SOS, EOS)
     train_labs, label_encoders = data_utils.preprocess_labels(train_labs)
     # Read validation data
     dev_file = os.path.join(params["data_dir"], "dev.jsonl")
-    dev_sents, dev_labs = data_utils.get_sentences_labels(dev_file, N=-1)
+    dev_sents, dev_labs = data_utils.get_sentences_labels(dev_file)
     dev_sents = data_utils.preprocess_sentences(dev_sents, SOS, EOS)
     # Use the label encoders fit on the train set
     dev_labs, _ = data_utils.preprocess_labels(
@@ -475,13 +439,18 @@ def run(params_file, verbose=False):
     checkpoint_found = False
     logging.info("Trying to load latest model checkpoint from")
     logging.info(f"  {ckpt_dir}")
-    vae, optimizer, start_epoch, ckpt_fname = load_latest_checkpoint(
+    vae, optimizer, start_epoch, ckpt_fname = utils.load_latest_checkpoint(
             vae, optimizer, ckpt_dir)
     if ckpt_fname is None:
         logging.warning("No checkpoint found!")
     else:
         checkpoint_found = True
         logging.info(f"Loaded checkpoint '{ckpt_fname}'")
+
+    # Log the experiment parameter file to recreate this run.
+    config_logfile = os.path.join(logdir, f"config_epoch{start_epoch}.json")
+    with open(config_logfile, 'w') as outF:
+        json.dump(params, outF)
 
     if params["train"] is True:
         logging.info("TRAINING")

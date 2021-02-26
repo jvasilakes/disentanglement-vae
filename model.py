@@ -314,7 +314,23 @@ class VariationalSeq2Seq(nn.Module):
         return output
 
     def sample(self, z, max_length=30):
-        raise NotImplementedError
+        batch_size = 1
+        decoder_hidden = self.compute_hidden(z, batch_size)
+        decoder_input = torch.LongTensor([[self.sos_token_idx]]).to(self.device)  # noqa
+        input_lengths = [1]
+        # Placeholder for predictions
+        vocab_size = self.decoder.vocab_size
+        decoder_output = torch.zeros(
+                1, max_length, vocab_size).to(self.device)
+        decoder_output[: 0, self.sos_token_idx] = 1.0
+        for i in range(max_length):
+            # logits: [batch_size, 1, vocab_size]
+            logits, decoder_hidden = self.decoder(
+                    decoder_input, input_lengths, decoder_hidden)
+            decoder_output[:, i, :] = logits.squeeze()
+            logprobs = torch.log_softmax(logits, dim=-1)
+            decoder_input = logprobs.argmax(-1).detach()
+        return decoder_output
 
 
 def build_vae(params, vocab_size, emb_matrix, label_dims, device,

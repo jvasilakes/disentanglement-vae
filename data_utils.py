@@ -21,7 +21,7 @@ class LabeledTextDataset(torch.utils.data.Dataset):
         self.word2idx = word2idx
         self.idx2word = {idx: word for (word, idx) in self.word2idx.items()}
         self.label_encoders = label_encoders
-        self.Xs = [self.doc2tensor(doc) for doc in self.docs]
+        self.Xs = [self.doc2tensor(doc, self.word2idx) for doc in self.docs]
         self.Ys = [self.label2tensor(lab) for lab in self.labels]
 
     def __getitem__(self, idx):
@@ -40,13 +40,13 @@ class LabeledTextDataset(torch.utils.data.Dataset):
             dims[label_name] = num_classes
         return dims
 
-    def doc2tensor(self, doc):
+    def doc2tensor(self, doc, word2idx):
         idxs = []
         for tok in doc:
             try:
-                idxs.append(self.word2idx[tok])
+                idxs.append(word2idx[tok])
             except KeyError:
-                idxs.append(self.word2idx["<UNK>"])
+                idxs.append(word2idx["<UNK>"])
         return torch.LongTensor([[idxs]])
 
     def label2tensor(self, label_dict):
@@ -115,3 +115,5 @@ def preprocess_labels(labels, label_encoders={}):
         enc_labels_by_name[label_name] = y
 
     return labels, label_encoders
+
+

@@ -6,7 +6,6 @@ from collections import defaultdict
 
 import torch
 import numpy as np
-from torch import nn
 
 
 def set_seed(seed):
@@ -20,14 +19,15 @@ def set_seed(seed):
 
 def validate_params(params):
     valid_params = {
-            "name": str,
+            "name": str,  # experiment name
             "random_seed": int,
-            "data_dir": str,
+            "data_dir": str,  # directory with {train,dev,test}.jsonl
             "checkpoint_dir": str,
             "glove_path": str,
-            "lowercase": bool,
-            "embedding_dim": int,
-            "hidden_dim": int,
+            "num_train_examples": int,  # -1 for all examples
+            "lowercase": bool,  # whether to lowercase input
+            "embedding_dim": int,  # unused if glove_path != ""
+            "hidden_dim": int,  # RNN hidden dim. unused if num_rnn_layers == 1.
             "num_rnn_layers": int,
             "latent_dims": dict,
             "epochs": int,
@@ -35,7 +35,7 @@ def validate_params(params):
             "learn_rate": float,
             "dropout": float,
             "teacher_forcing_prob": float,
-            "lambdas": dict,
+            "lambdas": dict,  # KL div weights for each latent space.
             "train": bool,
             "validate": bool,
             "test": bool}
@@ -113,6 +113,35 @@ def get_embedding_matrix(vocab, glove):
     return matrix, word2idx
 
 
+def load_latest_checkpoint(model, optimizer, checkpoint_dir):
+    """
+    Find the most recent (in epochs) checkpoint in checkpoint dir and load
+    it into the model and optimizer. Return the model and optimizer
+    along with the epoch the checkpoint was trained to.
+    If not checkpoint is found, return the unchanged model and optimizer,
+    and 0 for the epoch.
+    """
+    ls = os.listdir(checkpoint_dir)
+    ckpts = [fname for fname in ls if fname.endswith(".pt")]
+    if ckpts == []:
+        return model, optimizer, 0, None
+
+    latest_ckpt_idx = 0
+    latest_epoch = 0
+    for (i, ckpt) in enumerate(ckpts):
+        epoch = ckpt.replace("model_", '').replace(".pt", '')
+        epoch = int(epoch)
+        if epoch > latest_epoch:
+            latest_epoch = epoch
+            latest_ckpt_idx = i
+
+    ckpt = torch.load(os.path.join(checkpoint_dir, ckpts[latest_ckpt_idx]))
+    model.load_state_dict(ckpt["model_state_dict"])
+    optimizer.load_state_dict(ckpt["optimizer_state_dict"])
+    next_epoch = ckpt["epoch"] + 1
+    return model, optimizer, next_epoch, ckpts[latest_ckpt_idx]
+
+
 def pad_sequence(batch):
     """
     Pad the sequence batch with 0 vectors.
@@ -122,7 +151,7 @@ def pad_sequence(batch):
     argument to `torch.utils.data.DataLoader`.
     """
     seqs = [torch.squeeze(x) for (x, _) in batch]
-    seqs_padded = nn.utils.rnn.pad_sequence(
+    seqs_padded = torch.nn.utils.rnn.pad_sequence(
             seqs, batch_first=True, padding_value=0)  # 0 = <PAD>
     lengths = torch.LongTensor([len(s) for s in seqs])
     labels = defaultdict(list)
