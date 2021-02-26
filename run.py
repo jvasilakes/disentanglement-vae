@@ -1,6 +1,5 @@
 # Built-in packages
 import os
-import re
 import csv
 import json
 import logging
@@ -14,12 +13,12 @@ import torch.nn.functional as F
 import numpy as np
 import texar.torch as tx
 from tqdm import tqdm
-from sklearn.preprocessing import LabelEncoder
 from torch.utils.tensorboard import SummaryWriter
 from torchtext.data.metrics import bleu_score
 
 # Local packages
 import utils
+import data_utils
 import model
 
 
@@ -40,116 +39,6 @@ def parse_args():
                         help="""If specified, print tqdm progress bars
                                 for training and evaluation.""")
     return parser.parse_args()
-
-
-class LabeledTextDataset(torch.utils.data.Dataset):
-
-    def __init__(self, docs, labels, word2idx, label_encoders):
-        super(LabeledTextDataset, self).__init__()
-        self.docs = docs
-        assert isinstance(labels[0], dict)
-        self.labels = labels
-        if "<UNK>" not in word2idx.keys():
-            raise ValueError("word2idx must have an '<UNK>' entry.")
-        if "<PAD>" not in word2idx.keys():
-            raise ValueError("word2idx must have an '<PAD>' entry.")
-        self.word2idx = word2idx
-        self.idx2word = {idx: word for (word, idx) in self.word2idx.items()}
-        self.label_encoders = label_encoders
-        self.Xs = [self.doc2tensor(doc) for doc in self.docs]
-        self.Ys = [self.label2tensor(lab) for lab in self.labels]
-
-    def __getitem__(self, idx):
-        return self.Xs[idx], self.Ys[idx]
-
-    def __len__(self):
-        return len(self.Xs)
-
-    @property
-    def y_dims(self):
-        dims = dict()
-        for (label_name, encoder) in self.label_encoders.items():
-            num_classes = len(encoder.classes_)
-            if num_classes == 2:
-                num_classes = 1
-            dims[label_name] = num_classes
-        return dims
-
-    def doc2tensor(self, doc):
-        idxs = []
-        for tok in doc:
-            try:
-                idxs.append(self.word2idx[tok])
-            except KeyError:
-                idxs.append(self.word2idx["<UNK>"])
-        return torch.LongTensor([[idxs]])
-
-    def label2tensor(self, label_dict):
-        tensorized = dict()
-        for (label_name, label) in label_dict.items():
-            encoder = self.label_encoders[label_name]
-            # CrossEntropy requires LongTensors
-            # BCELoss requires FloatTensors
-            if len(encoder.classes_) > 2:
-                tensor_fn = torch.LongTensor
-            else:
-                tensor_fn = torch.FloatTensor
-            enc = encoder.transform([label])
-            tensorized[label_name] = tensor_fn(enc)
-        return tensorized
-
-
-def get_sentences_labels(path, label_keys=None, N=-1):
-    sentences = []
-    labels = []
-    with open(path, 'r') as inF:
-        for (i, line) in enumerate(inF):
-            if i == N:
-                break
-            data = json.loads(line)
-            sentences.append(data["sentence"])
-            if label_keys is None:
-                label_keys = [key for key in data.keys()
-                              if key != "sentence"]
-            labs = {key: value for (key, value) in data.items()
-                    if key in label_keys}
-            labels.append(labs)
-    return sentences, labels
-
-
-def preprocess_sentences(sentences, SOS, EOS, lowercase=True):
-    out_data = []
-    for sent in sentences:
-        sent = sent.strip()
-        if lowercase is True:
-            sent = sent.lower()
-        sent = re.sub(r"([.!?])", r" \1", sent)
-        sent = re.sub(r"[^a-zA-Z.!?]+", r" ", sent)
-        sent = sent.split()
-        sent = [SOS] + sent + [EOS]
-        out_data.append(sent)
-    return out_data
-
-
-def preprocess_labels(labels, label_encoders={}):
-    raw_labels_by_name = defaultdict(list)
-    for label_dict in labels:
-        for (label_name, lab) in label_dict.items():
-            raw_labels_by_name[label_name].append(lab)
-
-    label_encoders = dict()
-    enc_labels_by_name = dict()
-    for (label_name, labs) in raw_labels_by_name.items():
-        if label_name in label_encoders.keys():
-            # We're passing in an already fit encoder
-            le = label_encoders[label_name]
-        else:
-            le = LabelEncoder()
-        y = le.fit_transform(labs)
-        label_encoders[label_name] = le
-        enc_labels_by_name[label_name] = y
-
-    return labels, label_encoders
 
 
 def load_latest_checkpoint(model, optimizer, checkpoint_dir):
@@ -514,15 +403,16 @@ def run(params_file, verbose=False):
 
     # Read train data
     train_file = os.path.join(params["data_dir"], "train.jsonl")
-    train_sents, train_labs = get_sentences_labels(train_file, N=100)
-    train_sents = preprocess_sentences(train_sents, SOS, EOS)
-    train_labs, label_encoders = preprocess_labels(train_labs)
+    train_sents, train_labs = data_utils.get_sentences_labels(train_file, N=100)
+    train_sents = data_utils.preprocess_sentences(train_sents, SOS, EOS)
+    train_labs, label_encoders = data_utils.preprocess_labels(train_labs)
     # Read validation data
     dev_file = os.path.join(params["data_dir"], "dev.jsonl")
-    dev_sents, dev_labs = get_sentences_labels(dev_file, N=-1)
-    dev_sents = preprocess_sentences(dev_sents, SOS, EOS)
+    dev_sents, dev_labs = data_utils.get_sentences_labels(dev_file, N=-1)
+    dev_sents = data_utils.preprocess_sentences(dev_sents, SOS, EOS)
     # Use the label encoders fit on the train set
-    dev_labs, _ = preprocess_labels(dev_labs, label_encoders=label_encoders)
+    dev_labs, _ = data_utils.preprocess_labels(
+            dev_labs, label_encoders=label_encoders)
 
     vocab_path = os.path.join(logdir, "vocab.txt")
     if params["train"] is True:
@@ -548,9 +438,9 @@ def run(params_file, verbose=False):
         logging.info(f"Loaded embeddings with size {emb_matrix.shape}")
     idx2word = {idx: word for (word, idx) in word2idx.items()}
 
-    # Always load the train data
-    train_data = LabeledTextDataset(train_sents, train_labs,
-                                    word2idx, label_encoders)
+    # Always load the train data since we need it to build the model
+    train_data = data_utils.LabeledTextDataset(
+            train_sents, train_labs, word2idx, label_encoders)
     train_dataloader = torch.utils.data.DataLoader(
             train_data, shuffle=True, batch_size=params["batch_size"],
             collate_fn=utils.pad_sequence)
@@ -559,8 +449,8 @@ def run(params_file, verbose=False):
     train_writer = SummaryWriter(log_dir=train_writer_path)
 
     if params["validate"] is True:
-        dev_data = LabeledTextDataset(dev_sents, dev_labs,
-                                      word2idx, label_encoders)
+        dev_data = data_utils.LabeledTextDataset(
+                dev_sents, dev_labs, word2idx, label_encoders)
         dev_dataloader = torch.utils.data.DataLoader(
                 dev_data, shuffle=True, batch_size=params["batch_size"],
                 collate_fn=utils.pad_sequence)
@@ -568,9 +458,9 @@ def run(params_file, verbose=False):
         dev_writer_path = os.path.join("runs", params["name"], "dev")
         dev_writer = SummaryWriter(log_dir=dev_writer_path)
 
+    label_dims_dict = train_data.y_dims
     sos_idx = word2idx[SOS]
     eos_idx = word2idx[EOS]
-    label_dims_dict = train_data.y_dims
     vae = model.build_vae(params, len(vocab), emb_matrix, label_dims_dict,
                           DEVICE, sos_idx, eos_idx)
     logging.info(vae)
