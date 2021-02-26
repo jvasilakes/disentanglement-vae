@@ -25,12 +25,12 @@ For example, if your experiment is named `experiment1`,
 python scripts/plot_zs.py logs/experiment1/metadata/zs train polarity logs/experiment1/metadata/plots
 ```
 
-This produce a plot of the approximate posterior q(z|x) for each dimension of the specified latent space.
+This produces a plot of the approximate posterior q(z|x) for each dimension of the specified latent space.
 
 
 ### Reproducing Experiments
 
-For every experiment the config file passed to `run.py` is logged to `logs/<experiment_name>/config_epoch<start_epoch>.json`.
+For every experiment run, the config file passed to `run.py` is logged to `logs/<experiment_name>/config_epoch<start_epoch>.json`.
 You can use these config files directly to recreate an experiment. Besides some imprecision introduced by GPU computing,
 and barring any fiddling with the source code, the experiments should recreate exactly. We recommend the following steps
 to recreate an experiment named `experiment1`.
