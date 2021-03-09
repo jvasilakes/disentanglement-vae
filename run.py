@@ -9,12 +9,12 @@ from collections import defaultdict
 
 # External packages
 import torch
-import torch.nn.functional as F
 import numpy as np
 import texar.torch as tx
 from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
 from torchtext.data.metrics import bleu_score
+import torch.distributions as D
 
 # Local packages
 import utils
@@ -53,7 +53,33 @@ def kl_divergence(mu, logvar):
     return kl
 
 
-def compute_losses(model, model_outputs, Xbatch, Ybatch, lengths, params):
+def kl_divergence_normal(mus, logvars):
+    p = D.Normal(mus, logvars)
+    unit_mus = torch.zeros_like(mus)
+    unit_logvars = torch.ones_like(logvars)
+    q = D.Normal(unit_mus, unit_logvars)
+    return D.kl_divergence(p, q).mean(0).sum()
+
+
+def kl_divergence_beta(alphas, betas):
+    p = D.Beta(alphas, betas)
+    flat_params = torch.ones_like(alphas)
+    q = D.Beta(flat_params, flat_params)
+    return D.kl_divergence(p, q).mean(0).sum()
+
+
+def cyclic_annealing_weight(t, total_iters, num_cycles):
+    tau_num = t % (total_iters / num_cycles)
+    tau_denom = (total_iters / num_cycles)
+    tau = tau_num / tau_denom
+    if tau <= 1.0:
+        return tau / 1.0
+    else:
+        return 1
+
+
+def compute_losses(model, model_outputs, Xbatch, Ybatch, lengths, params,
+                   iteration):
     recon_loss = reconstruction_loss(
             Xbatch, model_outputs["decoder_logits"], lengths)
 
@@ -82,6 +108,8 @@ def compute_losses(model, model_outputs, Xbatch, Ybatch, lengths, params):
     total_weighted_kl = torch.tensor(0.0).to(model.device)
     for (latent_name, latent_params) in model_outputs["latent_params"].items():
         kl = kl_divergence(latent_params.mu, latent_params.logvar)
+        # kl = kl_divergence_normal(latent_params.mu, latent_params.logvar)
+        # kl = kl_divergence_beta(latent_params.mu, latent_params.logvar)
         idv_kls[latent_name] = kl.item()
         # NB we weight the KL term here.
         # This is so we can easily plug in learnable weights later
@@ -89,6 +117,9 @@ def compute_losses(model, model_outputs, Xbatch, Ybatch, lengths, params):
             weight = params["lambdas"][latent_name]
         except KeyError:
             weight = params["lambdas"]["default"]
+
+        if weight == "cyclic":
+            weight = cyclic_annealing_weight(iteration, 2800, 4)
         total_weighted_kl += weight * kl
         total_kl += kl.item()
 
@@ -100,6 +131,7 @@ def compute_losses(model, model_outputs, Xbatch, Ybatch, lengths, params):
               "idv_dsc_losses": idv_dsc_losses,  # dict
               "idv_dsc_accs": idv_dsc_accs,  # dict
               "total_kl": total_kl,  # scalar
+              "total_weighted_kl": total_weighted_kl.item(),  # scalar
               "idv_kls": idv_kls}  # dict
     return output
 
@@ -113,19 +145,26 @@ def compute_bleu(Xbatch, pred_batch, idx2word, eos_token_idx):
     return bleu
 
 
-def log_z_metadata(zs_dict, logdir, dataset_name, epoch):
+def log_params(params_dict, logdir, dataset_name, epoch):
+    """
+    :param defaultdict params_dict: {latent_name: {parameter: [p1...pN]}}
+    :param str logdir:
+    :param str dataset_name:
+    :param int epoch:
+    """
     metadata_dir = os.path.join(logdir, "metadata")
     os.makedirs(metadata_dir, exist_ok=True)
-    os.makedirs(os.path.join(metadata_dir, "zs"), exist_ok=True)
-    for (latent_name, zs) in zs_dict.items():
-        outfile = os.path.join(
-                metadata_dir, "zs",
-                f"zs_{dataset_name}_{latent_name}_{epoch}.log")
-        with open(outfile, 'w') as outF:
-            writer = csv.writer(outF, delimiter=',')
-            for z_row in zs:
-                z_row = [f"{z:.4f}" for z in z_row]
-                writer.writerow(z_row)
+    for latent_name in params_dict.keys():
+        for (param_name, values) in params_dict[latent_name].items():
+            param_dir = os.path.join(metadata_dir, param_name)
+            os.makedirs(param_dir, exist_ok=True)
+            outfile = os.path.join(
+                    param_dir, f"{dataset_name}_{latent_name}_{epoch}.log")
+            with open(outfile, 'w') as outF:
+                writer = csv.writer(outF, delimiter=',')
+                for value in values:
+                    row = [f"{dim:.4f}" for dim in value]
+                    writer.writerow(row)
 
 
 def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
@@ -145,13 +184,15 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
     # losses, accuracies per discriminator per step
     idv_dsc_losses = defaultdict(list)
     idv_dsc_accs = defaultdict(list)
-    # Total WEIGHTED KL over latent spaces per step
+    # Total KL over latent spaces per step
     total_kls = []
+    total_weighted_kls = []
     # UNWEIGHTED KLs per latent space per step
     idv_kls = defaultdict(list)
-    idv_ae_mse = defaultdict(list)
+    idv_ae = defaultdict(list)
     bleus = []
-    zs = defaultdict(list)
+    # zs = defaultdict(list)
+    all_latent_params = defaultdict(lambda: defaultdict(list))
 
     model.train()
     if verbose is True:
@@ -167,12 +208,13 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
                        teacher_forcing_prob=params["teacher_forcing_prob"])
 
         losses_dict = compute_losses(model, output, Xbatch,
-                                     Ybatch, lengths, params)
+                                     Ybatch, lengths, params, step)
         total_loss = losses_dict["total_loss"]
         losses.append(total_loss.item())
         recon_losses.append(losses_dict["recon_loss"])
         total_dsc_losses.append(losses_dict["total_dsc_loss"])
         total_kls.append(losses_dict["total_kl"])
+        total_weighted_kls.append(losses_dict["total_weighted_kl"])
         for (dsc_name, dsc_loss) in losses_dict["idv_dsc_losses"].items():
             dsc_acc = losses_dict["idv_dsc_accs"][dsc_name]
             idv_dsc_losses[dsc_name].append(dsc_loss)
@@ -188,9 +230,9 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
 
         # Log latents
         for (l_name, l_params) in output["latent_params"].items():
-            z_batch = l_params.z.detach().cpu().numpy()
-            for z in z_batch:
-                zs[l_name].append(z)
+            for (param_name, param_batch) in l_params._asdict().items():
+                param_batch = param_batch.detach().cpu().tolist()
+                all_latent_params[l_name][param_name].extend(param_batch)
 
         # Measure Autoencoding by reencoding the reconstructed output.
         x_prime = output["decoder_logits"].argmax(-1)
@@ -201,8 +243,8 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
         for (l_name, l_params) in output_prime["latent_params"].items():
             orig_z = output["latent_params"][l_name].z
             z_prime = l_params.z
-            mse = F.mse_loss(z_prime, orig_z, reduction="mean")
-            idv_ae_mse[l_name].append(mse.item())
+            diff = torch.norm(z_prime - orig_z, p=None, dim=1).mean()
+            idv_ae[l_name].append(diff.item())
 
         # Measure self-BLEU
         bleu = compute_bleu(Xbatch, x_prime, idx2word, model.eos_token_idx)
@@ -216,6 +258,9 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
                     "total_loss_step", total_loss.item(), step)
             summary_writer.add_scalar(
                     "recon_loss_step", losses_dict["recon_loss"], step)
+            weight = cyclic_annealing_weight(step, 2800, 4)
+            summary_writer.add_scalar(
+                    "lambda_step", weight, step)
             for dsc_name in idv_dsc_losses.keys():
                 dsc_loss = idv_dsc_losses[dsc_name][-1]
                 dsc_acc = idv_dsc_accs[dsc_name][-1]
@@ -237,6 +282,8 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
     summary_writer.add_scalar(
             "avg_dsc_loss_all", np.mean(total_dsc_losses), epoch)
     summary_writer.add_scalar("avg_self_bleu", np.mean(bleus), epoch)
+    summary_writer.add_scalar(
+            "avg_weighted_kl", np.mean(total_weighted_kls), epoch)
     for dsc_name in idv_dsc_losses.keys():
         avg_dsc_loss = np.mean(idv_dsc_losses[dsc_name])
         avg_dsc_acc = np.mean(idv_dsc_accs[dsc_name])
@@ -248,11 +295,11 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
         avg_kl = np.mean(idv_kls[latent_name])
         summary_writer.add_scalar(
                 f"avg_kl_{latent_name}", avg_kl, epoch)
-        avg_ae_mse = np.mean(idv_ae_mse[latent_name])
+        avg_ae = np.mean(idv_ae[latent_name])
         summary_writer.add_scalar(
-                f"avg_ae_mse_{latent_name}", avg_ae_mse, epoch)
+                f"avg_ae_{latent_name}", avg_ae, epoch)
 
-    log_z_metadata(zs, logdir, "train", epoch)
+    log_params(all_latent_params, logdir, "train", epoch)
 
     logstr = f"TRAIN ({epoch}) TOTAL: {np.mean(losses):.4f} +/- {np.std(losses):.4f}"  # noqa
     logstr += f" | RECON: {np.mean(recon_losses):.4f} +/- {np.std(recon_losses):.4f}"  # noqa
@@ -278,10 +325,12 @@ def evalstep(model, dataloader, params, epoch, idx2word,
     # losses, accuracies per discriminator per step
     idv_dsc_losses = defaultdict(list)
     idv_dsc_accs = defaultdict(list)
-    # Total WEIGHTED KL over latent spaces per step
+    # Total KL over latent spaces per step
     total_kls = []
+    total_weighted_kls = []
     # UNWEIGHTED KLs per latent space per step
     idv_kls = defaultdict(list)
+    bleus = []
 
     model.eval()
     if verbose is True:
@@ -292,17 +341,23 @@ def evalstep(model, dataloader, params, epoch, idx2word,
         output = model(Xbatch, lengths, teacher_forcing_prob=0.0)
 
         losses_dict = compute_losses(model, output, Xbatch,
-                                     Ybatch, lengths, params)
+                                     Ybatch, lengths, params, 100)
         losses.append(losses_dict["total_loss"].item())
         recon_losses.append(losses_dict["recon_loss"])
         total_dsc_losses.append(losses_dict["total_dsc_loss"])
         total_kls.append(losses_dict["total_kl"])
+        total_weighted_kls.append(losses_dict["total_weighted_kl"])
         for (dsc_name, dsc_loss) in losses_dict["idv_dsc_losses"].items():
             dsc_acc = losses_dict["idv_dsc_accs"][dsc_name]
             idv_dsc_losses[dsc_name].append(dsc_loss)
             idv_dsc_accs[dsc_name].append(dsc_acc)
         for (latent_name, kl) in losses_dict["idv_kls"].items():
             idv_kls[latent_name].append(kl)
+
+        # Measure self-BLEU
+        x_prime = output["decoder_logits"].argmax(-1)
+        bleu = compute_bleu(Xbatch, x_prime, idx2word, model.eos_token_idx)
+        bleus.append(bleu)
 
         if verbose is True:
             pbar.update(1)
@@ -315,6 +370,9 @@ def evalstep(model, dataloader, params, epoch, idx2word,
     summary_writer.add_scalar("avg_recon_loss", np.mean(recon_losses), epoch)
     summary_writer.add_scalar(
             "avg_dsc_loss_all", np.mean(total_dsc_losses), epoch)
+    summary_writer.add_scalar("avg_self_bleu", np.mean(bleus), epoch)
+    summary_writer.add_scalar(
+            "avg_weighted_kl", np.mean(total_weighted_kls), epoch)
     summary_writer.flush()
     for dsc_name in idv_dsc_losses.keys():
         avg_dsc_loss = np.mean(idv_dsc_losses[dsc_name])
