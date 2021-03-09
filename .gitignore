@@ -1,2 +1,6 @@
 __pycache__
 glove.*
+logs/
+model_checkpoints/
+runs/
+config_files/
