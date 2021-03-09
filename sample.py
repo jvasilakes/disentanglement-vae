@@ -2,6 +2,7 @@ import os
 import json
 import logging
 import argparse
+from collections import namedtuple
 
 # External packages
 import torch
@@ -97,13 +98,15 @@ def main(params_file):
             vae, optimizer, ckpt_dir)
     logging.info(f"Loaded checkpoint from '{ckpt_fname}'")
 
-    logging.info(f"Successfully loaded model from {params['name']}")
+    logging.info(f"Successfully loaded model {params['name']}")
     logging.info(vae)
+    vae.eval()
 
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print("Enter a sentence at the prompt.")
     print("Ctrl-D to quit.")
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    Params = namedtuple("Params", ["z", "mu", "logvar"])
     while True:
         try:
             sent = input("> ")
@@ -111,25 +114,35 @@ def main(params_file):
                              train_data.doc2tensor, word2idx)
             all_decoded_tokens = []
             all_params = []
-            for i in range(10):
+            for i in range(5):
                 latent_params = vae.compute_latent_params(context)
-                zs = [param.z for param in latent_params.values()]
                 all_params.append(latent_params)
+                zs = [param.z for param in latent_params.values()]
                 z = torch.cat(zs, dim=1)
                 decoded_tokens = decode(z, vae, idx2word, eos_idx)[:-1]  # No <EOS>
                 all_decoded_tokens.append(decoded_tokens)
-            print()
+                if "polarity" in latent_params:
+                    latent_params_copy = dict(latent_params)
+                    l_params = latent_params["polarity"]
+                    l_params_p = Params(-l_params.z, l_params.mu, l_params.logvar)
+                    latent_params_copy["polarity"] = l_params_p
+                    all_params.append(latent_params_copy)
+                    zs_p = [param.z for param in latent_params_copy.values()]
+                    z_p = torch.cat(zs_p, dim=1)
+                    decoded_tokens_p = decode(z_p, vae, idx2word, eos_idx)[:-1]  # No <EOS>
+                    all_decoded_tokens.append(decoded_tokens_p)
 
             max_len = max([len(' '.join(tokens)) for tokens in all_decoded_tokens])
             max_len += 2
             z_names = [f"{name:^10}" for name
                        in latent_params.keys() if name != "content"]
             print(f" {'RECONSTRUCTION':^{max_len}}|   {' | '.join(z_names)} |")
-            print(''.join(['-'] * 51))
+            print(''.join(['-'] * max_len))
             for (tokens, l_params) in zip(all_decoded_tokens, all_params):
                 zs_strs = [f"{param.z.item():^10.4f}" for (name, param)
                            in l_params.items() if name != "content"]
-                print(f"|{' '.join(decoded_tokens):^{max_len}}|   {' | '.join(zs_strs)} |")  # noqa
+                print(f"|{' '.join(tokens):^{max_len}}|   {' | '.join(zs_strs)} |")  # noqa
+            print(''.join(['-'] * max_len))
             print()
         except EOFError:
             return
