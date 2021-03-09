@@ -6,6 +6,7 @@ from collections import namedtuple
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.distributions as D
 
 
 class VariationalEncoder(nn.Module):
@@ -243,7 +244,17 @@ class VariationalSeq2Seq(nn.Module):
         for (name, layer) in self.context2params.items():
             params = layer(context)
             mu, logvar = params.chunk(2, dim=1)
+            # d = D.Normal(mu, logvar)
+            # mu = torch.relu(mu) + 1.0
+            # logvar = torch.relu(logvar) + 1.0
+            # d = D.Beta(mu, logvar)  # mu=alpha logvar=beta
+            # z = d.rsample()
+            # if self.training is True:
+            #     z = mu + torch.randn_like(logvar) * torch.exp(logvar)
+            # else:
+            #     z = mu
             z = mu + torch.randn_like(logvar) * torch.exp(logvar)
+            # z = mu
             latent_params[name] = Params(z, mu, logvar)
         return latent_params
 
