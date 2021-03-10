@@ -29,6 +29,7 @@ def validate_params(params):
             "embedding_dim": int,  # unused if glove_path != ""
             "hidden_dim": int,  # RNN hidden dim. unused if num_rnn_layers == 1.
             "num_rnn_layers": int,
+            "bidirectional_encoder": bool,
             "latent_dims": dict,
             "epochs": int,
             "batch_size": int,

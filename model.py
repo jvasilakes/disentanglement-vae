@@ -6,7 +6,7 @@ from collections import namedtuple
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.distributions as D
+# import torch.distributions as D
 
 
 class VariationalEncoder(nn.Module):
@@ -14,13 +14,14 @@ class VariationalEncoder(nn.Module):
     embedding -> dropout -> LSTM
     """
     def __init__(self, vocab_size, emb_dim, hidden_size, num_layers,
-                 dropout_rate=0.5, emb_matrix=None):
+                 dropout_rate=0.5, emb_matrix=None, bidirectional=False):
         super(VariationalEncoder, self).__init__()
         self._device = torch.device("cpu")
         self.vocab_size = vocab_size
         self.emb_dim = emb_dim
         self.hidden_size = hidden_size
         self.num_layers = num_layers
+        self.num_directions = 2 if bidirectional is True else 1
         self.dropout_rate = dropout_rate
         if emb_matrix is not None:
             self.embedding = nn.Embedding.from_pretrained(
@@ -32,7 +33,8 @@ class VariationalEncoder(nn.Module):
         self.dropout = nn.Dropout(dropout_rate)
         self.recurrent = nn.LSTM(self.emb_dim, self.hidden_size,
                                  num_layers=self.num_layers,
-                                 dropout=self.dropout_rate, batch_first=True)
+                                 dropout=self.dropout_rate, batch_first=True,
+                                 bidirectional=bidirectional)
 
     @property
     def device(self):
@@ -51,19 +53,19 @@ class VariationalEncoder(nn.Module):
                 embedded, lengths, batch_first=True, enforce_sorted=False)
         # packed: [sum(lengths), self.emb_dim]
         encoded, hidden = self.recurrent(packed, hidden)
-        # encoded: [batch_size, max(lengths), self.hidden_size]
-        # hidden: [num_layers, batch_size, hidden_size]
+        # encoded: [sum(lengths), hidden_size * num_directions]
+        # hidden: [num_layers * num_directions, batch_size, hidden_size]
         unpacked, lengths_unpacked = nn.utils.rnn.pad_packed_sequence(
                 encoded, batch_first=True)
-        # unpacked: [batch_size, max(lengths), hidden_size]
+        # unpacked: [batch_size, max(lengths), hidden_size * num_directions]
         return unpacked, hidden
 
     def init_hidden(self, batch_size):
         # Initialize the LSTM state.
         # One for hidden and one for the cell
-        return (torch.zeros(self.num_layers, batch_size,
+        return (torch.zeros(self.num_layers * self.num_directions, batch_size,
                             self.hidden_size, device=self.device),
-                torch.zeros(self.num_layers, batch_size,
+                torch.zeros(self.num_layers * self.num_directions, batch_size,
                             self.hidden_size, device=self.device))
 
 
@@ -78,6 +80,8 @@ class VariationalDecoder(nn.Module):
         self.vocab_size = vocab_size
         self.emb_dim = emb_dim
         self.hidden_size = hidden_size
+        if num_layers == 1:
+            num_layers = 2
         self.num_layers = num_layers
         self.dropout_rate = dropout_rate
 
@@ -187,13 +191,15 @@ class VariationalSeq2Seq(nn.Module):
         self.context2params = nn.ModuleDict()  # Name: (mu,logvar) linear layer
         # Total latent dimensions of the discriminators
         self.dsc_latent_dim = 0
+        linear_insize = encoder.hidden_size * \
+            encoder.num_layers * \
+            encoder.num_directions
         for dsc in discriminators:
             self.dsc_latent_dim += dsc.latent_dim
             self.discriminators[dsc.name] = dsc
             params_layer = nn.Linear(
-                    encoder.hidden_size * encoder.num_layers,
-                    # TEST encoder.hidden_size,
-                    2 * dsc.latent_dim)
+                    # 2 for mu, logvar
+                    linear_insize, 2 * dsc.latent_dim)
             self.context2params[dsc.name] = params_layer
         assert self.dsc_latent_dim <= self.latent_dim
 
@@ -201,9 +207,7 @@ class VariationalSeq2Seq(nn.Module):
         if self.dsc_latent_dim < self.latent_dim:
             leftover_latent_dim = self.latent_dim - self.dsc_latent_dim
             leftover_layer = nn.Linear(
-                    encoder.hidden_size * encoder.num_layers,
-                    # TEST encoder.hidden_size,
-                    2 * leftover_latent_dim)
+                    linear_insize, 2 * leftover_latent_dim)
             self.context2params["content"] = leftover_layer
             assert self.dsc_latent_dim + leftover_latent_dim == self.latent_dim
 
@@ -233,8 +237,6 @@ class VariationalSeq2Seq(nn.Module):
         encoded, (hidden_state, hidden_cell) = self.encoder(
                 inputs, lengths, (state, cell))
         # context: [batch_size, num_layers * hidden_size]
-        # TEST state_context = hidden_state.view(batch_size, -1)
-        # TEST state_context = hidden_state[-1, :, :]  # last layer
         state_context = torch.cat([layer for layer in hidden_state], dim=1)
         return encoded, state_context, (hidden_state, hidden_cell)
 
@@ -265,10 +267,8 @@ class VariationalSeq2Seq(nn.Module):
         # state, cell: [batch_size, hidden_size * decoder.num_layers]
         state, cell = hidden.chunk(2, dim=1)
         # state, cell = [num_layers, batch_size, hidden_size]
-        # TEST state = state.reshape(self.decoder.num_layers, batch_size, -1)
         state = state.chunk(self.decoder.num_layers, dim=-1)
         state = torch.stack(state, dim=0)
-        # TEST cell = cell.reshape(self.decoder.num_layers, batch_size, -1)
         cell = cell.chunk(self.decoder.num_layers, dim=-1)
         cell = torch.stack(cell, dim=0)
         return (state, cell)
@@ -359,7 +359,8 @@ def build_vae(params, vocab_size, emb_matrix, label_dims, device,
     encoder = VariationalEncoder(
             vocab_size, params["embedding_dim"], params["hidden_dim"],
             params["num_rnn_layers"], dropout_rate=params["dropout"],
-            emb_matrix=emb_matrix)
+            emb_matrix=emb_matrix,
+            bidirectional=params["bidirectional_encoder"])
     encoder.set_device(device)
 
     decoder = VariationalDecoder(

@@ -340,6 +340,7 @@ def evalstep(model, dataloader, params, epoch, idx2word,
         lengths = lengths.to(model.device)
         output = model(Xbatch, lengths, teacher_forcing_prob=0.0)
 
+        # I don't know what I should put for the iteration argument here
         losses_dict = compute_losses(model, output, Xbatch,
                                      Ybatch, lengths, params, 100)
         losses.append(losses_dict["total_loss"].item())
