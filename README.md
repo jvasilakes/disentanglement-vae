@@ -1,5 +1,13 @@
 # Learning Interpretable and Disentangled Representations of Text using VAEs
 
+### Requirements
+
+`scikit-learn`
+`pytorch`
+`tqdm`
+`numpy`
+
+
 After editing `config_example.json` to your liking, run
 
 ```
