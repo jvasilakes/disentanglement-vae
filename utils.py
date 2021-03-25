@@ -34,7 +34,8 @@ def validate_params(params):
             "epochs": int,
             "batch_size": int,
             "learn_rate": float,
-            "dropout": float,
+            "encoder_dropout": float,
+            "decoder_dropout": float,
             "teacher_forcing_prob": float,
             "lambdas": dict,  # KL div weights for each latent space.
             "train": bool,

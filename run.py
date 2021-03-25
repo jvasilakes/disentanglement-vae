@@ -14,7 +14,6 @@ import texar.torch as tx
 from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
 from torchtext.data.metrics import bleu_score
-import torch.distributions as D
 
 # Local packages
 import utils
@@ -53,31 +52,6 @@ def kl_divergence(mu, logvar):
     return kl
 
 
-def kl_divergence_normal(mus, logvars):
-    p = D.Normal(mus, logvars)
-    unit_mus = torch.zeros_like(mus)
-    unit_logvars = torch.ones_like(logvars)
-    q = D.Normal(unit_mus, unit_logvars)
-    return D.kl_divergence(p, q).mean(0).sum()
-
-
-def kl_divergence_beta(alphas, betas):
-    p = D.Beta(alphas, betas)
-    flat_params = torch.ones_like(alphas)
-    q = D.Beta(flat_params, flat_params)
-    return D.kl_divergence(p, q).mean(0).sum()
-
-
-def cyclic_annealing_weight(t, total_iters, num_cycles):
-    tau_num = t % (total_iters / num_cycles)
-    tau_denom = (total_iters / num_cycles)
-    tau = tau_num / tau_denom
-    if tau <= 1.0:
-        return tau / 1.0
-    else:
-        return 1
-
-
 def compute_losses(model, model_outputs, Xbatch, Ybatch, lengths, params,
                    iteration):
     recon_loss = reconstruction_loss(
@@ -108,8 +82,6 @@ def compute_losses(model, model_outputs, Xbatch, Ybatch, lengths, params,
     total_weighted_kl = torch.tensor(0.0).to(model.device)
     for (latent_name, latent_params) in model_outputs["latent_params"].items():
         kl = kl_divergence(latent_params.mu, latent_params.logvar)
-        # kl = kl_divergence_normal(latent_params.mu, latent_params.logvar)
-        # kl = kl_divergence_beta(latent_params.mu, latent_params.logvar)
         idv_kls[latent_name] = kl.item()
         # NB we weight the KL term here.
         # This is so we can easily plug in learnable weights later
@@ -118,8 +90,6 @@ def compute_losses(model, model_outputs, Xbatch, Ybatch, lengths, params,
         except KeyError:
             weight = params["lambdas"]["default"]
 
-        if weight == "cyclic":
-            weight = cyclic_annealing_weight(iteration, 2800, 4)
         total_weighted_kl += weight * kl
         total_kl += kl.item()
 
@@ -224,7 +194,7 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
 
         # Update model
         total_loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.trainable_parameters(), 1)
+        torch.nn.utils.clip_grad_norm_(model.trainable_parameters(), 5)
         optimizer.step()
         optimizer.zero_grad()
 
@@ -258,9 +228,6 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
                     "total_loss_step", total_loss.item(), step)
             summary_writer.add_scalar(
                     "recon_loss_step", losses_dict["recon_loss"], step)
-            weight = cyclic_annealing_weight(step, 2800, 4)
-            summary_writer.add_scalar(
-                    "lambda_step", weight, step)
             for dsc_name in idv_dsc_losses.keys():
                 dsc_loss = idv_dsc_losses[dsc_name][-1]
                 dsc_acc = idv_dsc_accs[dsc_name][-1]
@@ -425,13 +392,16 @@ def run(params_file, verbose=False):
 
     # Read train data
     train_file = os.path.join(params["data_dir"], "train.jsonl")
-    train_sents, train_labs = data_utils.get_sentences_labels(
+    train_sents, train_labs, train_lab_counts = data_utils.get_sentences_labels(  # noqa
             train_file, N=params["num_train_examples"])
+    logging.info("Train label counts:")
+    for (labname, values) in train_lab_counts.items():
+        logging.info(f"  {labname}: {values}")
     train_sents = data_utils.preprocess_sentences(train_sents, SOS, EOS)
     train_labs, label_encoders = data_utils.preprocess_labels(train_labs)
     # Read validation data
     dev_file = os.path.join(params["data_dir"], "dev.jsonl")
-    dev_sents, dev_labs = data_utils.get_sentences_labels(dev_file)
+    dev_sents, dev_labs, dev_lab_counts = data_utils.get_sentences_labels(dev_file)  # noqa
     dev_sents = data_utils.preprocess_sentences(dev_sents, SOS, EOS)
     # Use the label encoders fit on the train set
     dev_labs, _ = data_utils.preprocess_labels(

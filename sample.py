@@ -63,7 +63,8 @@ def main(params_file):
 
     # Load the train data so we can fully specify the model
     train_file = os.path.join(params["data_dir"], "train.jsonl")
-    train_sents, train_labs = data_utils.get_sentences_labels(train_file, N=-1)
+    train_sents, train_labs, train_lab_counts = data_utils.get_sentences_labels(
+        train_file, N=params["num_train_examples"])
     train_sents = data_utils.preprocess_sentences(train_sents, SOS, EOS)
     train_labs, label_encoders = data_utils.preprocess_labels(train_labs)
 
@@ -119,30 +120,42 @@ def main(params_file):
                 all_params.append(latent_params)
                 zs = [param.z for param in latent_params.values()]
                 z = torch.cat(zs, dim=1)
-                decoded_tokens = decode(z, vae, idx2word, eos_idx)[:-1]  # No <EOS>
+                # Remove <EOS> token
+                decoded_tokens = decode(z, vae, idx2word, eos_idx)[:-1]
                 all_decoded_tokens.append(decoded_tokens)
                 if "polarity" in latent_params:
                     latent_params_copy = dict(latent_params)
                     l_params = latent_params["polarity"]
-                    l_params_p = Params(-l_params.z, l_params.mu, l_params.logvar)
+                    l_params_p = Params(
+                        -l_params.z, l_params.mu, l_params.logvar)
                     latent_params_copy["polarity"] = l_params_p
                     all_params.append(latent_params_copy)
                     zs_p = [param.z for param in latent_params_copy.values()]
                     z_p = torch.cat(zs_p, dim=1)
-                    decoded_tokens_p = decode(z_p, vae, idx2word, eos_idx)[:-1]  # No <EOS>
+                    # Remove <EOS> token
+                    decoded_tokens_p = decode(z_p, vae, idx2word, eos_idx)[:-1]
                     all_decoded_tokens.append(decoded_tokens_p)
 
-            max_len = max([len(' '.join(tokens)) for tokens in all_decoded_tokens])
+            max_len = max([len(' '.join(tokens))
+                           for tokens in all_decoded_tokens])
             max_len += 2
-            z_names = [f"{name:^10}" for name
-                       in latent_params.keys() if name != "content"]
-            print(f" {'RECONSTRUCTION':^{max_len}}|   {' | '.join(z_names)} |")
-            print(''.join(['-'] * max_len))
+            z_names = [f"{name:^10}" for name in latent_params.keys()]
+            z_names_str = ' | '.join(z_names)
+            print(f"|{'RECONSTRUCTION':^{max_len}}|   {z_names_str} |")
+            print(''.join(['-'] * (max_len + len(z_names_str) + 7)))
             for (tokens, l_params) in zip(all_decoded_tokens, all_params):
-                zs_strs = [f"{param.z.item():^10.4f}" for (name, param)
-                           in l_params.items() if name != "content"]
+                zs_strs = []
+                for (name, param) in l_params.items():
+                    if name == "content":
+                        continue
+                    if param.z.size(1) == 1:
+                        zstr = f"{param.z.item():^10.4f}"
+                    else:
+                        #zstr = ','.join([f"{param.z[0,i].item():.2f}" for i in range(param.z.size(1))])
+                        zstr = f"{param.z.norm().item():.4f}"
+                    zs_strs.append(zstr)
                 print(f"|{' '.join(tokens):^{max_len}}|   {' | '.join(zs_strs)} |")  # noqa
-            print(''.join(['-'] * max_len))
+            print(''.join(['-'] * (max_len + len(z_names_str) + 7)))
             print()
         except EOFError:
             return

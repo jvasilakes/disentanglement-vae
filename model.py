@@ -6,7 +6,6 @@ from collections import namedtuple
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-# import torch.distributions as D
 
 
 class VariationalEncoder(nn.Module):
@@ -246,17 +245,11 @@ class VariationalSeq2Seq(nn.Module):
         for (name, layer) in self.context2params.items():
             params = layer(context)
             mu, logvar = params.chunk(2, dim=1)
-            # d = D.Normal(mu, logvar)
-            # mu = torch.relu(mu) + 1.0
-            # logvar = torch.relu(logvar) + 1.0
-            # d = D.Beta(mu, logvar)  # mu=alpha logvar=beta
-            # z = d.rsample()
-            # if self.training is True:
-            #     z = mu + torch.randn_like(logvar) * torch.exp(logvar)
-            # else:
-            #     z = mu
+            if self.training is True:
+                z = mu + torch.randn_like(logvar) * torch.exp(logvar)
+            else:
+                z = mu
             z = mu + torch.randn_like(logvar) * torch.exp(logvar)
-            # z = mu
             latent_params[name] = Params(z, mu, logvar)
         return latent_params
 
@@ -333,7 +326,7 @@ class VariationalSeq2Seq(nn.Module):
         vocab_size = self.decoder.vocab_size
         decoder_output = torch.zeros(
                 1, max_length, vocab_size).to(self.device)
-        decoder_output[: 0, self.sos_token_idx] = 1.0
+        decoder_output[:, 0, self.sos_token_idx] = 1.0
         for i in range(max_length):
             # logits: [batch_size, 1, vocab_size]
             logits, decoder_hidden = self.decoder(
@@ -358,14 +351,14 @@ def build_vae(params, vocab_size, emb_matrix, label_dims, device,
     """
     encoder = VariationalEncoder(
             vocab_size, params["embedding_dim"], params["hidden_dim"],
-            params["num_rnn_layers"], dropout_rate=params["dropout"],
+            params["num_rnn_layers"], dropout_rate=params["encoder_dropout"],
             emb_matrix=emb_matrix,
             bidirectional=params["bidirectional_encoder"])
     encoder.set_device(device)
 
     decoder = VariationalDecoder(
             vocab_size, params["embedding_dim"], params["hidden_dim"],
-            params["num_rnn_layers"], dropout_rate=params["dropout"],
+            params["num_rnn_layers"], dropout_rate=params["decoder_dropout"],
             emb_matrix=emb_matrix)
     decoder.set_device(device)
 
