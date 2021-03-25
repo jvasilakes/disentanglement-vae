@@ -168,16 +168,17 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
     if verbose is True:
         pbar = tqdm(total=len(dataloader))
     step = epoch * len(dataloader)
-    for (i, (Xbatch, Ybatch, lengths)) in enumerate(dataloader):
-        Xbatch = Xbatch.to(model.device)
+    for (i, (in_Xbatch, target_Xbatch, Ybatch, lengths)) in enumerate(dataloader):  # noqa
+        in_Xbatch = in_Xbatch.to(model.device)
+        target_Xbatch = target_Xbatch.to(model.device)
         lengths = lengths.to(model.device)
         # output = {"decoder_logits": out_logits,
         #           "latent_params": latent_params,  # Params(z, mu, logvar)
         #           "dsc_logits": dsc_logits}
-        output = model(Xbatch, lengths,
+        output = model(in_Xbatch, lengths,
                        teacher_forcing_prob=params["teacher_forcing_prob"])
 
-        losses_dict = compute_losses(model, output, Xbatch,
+        losses_dict = compute_losses(model, output, target_Xbatch,
                                      Ybatch, lengths, params, step)
         total_loss = losses_dict["total_loss"]
         losses.append(total_loss.item())
@@ -217,7 +218,8 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
             idv_ae[l_name].append(diff.item())
 
         # Measure self-BLEU
-        bleu = compute_bleu(Xbatch, x_prime, idx2word, model.eos_token_idx)
+        bleu = compute_bleu(target_Xbatch, x_prime, idx2word,
+                            model.eos_token_idx)
         bleus.append(bleu)
 
         if verbose is True:
@@ -302,13 +304,14 @@ def evalstep(model, dataloader, params, epoch, idx2word,
     model.eval()
     if verbose is True:
         pbar = tqdm(total=len(dataloader))
-    for (i, (Xbatch, Ybatch, lengths)) in enumerate(dataloader):
-        Xbatch = Xbatch.to(model.device)
+    for (i, (in_Xbatch, target_Xbatch, Ybatch, lengths)) in enumerate(dataloader):  # noqa
+        in_Xbatch = in_Xbatch.to(model.device)
+        target_Xbatch = target_Xbatch.to(model.device)
         lengths = lengths.to(model.device)
-        output = model(Xbatch, lengths, teacher_forcing_prob=0.0)
+        output = model(in_Xbatch, lengths, teacher_forcing_prob=0.0)
 
         # I don't know what I should put for the iteration argument here
-        losses_dict = compute_losses(model, output, Xbatch,
+        losses_dict = compute_losses(model, output, target_Xbatch,
                                      Ybatch, lengths, params, 100)
         losses.append(losses_dict["total_loss"].item())
         recon_losses.append(losses_dict["recon_loss"])
@@ -324,7 +327,8 @@ def evalstep(model, dataloader, params, epoch, idx2word,
 
         # Measure self-BLEU
         x_prime = output["decoder_logits"].argmax(-1)
-        bleu = compute_bleu(Xbatch, x_prime, idx2word, model.eos_token_idx)
+        bleu = compute_bleu(target_Xbatch, x_prime, idx2word,
+                            model.eos_token_idx)
         bleus.append(bleu)
 
         if verbose is True:
@@ -421,6 +425,13 @@ def run(params_file, verbose=False):
     # word2idx/idx2word are used for encoding/decoding tokens
     word2idx = {word: idx for (idx, word) in enumerate(vocab)}
 
+    if params["reverse_input"] is True:
+        noisy_train_sents = data_utils.reverse_sentences(train_sents)
+        noisy_dev_sents = data_utils.reverse_sentences(dev_sents)
+    else:
+        noisy_train_sents = train_sents
+        noisy_dev_sents = dev_sents
+
     # Load glove embeddings, if specified
     # This redefines word2idx/idx2word
     emb_matrix = None
@@ -432,21 +443,23 @@ def run(params_file, verbose=False):
     idx2word = {idx: word for (word, idx) in word2idx.items()}
 
     # Always load the train data since we need it to build the model
-    train_data = data_utils.LabeledTextDataset(
-            train_sents, train_labs, word2idx, label_encoders)
+    train_data = data_utils.DenoisingTextDataset(
+            noisy_train_sents, train_sents, train_labs,
+            word2idx, label_encoders)
     train_dataloader = torch.utils.data.DataLoader(
             train_data, shuffle=True, batch_size=params["batch_size"],
-            collate_fn=utils.pad_sequence)
+            collate_fn=utils.pad_sequence_denoising)
     logging.info(f"Training examples: {len(train_data)}")
     train_writer_path = os.path.join("runs", params["name"], "train")
     train_writer = SummaryWriter(log_dir=train_writer_path)
 
     if params["validate"] is True:
-        dev_data = data_utils.LabeledTextDataset(
-                dev_sents, dev_labs, word2idx, label_encoders)
+        dev_data = data_utils.DenoisingTextDataset(
+                noisy_dev_sents, dev_sents, dev_labs,
+                word2idx, label_encoders)
         dev_dataloader = torch.utils.data.DataLoader(
                 dev_data, shuffle=True, batch_size=params["batch_size"],
-                collate_fn=utils.pad_sequence)
+                collate_fn=utils.pad_sequence_denoising)
         logging.info(f"Validation examples: {len(dev_data)}")
         dev_writer_path = os.path.join("runs", params["name"], "dev")
         dev_writer = SummaryWriter(log_dir=dev_writer_path)

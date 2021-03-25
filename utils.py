@@ -26,8 +26,9 @@ def validate_params(params):
             "glove_path": str,
             "num_train_examples": int,  # -1 for all examples
             "lowercase": bool,  # whether to lowercase input
+            "reverse_input": bool,
             "embedding_dim": int,  # unused if glove_path != ""
-            "hidden_dim": int,  # RNN hidden dim. unused if num_rnn_layers == 1.
+            "hidden_dim": int,  # RNN hidden dim. unused if num_rnn_layers == 1.  # noqa
             "num_rnn_layers": int,
             "bidirectional_encoder": bool,
             "latent_dims": dict,
@@ -165,6 +166,30 @@ def pad_sequence(batch):
     return seqs_padded, labels, lengths
 
 
+def pad_sequence_denoising(batch):
+    """
+    Pad the sequence batch with 0 vectors.
+    Compute the original lengths of each sequence.
+    Collect labels into a dict of tensors.
+    Meant to be used as the value of the `collate_fn`
+    argument to `torch.utils.data.DataLoader`.
+    """
+    noisy_seqs = [torch.squeeze(x) for (x, _, _) in batch]
+    noisy_seqs_padded = torch.nn.utils.rnn.pad_sequence(
+            noisy_seqs, batch_first=True, padding_value=0)  # 0 = <PAD>
+    seqs = [torch.squeeze(x) for (_, x, _) in batch]
+    seqs_padded = torch.nn.utils.rnn.pad_sequence(
+            seqs, batch_first=True, padding_value=0)  # 0 = <PAD>
+    lengths = torch.LongTensor([len(s) for s in seqs])
+    labels = defaultdict(list)
+    for (_, _, y) in batch:
+        for label_name in y.keys():
+            labels[label_name].append(y[label_name])
+    for label_name in labels.keys():
+        labels[label_name] = torch.stack(labels[label_name])
+    return noisy_seqs_padded, seqs_padded, labels, lengths
+
+
 # === RECONSTRUCT AND LOG INPUT ===
 def tensor2text(tensor, idx2word, eos_token_idx):
     """
@@ -179,14 +204,15 @@ def tensor2text(tensor, idx2word, eos_token_idx):
 
 def get_reconstructions(model, dataset, idx2word, idxs):
     batch = [dataset[i] for i in idxs]
-    Xs, _, lengths = pad_sequence(batch)
-    Xs = Xs.to(model.device)
+    noisy_Xs, target_Xs, _, lengths = pad_sequence_denoising(batch)
+    noisy_Xs = noisy_Xs.to(model.device)
+    target_Xs = target_Xs.to(model.device)
     lengths = lengths.to(model.device)
-    output = model(Xs, lengths, teacher_forcing_prob=0.0)
+    output = model(noisy_Xs, lengths, teacher_forcing_prob=0.0)
     logits = output["decoder_logits"]
 
     X_text = [' '.join(tensor2text(X, idx2word, model.eos_token_idx))
-              for X in Xs.cpu().detach()]
+              for X in target_Xs.cpu().detach()]
     recon_idxs = logits.argmax(-1)
     recon_text = [' '.join(tensor2text(r, idx2word, model.eos_token_idx))
                   for r in recon_idxs]
