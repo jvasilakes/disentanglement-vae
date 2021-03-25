@@ -1,5 +1,6 @@
 import re
 import json
+import random
 from collections import defaultdict
 
 # External packages
@@ -64,22 +65,31 @@ class LabeledTextDataset(torch.utils.data.Dataset):
         return tensorized
 
 
-def get_sentences_labels(path, label_keys=None, N=-1):
+def get_sentences_labels(path, label_keys=None, N=-1, shuffle=True):
     sentences = []
     labels = []
+    label_counts = defaultdict(lambda: defaultdict(int))
     with open(path, 'r') as inF:
         for (i, line) in enumerate(inF):
-            if i == N:
-                break
             data = json.loads(line)
             sentences.append(data["sentence"])
             if label_keys is None:
                 label_keys = [key for key in data.keys()
                               if key != "sentence"]
-            labs = {key: value for (key, value) in data.items()
-                    if key in label_keys}
+            labs = {}
+            for (key, value) in data.items():
+                if key not in label_keys:
+                    continue
+                label_counts[key][value] += 1
+                labs[key] = value
             labels.append(labs)
-    return sentences, labels
+    if shuffle is True:
+        tmp = list(zip(sentences, labels))
+        random.shuffle(tmp)
+        sentences, labels = zip(*tmp)
+    if N == -1:
+        N = len(sentences)
+    return sentences[:N], labels[:N], label_counts
 
 
 def preprocess_sentences(sentences, SOS, EOS, lowercase=True):
@@ -115,5 +125,3 @@ def preprocess_labels(labels, label_encoders={}):
         enc_labels_by_name[label_name] = y
 
     return labels, label_encoders
-
-
