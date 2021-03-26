@@ -3,7 +3,7 @@ import argparse
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # noqa
 from glob import glob
 from collections import defaultdict
 
@@ -24,7 +24,7 @@ def main(args):
     outdir = os.path.join(args.outdir, args.data_split)
     os.makedirs(outdir, exist_ok=True)
     z_files = glob(os.path.join(
-        args.zs_dir, f"zs_{args.data_split}_{args.latent_name}*"))
+        args.zs_dir, f"{args.data_split}_{args.latent_name}*"))
     if z_files == []:
         raise ValueError(f"No z files found at '{args.zs_dir}/*_{args.data_split}_{args.latent_name}'")  # noqa
 

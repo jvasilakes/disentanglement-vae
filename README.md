@@ -33,7 +33,7 @@ For example, if your experiment is named `experiment1`,
 python scripts/plot_zs.py logs/experiment1/metadata/zs train polarity logs/experiment1/metadata/plots
 ```
 
-This produces a plot of the approximate posterior q(z|x) for each dimension of the specified latent space.
+This produces a plot of the aggregated approximate posterior ∫q(z|x)p(x)dx for each dimension of the specified latent space.
 
 
 ### Reproducing Experiments
@@ -64,3 +64,6 @@ Once a model has been trained, you can inspect it using the interactive sampling
 ```
 python sample.py config.json
 ```
+
+Type a sentence at the prompt to get a few reconstructions. Press ENTER with no input to generate a few sentences
+randomly from the latent space.
