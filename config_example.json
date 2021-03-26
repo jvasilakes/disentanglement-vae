@@ -5,6 +5,7 @@
  "glove_path": "/path/to/glove.6B/glove.6B.<dim>d.txt or ''",
  "num_train_examples": -1,
  "lowercase": true,
+ "reverse_input": false,
  "embedding_dim": 256,
  "hidden_dim": 256,
  "num_rnn_layers": 2,
