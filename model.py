@@ -300,15 +300,18 @@ class VariationalSeq2Seq(nn.Module):
             # logits: [batch_size, 1, vocab_size]
             logits, decoder_hidden = self.decoder(
                     decoder_input, input_lengths, decoder_hidden)
-            out_logits[:, i, :] = logits.squeeze()
+            logits = logits.squeeze()
+            out_logits[:, i, :] = logits
             use_teacher_forcing = random.random() < teacher_forcing_prob
             if use_teacher_forcing is True:
-                # target = inputs[:, i-1:i]
                 target = inputs[:, i]
                 decoder_input = torch.unsqueeze(target, 1)
             else:
-                logprobs = torch.log_softmax(out_logits, dim=-1)
-                decoder_input = logprobs.argmax(-1).detach()
+                probs = torch.softmax(logits, dim=-1)
+                decoder_input = torch.multinomial(probs, 1)
+                # logprobs = torch.log_softmax(logits, dim=-1)
+                # decoder_input = logprobs.argmax(-1).unsqueeze(1).detach()
+
         # decoder_logits: (batch_size, target_length, vocab_size)
         # latent_params: dict({latent_name: Params})
         # dsc_logits: dict({dsc_name: dsc_logits})
@@ -331,9 +334,10 @@ class VariationalSeq2Seq(nn.Module):
             # logits: [batch_size, 1, vocab_size]
             logits, decoder_hidden = self.decoder(
                     decoder_input, input_lengths, decoder_hidden)
-            decoder_output[:, i, :] = logits.squeeze()
-            logprobs = torch.log_softmax(logits, dim=-1)
-            decoder_input = logprobs.argmax(-1).detach()
+            logits = logits.squeeze()
+            decoder_output[:, i, :] = logits
+            probs = torch.softmax(logits, dim=-1)
+            decoder_input = torch.multinomial(probs, 1).unsqueeze(0)
         return decoder_output
 
 
