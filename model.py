@@ -159,12 +159,16 @@ class Discriminator(nn.Module):
             targets = targets.squeeze()
         return self.loss_fn(logits, targets)
 
-    def compute_accuracy(self, logits, targets):
+    def predict(self, logits):
         probs = self.activation(logits, *self.activation_args)
         if probs.size(1) == 1:
             preds = (probs > 0.5).long().squeeze()
         else:
             preds = probs.argmax(-1).squeeze()
+        return preds
+
+    def compute_accuracy(self, logits, targets):
+        preds = self.predict(logits)
         targets = targets.squeeze()
         acc = torch.mean((preds == targets).float())
         return acc

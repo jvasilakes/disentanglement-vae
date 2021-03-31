@@ -44,6 +44,29 @@ def decode(z, vae, idx2word, eos_idx):
     return tokens
 
 
+def interpolate(vae, context1, context2, latent_name):
+    params1 = vae.compute_latent_params(context1)
+    params2 = vae.compute_latent_params(context2)
+    T = 5
+    out_params = []
+    for i in range(T):
+        t = i / T
+        zt = (params1[latent_name].z * (1 - t)) + (params2[latent_name].z * t)
+        print(params1[latent_name].z)
+        print(params2[latent_name].z)
+        print(t)
+        print(zt)
+        print()
+        params_copy = params1[latent_name]._asdict()
+        params_copy['z'] = zt
+        new_params = params1[latent_name].__class__(**params_copy)
+        all_params_copy = dict(params1)
+        all_params_copy[latent_name] = new_params
+        out_params.append(all_params_copy)
+    out_params.append(params2)
+    return out_params
+
+
 def main(params_file):
     logging.basicConfig(level=logging.INFO)
 
@@ -115,31 +138,47 @@ def main(params_file):
             all_params = []
             for i in range(5):
                 latent_params = vae.compute_latent_params(context)
-                all_params.append(latent_params)
                 if sent.strip() == '':
                     header = "SAMPLE"
-                    zs = [torch.randn(param.z.size())
-                          for param in latent_params.values()]
-                    z = torch.cat(zs, dim=1).to(vae.device)
-                else:
-                    header = "RECONSTRUCTION"
+                    params_copy = dict(latent_params)
+                    for (name, param) in params_copy.items():
+                        param_dict = param._asdict()
+                        param_dict['z'] = torch.randn(param.z.size()).to(vae.device)  # noqa
+                        params_copy[name] = param.__class__(**param_dict)
+                    latent_params = params_copy
+                    all_params.append(latent_params)
                     zs = [param.z for param in latent_params.values()]
                     z = torch.cat(zs, dim=1)
-                # Remove <EOS> token
-                decoded_tokens = decode(z, vae, idx2word, eos_idx)[:-1]
-                all_decoded_tokens.append(decoded_tokens)
-                # if "polarity" in latent_params:
-                #     polarity_idx = [i for (i, lp) in
-                #                     enumerate(latent_params.keys())
-                #                     if lp == "polarity"][0]
-                #     zs_copy = zs[::]
-                #     print(zs_copy is zs)
-                #     zs_copy[polarity_idx] *= -1
-                #     z_p = torch.cat(zs_copy, dim=1).to(vae.device)
-                #     # Remove <EOS> token
-                #     decoded_tokens_p = decode(
-                #         z_p, vae, idx2word, eos_idx)[:-1]
-                #     all_decoded_tokens.append(decoded_tokens_p)
+                    # Remove <EOS> token
+                    decoded_tokens = decode(z, vae, idx2word, eos_idx)[:-1]
+                    all_decoded_tokens.append(decoded_tokens)
+                elif " || " in sent:
+                    header = "INTERPOLATE"
+                    sent1, sent2 = sent.split("||")
+                    context1 = encode(sent1, vae, SOS, EOS,
+                                      params["lowercase"],
+                                      train_data.doc2tensor, word2idx)
+                    context2 = encode(sent2, vae, SOS, EOS,
+                                      params["lowercase"],
+                                      train_data.doc2tensor, word2idx)
+                    all_latent_params = interpolate(
+                        vae, context1, context2, "polarity")
+                    for lps in all_latent_params:
+                        all_params.append(lps)
+                        zs = [param.z for param in latent_params.values()]
+                        z = torch.cat(zs, dim=1)
+                        # Remove <EOS> token
+                        decoded_tokens = decode(z, vae, idx2word, eos_idx)[:-1]
+                        all_decoded_tokens.append(decoded_tokens)
+                    break
+                else:
+                    header = "RECONSTRUCTION"
+                    all_params.append(latent_params)
+                    zs = [param.z for param in latent_params.values()]
+                    z = torch.cat(zs, dim=1)
+                    # Remove <EOS> token
+                    decoded_tokens = decode(z, vae, idx2word, eos_idx)[:-1]
+                    all_decoded_tokens.append(decoded_tokens)
 
             max_len = max([len(' '.join(tokens))
                            for tokens in all_decoded_tokens])
@@ -151,10 +190,16 @@ def main(params_file):
             for (tokens, l_params) in zip(all_decoded_tokens, all_params):
                 zs_strs = []
                 for (name, param) in l_params.items():
+                    try:
+                        dsc = vae.discriminators[name]
+                        logits = dsc.forward(param.z)
+                        pred = dsc.predict(logits).item()
+                    except KeyError:
+                        pred = "_"
                     if param.z.size(1) == 1:
-                        zstr = f"{param.z.item():^10.4f}"
+                        zstr = f"{param.z.item():^6.4f} ({pred})"
                     else:
-                        zstr = f"{param.z.norm().item():^10.4f}"
+                        zstr = f"{param.z.norm().item():^6.4f} ({pred})"
                     zs_strs.append(zstr)
                 print(f"|{' '.join(tokens):^{max_len}}|   {' | '.join(zs_strs)} |")  # noqa
             print(''.join(['-'] * (max_len + len(z_names_str) + 7)))
