@@ -67,3 +67,10 @@ python sample.py config.json
 
 Type a sentence at the prompt to get a few reconstructions. Press ENTER with no input to generate a few sentences
 randomly from the latent space.
+
+
+### Measuring Disentanglement
+
+```
+python scripts/predict_from_latents.py logs/<model_name>/metadata data/<dataset>/processed 
+```
