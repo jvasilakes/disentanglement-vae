@@ -174,20 +174,21 @@ def pad_sequence_denoising(batch):
     Meant to be used as the value of the `collate_fn`
     argument to `torch.utils.data.DataLoader`.
     """
-    noisy_seqs = [torch.squeeze(x) for (x, _, _) in batch]
+    noisy_seqs = [torch.squeeze(x) for (x, _, _, _) in batch]
     noisy_seqs_padded = torch.nn.utils.rnn.pad_sequence(
             noisy_seqs, batch_first=True, padding_value=0)  # 0 = <PAD>
-    seqs = [torch.squeeze(x) for (_, x, _) in batch]
+    seqs = [torch.squeeze(x) for (_, x, _, _) in batch]
     seqs_padded = torch.nn.utils.rnn.pad_sequence(
             seqs, batch_first=True, padding_value=0)  # 0 = <PAD>
     lengths = torch.LongTensor([len(s) for s in seqs])
     labels = defaultdict(list)
-    for (_, _, y) in batch:
+    for (_, _, y, _) in batch:
         for label_name in y.keys():
             labels[label_name].append(y[label_name])
     for label_name in labels.keys():
         labels[label_name] = torch.stack(labels[label_name])
-    return noisy_seqs_padded, seqs_padded, labels, lengths
+    ids = [i for (_, _, _, i) in batch]
+    return noisy_seqs_padded, seqs_padded, labels, lengths, ids
 
 
 # === RECONSTRUCT AND LOG INPUT ===
@@ -204,18 +205,16 @@ def tensor2text(tensor, idx2word, eos_token_idx):
 
 def get_reconstructions(model, dataset, idx2word, idxs):
     batch = [dataset[i] for i in idxs]
-    noisy_Xs, target_Xs, _, lengths = pad_sequence_denoising(batch)
+    noisy_Xs, target_Xs, _, lengths, ids = pad_sequence_denoising(batch)
     noisy_Xs = noisy_Xs.to(model.device)
     target_Xs = target_Xs.to(model.device)
     lengths = lengths.to(model.device)
     output = model(noisy_Xs, lengths, teacher_forcing_prob=0.0)
-    logits = output["decoder_logits"]
 
     X_text = [' '.join(tensor2text(X, idx2word, model.eos_token_idx))
               for X in target_Xs.cpu().detach()]
-    recon_idxs = logits.argmax(-1)
     recon_text = [' '.join(tensor2text(r, idx2word, model.eos_token_idx))
-                  for r in recon_idxs]
+                  for r in output["token_predictions"]]
     joined = '\n'.join([f"'{x}' ==> '{r}'" for (x, r)
                         in zip(X_text, recon_text)])
     return joined

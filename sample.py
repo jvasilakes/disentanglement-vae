@@ -29,7 +29,7 @@ def parse_args():
 def encode(sentence, vae, SOS, EOS, lowercase, doc2tensor_fn, word2idx):
     preprocessed = data_utils.preprocess_sentences(
             [sentence], SOS, EOS, lowercase=lowercase)[0]
-    tensorized = doc2tensor_fn(preprocessed, word2idx).to(vae.device)
+    tensorized = doc2tensor_fn(preprocessed).to(vae.device)
     tensorized = tensorized.squeeze(0)
 
     length = torch.tensor([len(preprocessed)]).to(vae.device)
@@ -52,11 +52,6 @@ def interpolate(vae, context1, context2, latent_name):
     for i in range(T):
         t = i / T
         zt = (params1[latent_name].z * (1 - t)) + (params2[latent_name].z * t)
-        print(params1[latent_name].z)
-        print(params2[latent_name].z)
-        print(t)
-        print(zt)
-        print()
         params_copy = params1[latent_name]._asdict()
         params_copy['z'] = zt
         new_params = params1[latent_name].__class__(**params_copy)
@@ -85,16 +80,18 @@ def main(params_file):
 
     # Load the train data so we can fully specify the model
     train_file = os.path.join(params["data_dir"], "train.jsonl")
-    train_sents, train_labs, train_lab_counts = data_utils.get_sentences_labels(  # noqa
+    tmp = data_utils.get_sentences_labels(
         train_file, N=params["num_train_examples"])
+    train_sents, train_labs, train_ids, train_lab_counts = tmp
     train_sents = data_utils.preprocess_sentences(train_sents, SOS, EOS)
     train_labs, label_encoders = data_utils.preprocess_labels(train_labs)
 
     vocab_file = os.path.join(logdir, "vocab.txt")
     vocab = [word.strip() for word in open(vocab_file)]
     word2idx = {word: idx for (idx, word) in enumerate(vocab)}
-    train_data = data_utils.LabeledTextDataset(
-            train_sents, train_labs, word2idx, label_encoders)
+    train_data = data_utils.DenoisingTextDataset(
+        train_sents, train_sents, train_labs, train_ids,
+        word2idx, label_encoders)
 
     # Get word embeddings if specified
     emb_matrix = None
@@ -183,7 +180,7 @@ def main(params_file):
             max_len = max([len(' '.join(tokens))
                            for tokens in all_decoded_tokens])
             max_len += 2  # For SOS and EOS tokens.
-            z_names = [f"{name:^10}" for name in latent_params.keys()]
+            z_names = [f"{name:^12}" for name in latent_params.keys()]
             z_names_str = ' | '.join(z_names)
             print(f"|{header:^{max_len}}|   {z_names_str} |")
             print(''.join(['-'] * (max_len + len(z_names_str) + 7)))
@@ -197,9 +194,9 @@ def main(params_file):
                     except KeyError:
                         pred = "_"
                     if param.z.size(1) == 1:
-                        zstr = f"{param.z.item():^6.4f} ({pred})"
+                        zstr = f"{param.z.item():^8.4f} ({pred})"
                     else:
-                        zstr = f"{param.z.norm().item():^6.4f} ({pred})"
+                        zstr = f"{param.z.norm().item():^8.4f} ({pred})"
                     zs_strs.append(zstr)
                 print(f"|{' '.join(tokens):^{max_len}}|   {' | '.join(zs_strs)} |")  # noqa
             print(''.join(['-'] * (max_len + len(z_names_str) + 7)))

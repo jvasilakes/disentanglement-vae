@@ -115,7 +115,7 @@ def compute_bleu(Xbatch, pred_batch, idx2word, eos_token_idx):
     return bleu
 
 
-def log_params(params_dict, logdir, dataset_name, epoch):
+def log_params(params_dict, example_ids, logdir, dataset_name, epoch):
     """
     :param defaultdict params_dict: {latent_name: {parameter: [p1...pN]}}
     :param str logdir:
@@ -124,6 +124,15 @@ def log_params(params_dict, logdir, dataset_name, epoch):
     """
     metadata_dir = os.path.join(logdir, "metadata")
     os.makedirs(metadata_dir, exist_ok=True)
+
+    # Log example IDs in the same order as their parameters.
+    ids_dir = os.path.join(metadata_dir, "ordered_ids")
+    os.makedirs(ids_dir, exist_ok=True)
+    ids_outfile = os.path.join(ids_dir, f"{dataset_name}_{epoch}.log")
+    with open(ids_outfile, 'w') as outF:
+        for i in example_ids:
+            outF.write(f"{i}\n")
+
     for latent_name in params_dict.keys():
         for (param_name, values) in params_dict[latent_name].items():
             param_dir = os.path.join(metadata_dir, param_name)
@@ -161,23 +170,25 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
     idv_kls = defaultdict(list)
     idv_ae = defaultdict(list)
     bleus = []
-    # zs = defaultdict(list)
+    # Log example IDs in same order as latent parameters
+    all_sent_ids = []
     all_latent_params = defaultdict(lambda: defaultdict(list))
 
     model.train()
     if verbose is True:
         pbar = tqdm(total=len(dataloader))
     step = epoch * len(dataloader)
-    for (i, (in_Xbatch, target_Xbatch, Ybatch, lengths)) in enumerate(dataloader):  # noqa
+    for (i, batch) in enumerate(dataloader):
+        in_Xbatch, target_Xbatch, Ybatch, lengths, batch_ids = batch
         in_Xbatch = in_Xbatch.to(model.device)
         target_Xbatch = target_Xbatch.to(model.device)
         lengths = lengths.to(model.device)
-        # output = {"decoder_logits": out_logits,
-        #           "latent_params": latent_params,  # Params(z, mu, logvar)
-        #           "dsc_logits": dsc_logits}
+        # output = {"decoder_logits": [batch_size, target_length, vocab_size]
+        #           "latent_params": [Params(z, mu, logvar)] * batch_size
+        #           "dsc_logits": {latent_name: [batch_size, n_classes]}
+        #           "token_predictions": [batch_size, target_length]
         output = model(in_Xbatch, lengths,
                        teacher_forcing_prob=params["teacher_forcing_prob"])
-
         losses_dict = compute_losses(model, output, target_Xbatch,
                                      Ybatch, lengths, params, step)
         total_loss = losses_dict["total_loss"]
@@ -200,6 +211,7 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
         optimizer.zero_grad()
 
         # Log latents
+        all_sent_ids.extend(batch_ids)
         for (l_name, l_params) in output["latent_params"].items():
             for (param_name, param_batch) in l_params._asdict().items():
                 param_batch = param_batch.detach().cpu().tolist()
@@ -268,7 +280,7 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
         summary_writer.add_scalar(
                 f"avg_ae_{latent_name}", avg_ae, epoch)
 
-    log_params(all_latent_params, logdir, "train", epoch)
+    log_params(all_latent_params, all_sent_ids, logdir, "train", epoch)
 
     logstr = f"TRAIN ({epoch}) TOTAL: {np.mean(losses):.4f} +/- {np.std(losses):.4f}"  # noqa
     logstr += f" | RECON: {np.mean(recon_losses):.4f} +/- {np.std(recon_losses):.4f}"  # noqa
@@ -279,11 +291,13 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
     return model, optimizer
 
 
-def evalstep(model, dataloader, params, epoch, idx2word,
-             name="dev", verbose=True, summary_writer=None):
+def evalstep(model, dataloader, params, epoch, idx2word, name="dev",
+             verbose=True, summary_writer=None, logdir=None):
 
     if summary_writer is None:
         summary_writer = SummaryWriter()
+    if logdir is None:
+        logdir = "logs"
 
     # Total loss (recon + discriminator + kl) per step
     losses = []
@@ -300,17 +314,21 @@ def evalstep(model, dataloader, params, epoch, idx2word,
     # UNWEIGHTED KLs per latent space per step
     idv_kls = defaultdict(list)
     bleus = []
+    # Log example IDs and latent params
+    all_sent_ids = []
+    all_latent_params = defaultdict(lambda: defaultdict(list))
 
     model.eval()
     if verbose is True:
         pbar = tqdm(total=len(dataloader))
-    for (i, (in_Xbatch, target_Xbatch, Ybatch, lengths)) in enumerate(dataloader):  # noqa
+    for (i, batch) in enumerate(dataloader):
+        in_Xbatch, target_Xbatch, Ybatch, lengths, batch_ids = batch
         in_Xbatch = in_Xbatch.to(model.device)
         target_Xbatch = target_Xbatch.to(model.device)
         lengths = lengths.to(model.device)
         output = model(in_Xbatch, lengths, teacher_forcing_prob=0.0)
 
-        # I don't know what I should put for the iteration argument here
+        # TODO: what should I put for the iteration argument here
         losses_dict = compute_losses(model, output, target_Xbatch,
                                      Ybatch, lengths, params, 100)
         losses.append(losses_dict["total_loss"].item())
@@ -330,6 +348,13 @@ def evalstep(model, dataloader, params, epoch, idx2word,
         bleu = compute_bleu(target_Xbatch, x_prime, idx2word,
                             model.eos_token_idx)
         bleus.append(bleu)
+
+        # Log latents
+        all_sent_ids.extend(batch_ids)
+        for (l_name, l_params) in output["latent_params"].items():
+            for (param_name, param_batch) in l_params._asdict().items():
+                param_batch = param_batch.detach().cpu().tolist()
+                all_latent_params[l_name][param_name].extend(param_batch)
 
         if verbose is True:
             pbar.update(1)
@@ -357,6 +382,8 @@ def evalstep(model, dataloader, params, epoch, idx2word,
         avg_kl = np.mean(idv_kls[latent_name])
         summary_writer.add_scalar(
                 f"avg_kl_{latent_name}", avg_kl, epoch)
+
+    log_params(all_latent_params, all_sent_ids, logdir, name, epoch)
 
     logstr = f"{name.upper()} ({epoch}) TOTAL: {np.mean(losses):.4f} +/- {np.std(losses):.4f}"  # noqa
     logstr += f" | RECON: {np.mean(recon_losses):.4f} +/- {np.std(recon_losses):.4f}"  # noqa
@@ -394,18 +421,22 @@ def run(params_file, verbose=False):
     if not os.path.isdir(ckpt_dir):
         os.makedirs(ckpt_dir)
 
+    label_keys = [lk for lk in params["latent_dims"].keys() if lk != "total"]
     # Read train data
     train_file = os.path.join(params["data_dir"], "train.jsonl")
-    train_sents, train_labs, train_lab_counts = data_utils.get_sentences_labels(  # noqa
-            train_file, N=params["num_train_examples"])
+    tmp = data_utils.get_sentences_labels(
+        train_file, N=params["num_train_examples"], label_keys=label_keys)
+    train_sents, train_labs, train_ids, train_lab_counts = tmp
     logging.info("Train label counts:")
     for (labname, values) in train_lab_counts.items():
         logging.info(f"  {labname}: {values}")
     train_sents = data_utils.preprocess_sentences(train_sents, SOS, EOS)
     train_labs, label_encoders = data_utils.preprocess_labels(train_labs)
+
     # Read validation data
     dev_file = os.path.join(params["data_dir"], "dev.jsonl")
-    dev_sents, dev_labs, dev_lab_counts = data_utils.get_sentences_labels(dev_file)  # noqa
+    tmp = data_utils.get_sentences_labels(dev_file, label_keys=label_keys)
+    dev_sents, dev_labs, dev_ids, dev_lab_counts = tmp
     dev_sents = data_utils.preprocess_sentences(dev_sents, SOS, EOS)
     # Use the label encoders fit on the train set
     dev_labs, _ = data_utils.preprocess_labels(
@@ -444,7 +475,7 @@ def run(params_file, verbose=False):
 
     # Always load the train data since we need it to build the model
     train_data = data_utils.DenoisingTextDataset(
-            noisy_train_sents, train_sents, train_labs,
+            noisy_train_sents, train_sents, train_labs, train_ids,
             word2idx, label_encoders)
     train_dataloader = torch.utils.data.DataLoader(
             train_data, shuffle=True, batch_size=params["batch_size"],
@@ -455,7 +486,7 @@ def run(params_file, verbose=False):
 
     if params["validate"] is True:
         dev_data = data_utils.DenoisingTextDataset(
-                noisy_dev_sents, dev_sents, dev_labs,
+                noisy_dev_sents, dev_sents, dev_labs, dev_ids,
                 word2idx, label_encoders)
         dev_dataloader = torch.utils.data.DataLoader(
                 dev_data, shuffle=True, batch_size=params["batch_size"],
@@ -492,7 +523,7 @@ def run(params_file, verbose=False):
     # Log the experiment parameter file to recreate this run.
     config_logfile = os.path.join(logdir, f"config_epoch{start_epoch}.json")
     with open(config_logfile, 'w') as outF:
-        json.dump(params, outF)
+        json.dump(params, outF, indent=2)
 
     if params["train"] is True:
         logging.info("TRAINING")
@@ -510,14 +541,12 @@ def run(params_file, verbose=False):
                 # Log train inputs and their reconstructions
                 utils.log_reconstructions(vae, train_data, idx2word,
                                           "train", epoch, logdir, n=20)
-
                 if params["validate"] is True:
                     evalstep(vae, dev_dataloader, params, epoch, idx2word,
                              verbose=verbose, summary_writer=dev_writer)
                     # Log dev inputs and their reconstructions
                     utils.log_reconstructions(vae, dev_data, idx2word,
                                               "dev", epoch, logdir, n=20)
-
             except KeyboardInterrupt:
                 break
 
@@ -534,7 +563,7 @@ def run(params_file, verbose=False):
 
     if params["validate"] is True:
         evalstep(vae, dev_dataloader, params, start_epoch, idx2word,
-                 verbose=verbose, summary_writer=dev_writer)
+                 verbose=verbose, summary_writer=dev_writer, logdir=logdir)
         utils.log_reconstructions(vae, dev_data, idx2word,
                                   "dev", start_epoch, logdir, n=30)
 

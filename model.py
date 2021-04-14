@@ -154,6 +154,7 @@ class Discriminator(nn.Module):
     def forward(self, inputs):
         return self.linear(inputs)
 
+    # TODO: add parameter to pass label weights for balancing
     def compute_loss(self, logits, targets):
         if self.output_dim > 1:
             targets = targets.squeeze()
@@ -300,6 +301,8 @@ class VariationalSeq2Seq(nn.Module):
         out_logits = torch.zeros(
                 batch_size, target_length, vocab_size).to(self.device)
         out_logits[:, 0, self.sos_token_idx] = 1.0  # Always output <SOS> first
+        out_predictions = torch.zeros(batch_size, target_length)
+        out_predictions[:, 0] = self.sos_token_idx
         for i in range(1, target_length):
             # logits: [batch_size, 1, vocab_size]
             logits, decoder_hidden = self.decoder(
@@ -315,13 +318,15 @@ class VariationalSeq2Seq(nn.Module):
                 decoder_input = torch.multinomial(probs, 1)
                 # logprobs = torch.log_softmax(logits, dim=-1)
                 # decoder_input = logprobs.argmax(-1).unsqueeze(1).detach()
+            out_predictions[:, i] = decoder_input.squeeze()
 
         # decoder_logits: (batch_size, target_length, vocab_size)
         # latent_params: dict({latent_name: Params})
         # dsc_logits: dict({dsc_name: dsc_logits})
         output = {"decoder_logits": out_logits,
                   "latent_params": latent_params,  # Params(z, mu, logvar)
-                  "dsc_logits": dsc_logits}
+                  "dsc_logits": dsc_logits,
+                  "token_predictions": out_predictions}
         return output
 
     def sample(self, z, max_length=30):

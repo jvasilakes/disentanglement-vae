@@ -73,14 +73,18 @@ class DenoisingTextDataset(torch.utils.data.Dataset):
     the labels as an auxilliary task.
     """
 
-    def __init__(self, noisy_docs, orig_docs, labels,
+    def __init__(self, noisy_docs, orig_docs, labels, ids,
                  word2idx, label_encoders):
         super(DenoisingTextDataset, self).__init__()
         self._dims = None
+        assert len(noisy_docs) == len(orig_docs)
+        assert len(noisy_docs) == len(labels)
+        assert len(noisy_docs) == len(ids)
         self.noisy_docs = noisy_docs
         self.orig_docs = orig_docs
         assert isinstance(labels[0], dict)
         self.labels = labels
+        self.ids = ids
         if "<UNK>" not in word2idx.keys():
             raise ValueError("word2idx must have an '<UNK>' entry.")
         if "<PAD>" not in word2idx.keys():
@@ -93,7 +97,8 @@ class DenoisingTextDataset(torch.utils.data.Dataset):
         self.Ys = [self.label2tensor(lab) for lab in self.labels]
 
     def __getitem__(self, idx):
-        return self.noisy_Xs[idx], self.orig_Xs[idx], self.Ys[idx]
+        return (self.noisy_Xs[idx], self.orig_Xs[idx],
+                self.Ys[idx], self.ids[idx])
 
     def __len__(self):
         return len(self.orig_Xs)
@@ -136,16 +141,18 @@ class DenoisingTextDataset(torch.utils.data.Dataset):
 
 
 def get_sentences_labels(path, label_keys=None, N=-1, shuffle=True):
+    sentence_ids = []
     sentences = []
     labels = []
     label_counts = defaultdict(lambda: defaultdict(int))
     with open(path, 'r') as inF:
         for (i, line) in enumerate(inF):
             data = json.loads(line)
+            sentence_ids.append(data["id"])
             sentences.append(data["sentence"])
             if label_keys is None:
                 label_keys = [key for key in data.keys()
-                              if key != "sentence"]
+                              if key not in ["sentence", "id"]]
             labs = {}
             for (key, value) in data.items():
                 if key not in label_keys:
@@ -154,12 +161,12 @@ def get_sentences_labels(path, label_keys=None, N=-1, shuffle=True):
                 labs[key] = value
             labels.append(labs)
     if shuffle is True:
-        tmp = list(zip(sentences, labels))
+        tmp = list(zip(sentences, labels, sentence_ids))
         random.shuffle(tmp)
-        sentences, labels = zip(*tmp)
+        sentences, labels, sentence_ids = zip(*tmp)
     if N == -1:
         N = len(sentences)
-    return sentences[:N], labels[:N], label_counts
+    return sentences[:N], labels[:N], sentence_ids[:N], label_counts
 
 
 def preprocess_sentences(sentences, SOS, EOS, lowercase=True):
