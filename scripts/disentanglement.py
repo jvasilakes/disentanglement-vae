@@ -4,6 +4,7 @@ import csv
 import json
 import argparse
 from glob import glob
+from tqdm import trange
 from collections import Counter, defaultdict
 
 import torch
@@ -20,58 +21,92 @@ from sklearn.metrics import precision_recall_fscore_support
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--test", action="store_true", default=False)
-    parser.add_argument("metadata_dir", type=str,
-                        help="Directory containing z/ and ordered_ids/")
-    parser.add_argument("data_dir", type=str,
-                        help="Directory containing {train,dev,test.jsonl}.")
-    parser.add_argument("outdir", type=str, help="Where to save the results.")
-    parser.add_argument("--epoch", type=int, default=-1,
-                        help="Which training epoch to run on. Default last.")
-    parser.add_argument("--num_resamples", type=int, default=10)
-    return parser.parse_args()
+    subparsers = parser.add_subparsers(
+        help="Specify test, compute, or summarize")
+
+    test_parser = subparsers.add_parser("test")
+    test_parser.set_defaults(test=True, compute=False, summarize=False)
+    test_parser.add_argument("-N", type=int, default=100000, required=False,
+                             help="""Number of samples to use.""")
+
+    compute_parser = subparsers.add_parser("compute")
+    compute_parser.set_defaults(test=False, compute=True, summarize=False)
+    compute_parser.add_argument("metadata_dir", type=str,
+                                help="""Directory containing z/
+                                        and ordered_ids/""")
+    compute_parser.add_argument("data_dir", type=str,
+                                help="""Directory containing
+                                        {train,dev,test.jsonl}.""")
+    compute_parser.add_argument("dataset", type=str,
+                                choices=["train", "dev", "test"],
+                                help="Dataset to run on.")
+    compute_parser.add_argument("outdir", type=str,
+                                help="Where to save the results.")
+    compute_parser.add_argument("--epoch", type=int, default=-1,
+                                help="""Which epoch to run on.
+                                        Default last.""")
+    compute_parser.add_argument("--num_resamples", type=int, default=10,
+                                help="""The number of times to
+                                        resample and compute MIG""")
+
+    summ_parser = subparsers.add_parser("summarize")
+    summ_parser.set_defaults(test=False, compute=False, summarize=True)
+    summ_parser.add_argument("dataset", type=str,
+                             choices=["train", "dev", "test"],
+                             help="Dataset to run on.")
+    summ_parser.add_argument("outdir", type=str,
+                             help="Directory containing results to summarize.")
+
+    args = parser.parse_args()
+    if [args.test, args.compute, args.summarize] == [False, False, False]:
+        parser.print_help()
+    return args
 
 
-def main(args):
+def compute(args):
     """
-    Get zs from metadata_dir/z/train_*_epoch.log
-    Get labels from data_dir/train.jsonl using ids from
-        metadata_dir/ordered_ids/train_epoch.log
+    Get zs from metadata_dir/z/dataset_*_epoch.log
+    Get labels from data_dir/dataset.jsonl using ids from
+        metadata_dir/ordered_ids/dataset_epoch.log
     For each zs/labels pair:
         Estimate logistic regression model from zs to labels.
         Evaluate above model on data_dir/{train,dev,test}.jsonl
     """
+    os.makedirs(args.outdir, exist_ok=True)
+
     zs_dir = os.path.join(args.metadata_dir, 'z')
     if args.epoch == -1:
         epoch = get_last_epoch(zs_dir)
     else:
         epoch = args.epoch
-    z_files = glob(os.path.join(zs_dir, f"train_*_{epoch}.log"))
+    z_files = glob(os.path.join(zs_dir, f"{args.dataset}_*_{epoch}.log"))
     mu_files = glob(os.path.join(args.metadata_dir, "mu",
-                                 f"train_*_{epoch}.log"))
+                                 f"{args.dataset}_*_{epoch}.log"))
     logvar_files = glob(os.path.join(args.metadata_dir, "logvar",
-                                     f"train_*_{epoch}.log"))
+                                     f"{args.dataset}_*_{epoch}.log"))
     latent_names = get_latent_names(z_files)
 
     ids_dir = os.path.join(args.metadata_dir, "ordered_ids")
-    ids_file = os.path.join(ids_dir, f"train_{epoch}.log")
+    ids_file = os.path.join(ids_dir, f"{args.dataset}_{epoch}.log")
     ids = [uuid.strip() for uuid in open(ids_file)]
 
     # id2labels = {uuid: {latent_name: value for latent_name in latent_names}}
     # But this will not include the "content" latent.
     # labels_set = {lname for lname in latent_names if lname is a supervised latent}  # noqa
-    id2labels, labels_set = get_labels(args.data_dir, latent_names)
+    id2labels, labels_set = get_labels(
+        args.data_dir, args.dataset, latent_names)
     Vs = defaultdict(list)
     for uuid in ids:
         labels = id2labels[uuid]
         for (lab_name, val) in labels.items():
             Vs[lab_name].append(val)
 
-    preds_outfile = os.path.join(args.outdir, "prediction.csv")
-    migs_outfile = os.path.join(args.outdir, "MIGS.jsonl")
+    migs_outfile = os.path.join(args.outdir, f"MIGS_{args.dataset}.jsonl")
+    preds_outfile = os.path.join(args.outdir,
+                                 f"predictions_{args.dataset}.csv")
     zipped = list(zip(latent_names, z_files, mu_files, logvar_files))
     Hvs = {}
-    for i in range(args.num_resamples):
+    for i in trange(args.num_resamples):
         mis = defaultdict(dict)
         pred_results = []
         for (latent_name, zfile, mufile, logvarfile) in zipped:
@@ -122,12 +157,12 @@ def get_latent_names(filenames):
     return latent_names
 
 
-def get_labels(data_dir, latent_names):
-    train_file = os.path.join(data_dir, "train.jsonl")
-    train_data = [json.loads(line) for line in open(train_file)]
+def get_labels(data_dir, dataset, latent_names):
+    data_file = os.path.join(data_dir, f"{dataset}.jsonl")
+    data = [json.loads(line) for line in open(data_file)]
     id2labels = {}
     labels_set = set()
-    for datum in train_data:
+    for datum in data:
         labs = {key: val for (key, val) in datum.items()
                 if key in latent_names}
         id2labels[datum["id"]] = labs
@@ -266,7 +301,7 @@ def test_random(N):
 def test_kinda_predictive(N):
     zs = np.random.randn(N).reshape(-1, 1)
     vs = np.array([0 if z < 0.0 else 1 for z in zs])
-    idxs = np.random.randint(0, len(vs), size=N-5000)
+    idxs = np.random.randint(0, len(vs), size=int(N//5))
     vs[idxs] = np.logical_not(vs[idxs]).astype(int)
     clf = LogisticRegression(random_state=10, class_weight="balanced",
                              penalty="none").fit(zs, vs)
@@ -321,28 +356,110 @@ def test_bijective_oracle(N, predictive=False):
     print("MI = H[z] + H[v] - H[v,z]: ", MI_joint)
 
 
+# ===========================
+#    Summarization functions
+# ===========================
+
+def summarize_results(args):
+    print(f"Summarizing results from {args.outdir}/*_{args.dataset}")
+    print()
+
+    plot_dir = os.path.join(args.outdir, "plots")
+    os.makedirs(plot_dir, exist_ok=True)
+
+    migs_outfile = os.path.join(args.outdir, f"MIGS_{args.dataset}.jsonl")
+    preds_outfile = os.path.join(
+        args.outdir, f"predictions_{args.dataset}.csv")
+    migs_data = [json.loads(line) for line in open(migs_outfile)]
+    migs_plot, mis_plot = summarize_migs(migs_data)
+    plot_outfile = os.path.join(plot_dir, f"MIGs_{args.dataset}.pdf")
+    migs_plot.savefig(plot_outfile, dpi=300)
+    plot_outfile = os.path.join(plot_dir, f"MIs_{args.dataset}.pdf")
+    mis_plot.savefig(plot_outfile, dpi=300)
+
+    preds_data = pd.read_csv(preds_outfile)
+    boxplot = summarize_preds(preds_data)
+    plot_outfile = os.path.join(plot_dir, f"predictions_{args.dataset}.pdf")
+    boxplot.savefig(plot_outfile, dpi=300)
+
+
+def summarize_migs(migs_data):
+    migs = defaultdict(list)
+    mis = defaultdict(list)
+    for datum in migs_data:
+        for latent_name in datum.keys():
+            if latent_name == "sample_num":
+                continue
+            migs[latent_name].append(datum[latent_name]["MIG"])
+            mis[latent_name].append(datum[latent_name]["top_2_MIs"][0])
+
+    migs_df = pd.DataFrame(migs)
+    print("======== MIGs ========")
+    migs_summ_df = migs_df.agg(["mean", "std", "size"]).T
+    migs_summ_df.reset_index(inplace=True)
+    migs_summ_df.columns = ["latent", "mean", "sd", "N"]
+    print(migs_summ_df)
+    print()
+    # Boxplot of the MIGs
+    mig_fig, mig_ax = plt.subplots()
+    migs_df.boxplot(ax=mig_ax)
+    mig_ax.set_title("MIGs")
+    mig_fig.tight_layout()
+
+    mi_df = pd.DataFrame(mis)
+    print("======== MIs ========")
+    mi_summ_df = mi_df.agg(["mean", "std", "size"]).T
+    mi_summ_df.reset_index(inplace=True)
+    mi_summ_df.columns = ["latent", "mean", "sd", "N"]
+    print(mi_summ_df)
+    print()
+    # Boxplot of the MIs
+    mi_fig, mi_ax = plt.subplots()
+    mi_df.boxplot(ax=mi_ax)
+    mi_ax.set_title("MIs")
+    mi_fig.tight_layout()
+
+    return mig_fig, mi_fig
+
+
+def summarize_preds(preds_df):
+    summ = preds_df.groupby(["latent_name", "label_name"]).agg(
+        ["mean", "std"]).drop("sample_num", axis="columns")
+    print("=== Predictive Performance ===")
+    print(summ)
+
+    fig, ax = plt.subplots()
+    preds_df.boxplot(by=["latent_name", "label_name"],
+                     column=["precision", "recall", "F1"],
+                     rot=90, layout=(1, 3), ax=ax)
+    ax.set_title("Precision, Recall, F1")
+    plt.tight_layout()
+    return fig
+
+
 if __name__ == "__main__":
     args = parse_args()
     if args.test is True:
-        N = 1000000
         print("RANDOM")
-        test_random(N)
+        test_random(args.N)
         print("KINDA PREDICTIVE")
-        test_kinda_predictive(N)
+        test_kinda_predictive(args.N)
         print("PREDICTIVE")
-        test_predictive(N)
+        test_predictive(args.N)
         print()
         print("BIJECTIVE ORACLE")
         print("  random")
-        test_bijective_oracle(N)
+        test_bijective_oracle(args.N)
         print("  predictive")
-        test_bijective_oracle(N, predictive=True)
+        test_bijective_oracle(args.N, predictive=True)
         print()
         print("BIJECTIVE")
         print("  random")
-        test_bijective(N)
+        test_bijective(args.N)
         print("  predictive")
-        test_bijective(N, predictive=True)
+        test_bijective(args.N, predictive=True)
         print()
-    else:
-        main(args)
+    elif args.compute is True:
+        compute(args)
+    elif args.summarize is True:
+        summarize_results(args)
