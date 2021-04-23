@@ -1,5 +1,6 @@
 import os
 import re
+import csv
 import json
 import argparse
 from glob import glob
@@ -14,7 +15,7 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import mutual_info_classif
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report
+from sklearn.metrics import precision_recall_fscore_support
 
 
 def parse_args():
@@ -24,6 +25,7 @@ def parse_args():
                         help="Directory containing z/ and ordered_ids/")
     parser.add_argument("data_dir", type=str,
                         help="Directory containing {train,dev,test.jsonl}.")
+    parser.add_argument("outdir", type=str, help="Where to save the results.")
     parser.add_argument("--epoch", type=int, default=-1,
                         help="Which training epoch to run on. Default last.")
     parser.add_argument("--num_resamples", type=int, default=10)
@@ -65,35 +67,44 @@ def main(args):
         for (lab_name, val) in labels.items():
             Vs[lab_name].append(val)
 
-    mis = defaultdict(dict)
-    Hvs = {}
+    preds_outfile = os.path.join(args.outdir, "prediction.csv")
+    migs_outfile = os.path.join(args.outdir, "MIGS.jsonl")
     zipped = list(zip(latent_names, z_files, mu_files, logvar_files))
+    Hvs = {}
     for i in range(args.num_resamples):
+        mis = defaultdict(dict)
+        pred_results = []
         for (latent_name, zfile, mufile, logvarfile) in zipped:
             for lab_name in labels_set:
                 # Predict lab_name from z_latent_name
                 mus = np.loadtxt(mufile, delimiter=',')
                 logvars = np.loadtxt(logvarfile, delimiter=',')
-                #zs = np.loadtxt(zfile, delimiter=',')
+                # zs = np.loadtxt(zfile, delimiter=',')
                 zs = sample_from_latent(mus, logvars).numpy()
                 id2z = dict(zip(ids, zs))
-                print(f"{latent_name} |-> {lab_name}")
-                model, results = train_lr(latent_name, id2z, lab_name, id2labels)
-                print(results)
+                # print(f"{latent_name} |-> {lab_name}")
+                # Precision, recall, f1
+                model, (p, r, f, _) = train_lr(latent_name, id2z,
+                                               lab_name, id2labels)
+                pred_results.append([i, latent_name, lab_name, p, r, f])
 
                 if lab_name not in Hvs.keys():
                     Hvs[lab_name] = compute_entropy_freq(Vs[lab_name])
 
                 mi = compute_mi(zs, Vs[lab_name])
-                print("MI: ", mi)
-                print()
                 mis[lab_name][latent_name] = mi
-        # TODO: Log MIGs for each resample as JSONL, one line per resample.
-        # {latent_name: {MIG: float, MIs: [float, float], Hv: float}, ...}
         migs = compute_migs(mis, Hvs)
-        for (key, val) in migs.items():
-            print(f"{key}: {val}")
-        print("-----------------------------------")
+        with open(migs_outfile, 'a') as outF:
+            migs["sample_num"] = i
+            json.dump(migs, outF)
+            outF.write('\n')
+        with open(preds_outfile, 'a') as outF:
+            writer = csv.writer(outF, delimiter=',')
+            if i == 0:
+                writer.writerow(["sample_num", "latent_name", "label_name",
+                                 "precision", "recall", "F1"])
+            for line in pred_results:
+                writer.writerow(line)
 
 
 def get_last_epoch(directory):
@@ -136,7 +147,7 @@ def train_lr(latent_name, id2z, label_name, id2labels):
     clf = LogisticRegression(random_state=10, class_weight="balanced",
                              penalty="none").fit(Z, V)
     preds = clf.predict(Z)
-    return clf, classification_report(V, preds)
+    return clf, precision_recall_fscore_support(V, preds, average="macro")
 
 
 def plot_z_v(Z, V):
@@ -229,7 +240,10 @@ def compute_migs(mi_dict, Hvs):
         sorted_lab_mis, sorted_names = zip(*sorted_pairs)
         Hv = Hvs[lab_name]
         mig_v = (sorted_lab_mis[0] - sorted_lab_mis[1]) / Hv
-        migs[lab_name][sorted_names[:2]] = (mig_v, (sorted_lab_mis[:2], Hv))
+        migs[lab_name] = {"top_2_latents": sorted_names[:2],
+                          "MIG": mig_v,
+                          "top_2_MIs": sorted_lab_mis[:2],
+                          "label_entropy": Hv}
     return migs
 
 
