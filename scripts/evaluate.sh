@@ -17,15 +17,15 @@ for dirname in ${LOGDIR}/*; do
 		continue
 	fi
 	# We've already computed it, so skip
-	if [ -d ${dirname}/evaluation ]; then
- 	echo "Warning: Evaluation for ${dirname} already complete. Skipping..."
+	if [ -f ${dirname}/evaluation/summary_${DATASET}.txt ]; then
+ 	echo "Warning: Evaluation for ${dirname}/${DATASET} already complete. Skipping..."
 		continue
 	fi
   echo "Computing results for ${dirname}..."
 	python scripts/disentanglement.py compute --num_resamples 30 \
 																						${dirname}/metadata \
 																						${DATADIR} ${DATASET} \
-																						${dirname}/evaluation/raw/
-	python scripts/disentanglement.py summarize ${DATASET} ${dirname}/evaluation/raw \
-																		> ${dirname}/evaluation/summary.txt
+																						${dirname}/evaluation/
+	python scripts/disentanglement.py summarize ${DATASET} ${dirname}/evaluation/ \
+																		> ${dirname}/evaluation/summary_${DATASET}.txt
 done

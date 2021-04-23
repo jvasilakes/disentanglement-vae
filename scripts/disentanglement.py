@@ -398,7 +398,7 @@ def summarize_migs(migs_data):
     migs_summ_df = migs_df.agg(["mean", "std", "size"]).T
     migs_summ_df.reset_index(inplace=True)
     migs_summ_df.columns = ["latent", "mean", "sd", "N"]
-    print(migs_summ_df)
+    print(migs_summ_df.to_string())
     print()
     # Boxplot of the MIGs
     mig_fig, mig_ax = plt.subplots()
@@ -411,7 +411,7 @@ def summarize_migs(migs_data):
     mi_summ_df = mi_df.agg(["mean", "std", "size"]).T
     mi_summ_df.reset_index(inplace=True)
     mi_summ_df.columns = ["latent", "mean", "sd", "N"]
-    print(mi_summ_df)
+    print(mi_summ_df.to_string())
     print()
     # Boxplot of the MIs
     mi_fig, mi_ax = plt.subplots()
@@ -426,7 +426,7 @@ def summarize_preds(preds_df):
     summ = preds_df.groupby(["latent_name", "label_name"]).agg(
         ["mean", "std"]).drop("sample_num", axis="columns")
     print("=== Predictive Performance ===")
-    print(summ)
+    print(summ.to_string())
 
     fig, ax = plt.subplots()
     preds_df.boxplot(by=["latent_name", "label_name"],
