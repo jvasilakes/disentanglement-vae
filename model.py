@@ -301,7 +301,7 @@ class VariationalSeq2Seq(nn.Module):
         out_logits = torch.zeros(
                 batch_size, target_length, vocab_size).to(self.device)
         out_logits[:, 0, self.sos_token_idx] = 1.0  # Always output <SOS> first
-        out_predictions = torch.zeros(batch_size, target_length)
+        out_predictions = torch.zeros(batch_size, target_length, dtype=int)
         out_predictions[:, 0] = self.sos_token_idx
         for i in range(1, target_length):
             # logits: [batch_size, 1, vocab_size]
