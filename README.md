@@ -1,4 +1,4 @@
-# Learning Interpretable and Disentangled Representations of Text using VAEs
+# Learning Disentangled and Informative Representations of Negation and Uncertainty
 
 ### Requirements
 
@@ -71,6 +71,12 @@ randomly from the latent space.
 
 ### Measuring Disentanglement
 
+The first script will estimate the Mutual Information Gap (MIG) for each latent space by sampling multiple
+times from each space and then computing the mutual information between the latents and the ground truth generative factor values
+(i.e. the labels). The second command will then summarize these results, saving to `logs/<model_name>/evaluation`.
+
 ```
-python scripts/predict_from_latents.py logs/<model_name>/metadata data/<dataset>/processed 
+python scripts/disentanglement.py compute logs/<model_name>/metadata data/<dataset>/processed logs/<model_name>/ \
+																					{train,dev,test} logs/<model_name>/evaluation
+python scripts/disentanglement.py summarize {train,dev,test} logs/<model_name>/evaluation
 ```
