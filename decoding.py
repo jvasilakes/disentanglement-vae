@@ -9,6 +9,7 @@ from collections import defaultdict
 import torch
 import numpy as np
 import pandas as pd
+import matplotlib
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from sklearn.metrics import precision_recall_fscore_support
@@ -230,15 +231,30 @@ def summarize(args):
         ["mean", "std"]).drop("sample_num", axis="columns")
     print(summ_df.to_string())
 
-    fig, ax = plt.subplots()
-    df.boxplot(by=["label", "true", "pred"],
-               column=["precision", "recall", "F1"],
-               rot=90, layout=(1, 3), ax=ax)
-    ax.set_title("Precision, Recall, F1")
+    fig, ax = plt.subplots(figsize=(10, 4))
+    means = df.groupby(["label", "true", "pred"]).mean().drop(
+        "sample_num", axis="columns")
+    errs = df.groupby(["label", "true", "pred"]).std().drop(
+        "sample_num", axis="columns")
+    plots = means.plot.barh(yerr=errs, rot=0, subplots=True,
+                            ax=ax, sharey=True, layout=(1, 3), legend=False)
+
+    colors = list(matplotlib.colors.TABLEAU_COLORS.values())[:3]
+    for plot in plots[0]:
+        for (i, bar) in enumerate(plot.patches):
+            c = colors[i % 3]
+            bar.set_color(c)
+            if i < 3:
+                bar.set_hatch('/')
+                bar.set_edgecolor('k')
+
     plt.tight_layout()
     os.makedirs(os.path.join(args.outdir, "plots"), exist_ok=True)
     plot_outfile = os.path.join(
         args.outdir, "plots", f"decoder_predictions_{args.dataset}.pdf")
+    fig.savefig(plot_outfile, dpi=300)
+    plot_outfile = os.path.join(
+        args.outdir, "plots", f"decoder_predictions_{args.dataset}.png")
     fig.savefig(plot_outfile, dpi=300)
 
 

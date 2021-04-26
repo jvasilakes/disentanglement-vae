@@ -63,7 +63,7 @@ def parse_args():
     return args
 
 
-def compute(args):
+def compute(args, model=None):
     """
     Get zs from metadata_dir/z/dataset_*_epoch.log
     Get labels from data_dir/dataset.jsonl using ids from
@@ -75,10 +75,12 @@ def compute(args):
     os.makedirs(args.outdir, exist_ok=True)
 
     zs_dir = os.path.join(args.metadata_dir, 'z')
+    ids_dir = os.path.join(args.metadata_dir, "ordered_ids")
     if args.epoch == -1:
         epoch = get_last_epoch(zs_dir)
     else:
         epoch = args.epoch
+
     z_files = glob(os.path.join(zs_dir, f"{args.dataset}_*_{epoch}.log"))
     mu_files = glob(os.path.join(args.metadata_dir, "mu",
                                  f"{args.dataset}_*_{epoch}.log"))
@@ -128,6 +130,8 @@ def compute(args):
 
                 mi = compute_mi(zs, Vs[lab_name])
                 mis[lab_name][latent_name] = mi
+                print(lab_name, latent_name, mis[lab_name][latent_name])
+                input()
         migs = compute_migs(mis, Hvs)
         with open(migs_outfile, 'a') as outF:
             migs["sample_num"] = i
@@ -371,27 +375,48 @@ def summarize_results(args):
     preds_outfile = os.path.join(
         args.outdir, f"predictions_{args.dataset}.csv")
     migs_data = [json.loads(line) for line in open(migs_outfile)]
-    migs_plot, mis_plot = summarize_migs(migs_data)
-    plot_outfile = os.path.join(plot_dir, f"MIGs_{args.dataset}.pdf")
-    migs_plot.savefig(plot_outfile, dpi=300)
-    plot_outfile = os.path.join(plot_dir, f"MIs_{args.dataset}.pdf")
-    mis_plot.savefig(plot_outfile, dpi=300)
+    plot = summarize_migs(migs_data)
+    plot_outfile = os.path.join(plot_dir, f"disentanglement_{args.dataset}")
+    plot.savefig(f"{plot_outfile}.png", dpi=300)
+    plot.savefig(f"{plot_outfile}.pdf", dpi=300)
 
     preds_data = pd.read_csv(preds_outfile)
-    boxplot = summarize_preds(preds_data)
-    plot_outfile = os.path.join(plot_dir, f"predictions_{args.dataset}.pdf")
-    boxplot.savefig(plot_outfile, dpi=300)
+    plot = summarize_preds(preds_data)
+    plot_outfile = os.path.join(plot_dir, f"predictions_{args.dataset}")
+    plot.savefig(f"{plot_outfile}.png", dpi=300)
+    plot.savefig(f"{plot_outfile}.pdf", dpi=300)
 
 
 def summarize_migs(migs_data):
     migs = defaultdict(list)
-    mis = defaultdict(list)
-    for datum in migs_data:
-        for latent_name in datum.keys():
-            if latent_name == "sample_num":
+    mis = defaultdict(lambda: defaultdict(list))
+    mis_rows = []
+    for (i, datum) in enumerate(migs_data):
+        for label_name in datum.keys():
+            if label_name == "sample_num":
                 continue
-            migs[latent_name].append(datum[latent_name]["MIG"])
-            mis[latent_name].append(datum[latent_name]["top_2_MIs"][0])
+            migs[label_name].append(datum[label_name]["MIG"])
+            mi = datum[label_name]["top_2_MIs"]
+            names = datum[label_name]["top_2_latents"]
+            for (latent_name, latent_mi) in zip(names, mi):
+                mis[label_name][latent_name].append(latent_mi)
+                mis_rows.append({"sample_num": i, "label_name": label_name,
+                                 "latent_name": latent_name, "MI": latent_mi})
+
+    fig, axs = plt.subplots(1, 2, figsize=[8, 6])
+
+    mi_df = pd.DataFrame(mis_rows)
+    print(mi_df)
+    print('----')
+    print("======== MIs ========")
+    mi_summ_df = mi_df.groupby(["label_name", "latent_name"]).agg(
+        ["mean", "std"]).drop("sample_num", axis="columns")
+    print(mi_summ_df.to_string())
+    print()
+    # Boxplot of the MIs
+    mi_df.boxplot(column=["MI"], by=["label_name", "latent_name"],
+                  ax=axs[0], rot=60)
+    axs[0].set_title("MI per (label, latent) pair")
 
     migs_df = pd.DataFrame(migs)
     print("======== MIGs ========")
@@ -401,25 +426,11 @@ def summarize_migs(migs_data):
     print(migs_summ_df.to_string())
     print()
     # Boxplot of the MIGs
-    mig_fig, mig_ax = plt.subplots()
-    migs_df.boxplot(ax=mig_ax)
-    mig_ax.set_title("MIGs")
-    mig_fig.tight_layout()
+    migs_df.boxplot(column=sorted(migs_df.columns), ax=axs[1])
+    axs[1].set_title("MIGs")
 
-    mi_df = pd.DataFrame(mis)
-    print("======== MIs ========")
-    mi_summ_df = mi_df.agg(["mean", "std", "size"]).T
-    mi_summ_df.reset_index(inplace=True)
-    mi_summ_df.columns = ["latent", "mean", "sd", "N"]
-    print(mi_summ_df.to_string())
-    print()
-    # Boxplot of the MIs
-    mi_fig, mi_ax = plt.subplots()
-    mi_df.boxplot(ax=mi_ax)
-    mi_ax.set_title("MIs")
-    mi_fig.tight_layout()
-
-    return mig_fig, mi_fig
+    fig.tight_layout()
+    return fig
 
 
 def summarize_preds(preds_df):
@@ -428,11 +439,15 @@ def summarize_preds(preds_df):
     print("=== Predictive Performance ===")
     print(summ.to_string())
 
-    fig, ax = plt.subplots()
-    preds_df.boxplot(by=["latent_name", "label_name"],
-                     column=["precision", "recall", "F1"],
-                     rot=90, layout=(1, 3), ax=ax)
-    ax.set_title("Precision, Recall, F1")
+    fig, axs = plt.subplots(1, 3, figsize=[10, 4])
+    i = 0
+    for latent_name in sorted(preds_df.latent_name.unique()):
+        df = preds_df.loc[preds_df.latent_name == latent_name, :]
+        means = df.groupby("label_name").mean().drop(
+            "sample_num", axis="columns")
+        means.plot.bar(ax=axs[i], ylim=(0.2, 1.0), rot=0)
+        axs[i].set_title(f"Latent: {latent_name}")
+        i += 1
     plt.tight_layout()
     return fig
 
