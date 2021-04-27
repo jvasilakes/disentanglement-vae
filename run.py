@@ -106,6 +106,45 @@ def compute_losses(model, model_outputs, Xbatch, Ybatch, lengths, params,
     return output
 
 
+def compute_losses_ft(model, model_outputs, Xbatch,
+                      lengths, params, iteration):
+    """
+    Same as compute_losses, but focuses only on the latents and the decoder.
+    """
+    recon_loss = reconstruction_loss(
+            Xbatch, model_outputs["decoder_logits"], lengths)
+
+    # KL for each latent space
+    idv_kls = dict()
+    # total kl over all latent spaces
+    # used in backward pass
+    # total_kl = torch.tensor(0.0).to(model.device)
+    total_kl = 0.0  # scalar for logging
+    # tensor scalar for backward pass
+    total_weighted_kl = torch.tensor(0.0).to(model.device)
+    for (latent_name, latent_params) in model_outputs["latent_params"].items():
+        kl = kl_divergence(latent_params.mu, latent_params.logvar)
+        idv_kls[latent_name] = kl.item()
+        # NB we weight the KL term here.
+        # This is so we can easily plug in learnable weights later
+        try:
+            weight = params["lambdas"][latent_name]
+        except KeyError:
+            weight = params["lambdas"]["default"]
+
+        total_weighted_kl += weight * kl
+        total_kl += kl.item()
+
+    # Compute loss function and do backward pass/update parameters
+    loss = recon_loss + total_weighted_kl
+    output = {"total_loss": loss,  # Scalar tensor
+              "recon_loss": recon_loss.item(),  # scalar
+              "total_kl": total_kl,  # scalar
+              "total_weighted_kl": total_weighted_kl.item(),  # scalar
+              "idv_kls": idv_kls}  # dict
+    return output
+
+
 def compute_bleu(Xbatch, pred_batch, idx2word, eos_token_idx):
     Xtext = [[utils.tensor2text(X, idx2word, eos_token_idx)[1:-1]]  # RM SOS and EOS   # noqa
              for X in Xbatch.cpu().detach()]
@@ -218,7 +257,7 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
                 all_latent_params[l_name][param_name].extend(param_batch)
 
         # Measure Autoencoding by reencoding the reconstructed output.
-        x_prime = output["decoder_logits"].argmax(-1)
+        x_prime = output["token_predictions"].to(model.device)
         output_prime = model(
                 x_prime, lengths,
                 teacher_forcing_prob=params["teacher_forcing_prob"])
@@ -291,6 +330,125 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
     return model, optimizer
 
 
+def finetune_trainstep(model, optimizer, dataloader, params, epoch, idx2word,
+                       verbose=True, summary_writer=None, logdir=None):
+
+    if summary_writer is None:
+        summary_writer = SummaryWriter()
+    if logdir is None:
+        logdir = "logs/finetune"
+
+    # Total loss (recon + discriminator + kl) per step
+    losses = []
+    # Reconstruction losses per step
+    recon_losses = []
+    # Total KL over latent spaces per step
+    total_kls = []
+    total_weighted_kls = []
+    # UNWEIGHTED KLs per latent space per step
+    idv_kls = defaultdict(list)
+    idv_ae = defaultdict(list)
+    bleus = []
+    # Log example IDs in same order as latent parameters
+    all_sent_ids = []
+    all_latent_params = defaultdict(lambda: defaultdict(list))
+
+    model.train()
+    if verbose is True:
+        pbar = tqdm(total=len(dataloader))
+    step = epoch * len(dataloader)
+    for (i, batch) in enumerate(dataloader):
+        # We ignore Ybatch, since we're just finetuning the decoder
+        in_Xbatch, target_Xbatch, _, lengths, batch_ids = batch
+        in_Xbatch = in_Xbatch.to(model.device)
+        target_Xbatch = target_Xbatch.to(model.device)
+        lengths = lengths.to(model.device)
+        # output = {"decoder_logits": [batch_size, target_length, vocab_size]
+        #           "latent_params": [Params(z, mu, logvar)] * batch_size
+        #           "dsc_logits": {latent_name: [batch_size, n_classes]}
+        #           "token_predictions": [batch_size, target_length]
+        output = model(in_Xbatch, lengths,
+                       teacher_forcing_prob=params["teacher_forcing_prob"])
+        losses_dict = compute_losses_ft(model, output, target_Xbatch,
+                                        lengths, params, step)
+        total_loss = losses_dict["total_loss"]
+        losses.append(total_loss.item())
+        recon_losses.append(losses_dict["recon_loss"])
+        total_kls.append(losses_dict["total_kl"])
+        total_weighted_kls.append(losses_dict["total_weighted_kl"])
+        for (latent_name, latent_kl) in losses_dict["idv_kls"].items():
+            idv_kls[latent_name].append(latent_kl)
+
+        # Update model
+        total_loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.trainable_parameters(), 5)
+        optimizer.step()
+        optimizer.zero_grad()
+
+        # Log latents
+        all_sent_ids.extend(batch_ids)
+        for (l_name, l_params) in output["latent_params"].items():
+            for (param_name, param_batch) in l_params._asdict().items():
+                param_batch = param_batch.detach().cpu().tolist()
+                all_latent_params[l_name][param_name].extend(param_batch)
+
+        # Measure Autoencoding by reencoding the reconstructed output.
+        x_prime = output["token_predictions"].to(model.device)
+        output_prime = model(
+                x_prime, lengths,
+                teacher_forcing_prob=params["teacher_forcing_prob"])
+
+        for (l_name, l_params) in output_prime["latent_params"].items():
+            orig_z = output["latent_params"][l_name].z
+            z_prime = l_params.z
+            diff = torch.norm(z_prime - orig_z, p=None, dim=1).mean()
+            idv_ae[l_name].append(diff.item())
+
+        # Measure self-BLEU
+        bleu = compute_bleu(target_Xbatch, x_prime, idx2word,
+                            model.eos_token_idx)
+        bleus.append(bleu)
+
+        if verbose is True:
+            pbar.update(1)
+            pbar.set_description(f"EPOCH: {epoch}")
+        if step % 5 == 0:
+            summary_writer.add_scalar(
+                    "total_loss_step", total_loss.item(), step)
+            summary_writer.add_scalar(
+                    "recon_loss_step", losses_dict["recon_loss"], step)
+            for latent_name in idv_kls.keys():
+                kl = idv_kls[latent_name][-1]
+                summary_writer.add_scalar(
+                        f"kl_step_{latent_name}", kl, step)
+        step += 1
+
+    if verbose is True:
+        pbar.close()
+
+    summary_writer.add_scalar("avg_loss", np.mean(losses), epoch)
+    summary_writer.add_scalar("avg_recon_loss", np.mean(recon_losses), epoch)
+    summary_writer.add_scalar("avg_self_bleu", np.mean(bleus), epoch)
+    summary_writer.add_scalar(
+            "avg_weighted_kl", np.mean(total_weighted_kls), epoch)
+    for latent_name in idv_kls.keys():
+        avg_kl = np.mean(idv_kls[latent_name])
+        summary_writer.add_scalar(
+                f"avg_kl_{latent_name}", avg_kl, epoch)
+        avg_ae = np.mean(idv_ae[latent_name])
+        summary_writer.add_scalar(
+                f"avg_ae_{latent_name}", avg_ae, epoch)
+
+    log_params(all_latent_params, all_sent_ids, logdir, "train", epoch)
+
+    logstr = f"TRAIN ({epoch}) TOTAL: {np.mean(losses):.4f} +/- {np.std(losses):.4f}"  # noqa
+    logstr += f" | RECON: {np.mean(recon_losses):.4f} +/- {np.std(recon_losses):.4f}"  # noqa
+    logstr += f" | KL: {np.mean(total_kls):.4f} +/- {np.std(total_kls):.4f}"  # noqa
+    logging.info(logstr)
+
+    return model, optimizer
+
+
 def evalstep(model, dataloader, params, epoch, idx2word, name="dev",
              verbose=True, summary_writer=None, logdir=None):
 
@@ -344,7 +502,7 @@ def evalstep(model, dataloader, params, epoch, idx2word, name="dev",
             idv_kls[latent_name].append(kl)
 
         # Measure self-BLEU
-        x_prime = output["decoder_logits"].argmax(-1)
+        x_prime = output["token_predictions"].to(model.device)
         bleu = compute_bleu(target_Xbatch, x_prime, idx2word,
                             model.eos_token_idx)
         bleus.append(bleu)
@@ -391,6 +549,87 @@ def evalstep(model, dataloader, params, epoch, idx2word, name="dev",
     logging.info(logstr)
 
 
+def finetune_evalstep(model, dataloader, params, epoch, idx2word, name="dev",
+                      verbose=True, summary_writer=None, logdir=None):
+
+    if summary_writer is None:
+        summary_writer = SummaryWriter()
+    if logdir is None:
+        logdir = "logs/finetune"
+
+    # Total loss (recon + discriminator + kl) per step
+    losses = []
+    # Reconstruction losses per step
+    recon_losses = []
+    # Total KL over latent spaces per step
+    total_kls = []
+    total_weighted_kls = []
+    # UNWEIGHTED KLs per latent space per step
+    idv_kls = defaultdict(list)
+    bleus = []
+    # Log example IDs and latent params
+    all_sent_ids = []
+    all_latent_params = defaultdict(lambda: defaultdict(list))
+
+    model.eval()
+    if verbose is True:
+        pbar = tqdm(total=len(dataloader))
+    for (i, batch) in enumerate(dataloader):
+        # Ignore Ybatch
+        in_Xbatch, target_Xbatch, _, lengths, batch_ids = batch
+        in_Xbatch = in_Xbatch.to(model.device)
+        target_Xbatch = target_Xbatch.to(model.device)
+        lengths = lengths.to(model.device)
+        output = model(in_Xbatch, lengths, teacher_forcing_prob=0.0)
+
+        # TODO: what should I put for the iteration argument here
+        losses_dict = compute_losses_ft(model, output, target_Xbatch,
+                                        lengths, params, 100)
+        losses.append(losses_dict["total_loss"].item())
+        recon_losses.append(losses_dict["recon_loss"])
+        total_kls.append(losses_dict["total_kl"])
+        total_weighted_kls.append(losses_dict["total_weighted_kl"])
+        for (latent_name, kl) in losses_dict["idv_kls"].items():
+            idv_kls[latent_name].append(kl)
+
+        # Measure self-BLEU
+        x_prime = output["token_predictions"].to(model.device)
+        bleu = compute_bleu(target_Xbatch, x_prime, idx2word,
+                            model.eos_token_idx)
+        bleus.append(bleu)
+
+        # Log latents
+        all_sent_ids.extend(batch_ids)
+        for (l_name, l_params) in output["latent_params"].items():
+            for (param_name, param_batch) in l_params._asdict().items():
+                param_batch = param_batch.detach().cpu().tolist()
+                all_latent_params[l_name][param_name].extend(param_batch)
+
+        if verbose is True:
+            pbar.update(1)
+            pbar.set_description(f" ↳ EVAL ({name})")
+
+    if verbose is True:
+        pbar.close()
+
+    summary_writer.add_scalar("avg_loss", np.mean(losses), epoch)
+    summary_writer.add_scalar("avg_recon_loss", np.mean(recon_losses), epoch)
+    summary_writer.add_scalar("avg_self_bleu", np.mean(bleus), epoch)
+    summary_writer.add_scalar(
+            "avg_weighted_kl", np.mean(total_weighted_kls), epoch)
+    summary_writer.flush()
+    for latent_name in idv_kls.keys():
+        avg_kl = np.mean(idv_kls[latent_name])
+        summary_writer.add_scalar(
+                f"avg_kl_{latent_name}", avg_kl, epoch)
+
+    log_params(all_latent_params, all_sent_ids, logdir, name, epoch)
+
+    logstr = f"{name.upper()} ({epoch}) TOTAL: {np.mean(losses):.4f} +/- {np.std(losses):.4f}"  # noqa
+    logstr += f" | RECON: {np.mean(recon_losses):.4f} +/- {np.std(recon_losses):.4f}"  # noqa
+    logging.info(logstr)
+
+
 def run(params_file, verbose=False):
     SOS = "<SOS>"
     EOS = "<EOS>"
@@ -403,6 +642,8 @@ def run(params_file, verbose=False):
 
     # Set logging directory
     logdir = os.path.join("logs", params["name"])
+    if params["finetune"] is True:
+        logdir = os.path.join(logdir, "finetune")
     os.makedirs(logdir, exist_ok=True)
     logfile = os.path.join(logdir, "run.log")
     print(f"Logging to {logfile}")
@@ -443,6 +684,8 @@ def run(params_file, verbose=False):
             dev_labs, label_encoders=label_encoders)
 
     vocab_path = os.path.join(logdir, "vocab.txt")
+    if params["finetune"] is True:
+        vocab_path = os.path.join(logdir, "../vocab.txt")
     if params["train"] is True:
         # Get token vocabulary
         vocab = [PAD, UNK] + \
@@ -481,7 +724,10 @@ def run(params_file, verbose=False):
             train_data, shuffle=True, batch_size=params["batch_size"],
             collate_fn=utils.pad_sequence_denoising)
     logging.info(f"Training examples: {len(train_data)}")
-    train_writer_path = os.path.join("runs", params["name"], "train")
+    summary_writer_path = os.path.join("runs", params["name"])
+    if params["finetune"] is True:
+        summary_writer_path = os.path.join(summary_writer_path, "finetune")
+    train_writer_path = os.path.join(summary_writer_path, "train")
     train_writer = SummaryWriter(log_dir=train_writer_path)
 
     if params["validate"] is True:
@@ -492,10 +738,16 @@ def run(params_file, verbose=False):
                 dev_data, shuffle=True, batch_size=params["batch_size"],
                 collate_fn=utils.pad_sequence_denoising)
         logging.info(f"Validation examples: {len(dev_data)}")
-        dev_writer_path = os.path.join("runs", params["name"], "dev")
+        dev_writer_path = os.path.join(summary_writer_path, "dev")
         dev_writer = SummaryWriter(log_dir=dev_writer_path)
 
-    label_dims_dict = train_data.y_dims
+    # Build the VAE
+    # label_dims_dict = train_data.y_dims
+    # TODO: This isn't right, because it just so happens that latent_dims are
+    #   equal to the output dims for negation/uncertainty.
+    #   This will fail in general.
+    label_dims_dict = {key: val for (key, val) in params["latent_dims"].items()
+                       if key != "total"}
     sos_idx = word2idx[SOS]
     eos_idx = word2idx[EOS]
     vae = model.build_vae(params, len(vocab), emb_matrix, label_dims_dict,
@@ -519,6 +771,12 @@ def run(params_file, verbose=False):
     else:
         checkpoint_found = True
         logging.info(f"Loaded checkpoint '{ckpt_fname}'")
+    # If we're finetuning, we want to save the new checkpoints separately
+    if params["finetune"] is True:
+        start_epoch = 0
+        ckpt_dir = os.path.join(ckpt_dir, "finetune")
+        os.makedirs(ckpt_dir, exist_ok=True)
+        logging.info(f"Updating checkpoint directory to '{ckpt_dir}'")
 
     # Log the experiment parameter file to recreate this run.
     config_logfile = os.path.join(logdir, f"config_epoch{start_epoch}.json")
@@ -543,7 +801,8 @@ def run(params_file, verbose=False):
                                           "train", epoch, logdir, n=20)
                 if params["validate"] is True:
                     evalstep(vae, dev_dataloader, params, epoch, idx2word,
-                             verbose=verbose, summary_writer=dev_writer)
+                             verbose=verbose, summary_writer=dev_writer,
+                             logdir=logdir)
                     # Log dev inputs and their reconstructions
                     utils.log_reconstructions(vae, dev_data, idx2word,
                                               "dev", epoch, logdir, n=20)
@@ -561,11 +820,54 @@ def run(params_file, verbose=False):
         checkpoint_found = True
         start_epoch = epoch
 
-    if params["validate"] is True:
+    if params["validate"] is True and params["finetune"] is False:
         evalstep(vae, dev_dataloader, params, start_epoch, idx2word,
                  verbose=verbose, summary_writer=dev_writer, logdir=logdir)
         utils.log_reconstructions(vae, dev_data, idx2word,
                                   "dev", start_epoch, logdir, n=30)
+
+    if params["finetune"] is True:
+        logging.info("Fine-tuning")
+        if checkpoint_found is False:
+            ValueError("No checkpoint found! Nothing to fine-tune.")
+        logging.info("Ctrl-C to interrupt and save most recent model.")
+
+        # Freeze everything but the decoder
+        for (name, param) in vae.named_parameters():
+            if not name.startswith("decoder"):
+                param.requires_grad = False
+
+        epoch_range = range(start_epoch, start_epoch + params["epochs"])
+        for epoch in epoch_range:
+            try:
+                vae, optimizer = finetune_trainstep(
+                        vae, optimizer, train_dataloader, params, epoch,
+                        idx2word, verbose=verbose, summary_writer=train_writer,
+                        logdir=logdir)
+                # Log train inputs and their reconstructions
+                utils.log_reconstructions(vae, train_data, idx2word,
+                                          "train", epoch, logdir, n=20)
+                if params["validate"] is True:
+                    finetune_evalstep(vae, dev_dataloader, params, epoch,
+                                      idx2word, verbose=verbose,
+                                      summary_writer=dev_writer,
+                                      logdir=logdir)
+                    # Log dev inputs and their reconstructions
+                    utils.log_reconstructions(vae, dev_data, idx2word,
+                                              "dev", epoch, logdir, n=20)
+            except KeyboardInterrupt:
+                break
+
+        # Save the model
+        ckpt_fname = f"model_{epoch}.pt"
+        ckpt_path = os.path.join(ckpt_dir, ckpt_fname)
+        logging.info(f"Saving trained model to {ckpt_path}")
+        torch.save({"model_state_dict": vae.state_dict(),
+                    "optimizer_state_dict": optimizer.state_dict(),
+                    "epoch": epoch},
+                   ckpt_path)
+        checkpoint_found = True
+        start_epoch = epoch
 
     now = datetime.now()
     now_str = now.strftime("%Y-%m-%d_%H:%M:%S")

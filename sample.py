@@ -75,6 +75,8 @@ def main(params_file):
     logdir = os.path.join("logs", params["name"])
 
     ckpt_dir = os.path.join(params["checkpoint_dir"], params["name"])
+    if params["finetune"] is True:
+        ckpt_dir = os.path.join(ckpt_dir, "finetune")
     if not os.path.isdir(ckpt_dir):
         raise OSError(f"No model found at {params['checkpoint_dir']}")
 
@@ -103,7 +105,12 @@ def main(params_file):
     idx2word = {idx: word for (word, idx) in word2idx.items()}
 
     # Build the VAE
-    label_dims_dict = train_data.y_dims
+    # label_dims_dict = train_data.y_dims
+    # TODO: This isn't right, because it just so happens that latent_dims are
+    #   equal to the output dims for negation/uncertainty.
+    #   This will fail in general.
+    label_dims_dict = {key: val for (key, val) in params["latent_dims"].items()
+                       if key != "total"}
     sos_idx = word2idx[SOS]
     eos_idx = word2idx[EOS]
     vae = model.build_vae(params, len(vocab), emb_matrix, label_dims_dict,
@@ -111,12 +118,9 @@ def main(params_file):
     optimizer = torch.optim.Adam(
             vae.trainable_parameters(), lr=params["learn_rate"])
 
-    ckpt_dir = os.path.join(params["checkpoint_dir"], params["name"])
-    if not os.path.isdir(ckpt_dir):
-        raise OSError(f"No checkpoint found at '{ckpt_dir}'!")
     vae, optimizer, start_epoch, ckpt_fname = utils.load_latest_checkpoint(
             vae, optimizer, ckpt_dir)
-    logging.info(f"Loaded checkpoint from '{ckpt_fname}'")
+    logging.info(f"Loaded checkpoint from '{os.path.join(ckpt_dir, ckpt_fname}'")  # noqa
 
     logging.info(f"Successfully loaded model {params['name']}")
     logging.info(vae)
@@ -182,6 +186,7 @@ def main(params_file):
             max_len += 2  # For SOS and EOS tokens.
             z_names = [f"{name:^12}" for name in latent_params.keys()]
             z_names_str = ' | '.join(z_names)
+            print(''.join(['-'] * (max_len + len(z_names_str) + 7)))
             print(f"|{header:^{max_len}}|   {z_names_str} |")
             print(''.join(['-'] * (max_len + len(z_names_str) + 7)))
             for (tokens, l_params) in zip(all_decoded_tokens, all_params):

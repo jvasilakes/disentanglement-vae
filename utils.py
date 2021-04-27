@@ -38,11 +38,16 @@ def validate_params(params):
             "encoder_dropout": float,
             "decoder_dropout": float,
             "teacher_forcing_prob": float,
+            "objective": str,  # 'vi' or 'ae'
             "lambdas": dict,  # KL div weights for each latent space.
             "train": bool,
+            "finetune": bool,
             "validate": bool,
             "test": bool}
     valid = True
+    if params["train"] is True and params["finetune"] is True:
+        logging.critical("train and finetune cannot both be True.")
+        valid = False
     for (key, val) in valid_params.items():
         if key not in params.keys():
             logging.critical(f"parameter file missing '{key}'")

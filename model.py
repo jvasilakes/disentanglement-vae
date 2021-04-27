@@ -29,6 +29,7 @@ class VariationalEncoder(nn.Module):
             self.vocab_size, self.emb_dim = emb_matrix.shape
         else:
             self.embedding = nn.Embedding(self.vocab_size, self.emb_dim)
+        self.bidirectional = bidirectional
         self.dropout = nn.Dropout(dropout_rate)
         self.recurrent = nn.LSTM(self.emb_dim, self.hidden_size,
                                  num_layers=self.num_layers,
@@ -79,8 +80,6 @@ class VariationalDecoder(nn.Module):
         self.vocab_size = vocab_size
         self.emb_dim = emb_dim
         self.hidden_size = hidden_size
-        if num_layers == 1:
-            num_layers = 2
         self.num_layers = num_layers
         self.dropout_rate = dropout_rate
 
@@ -185,7 +184,7 @@ class VariationalSeq2Seq(nn.Module):
                              [polarity_dsc, modality_dsc], sos, eos)
     """
     def __init__(self, encoder, decoder, discriminators, latent_dim,
-                 sos_token_idx, eos_token_idx):
+                 sos_token_idx, eos_token_idx, objective="vi"):
         super(VariationalSeq2Seq, self).__init__()
         self._device = torch.device("cpu")
         self.encoder = encoder
@@ -219,6 +218,9 @@ class VariationalSeq2Seq(nn.Module):
                 self.latent_dim, 2 * decoder.hidden_size * decoder.num_layers)
         self.sos_token_idx = sos_token_idx
         self.eos_token_idx = eos_token_idx
+        if objective not in ["vi", "ae"]:
+            raise ValueError(f"Unknown objective '{objective}'")
+        self.objective = objective
 
     @property
     def device(self):
@@ -288,8 +290,10 @@ class VariationalSeq2Seq(nn.Module):
 
         zs = [param.z for param in latent_params.values()]
         z = torch.cat(zs, dim=1)
-        decoder_hidden = self.compute_hidden(z, batch_size)
-        # decoder_hidden = encoder_hidden
+        if self.objective == "vi":
+            decoder_hidden = self.compute_hidden(z, batch_size)
+        elif self.objective == "ae":
+            decoder_hidden = encoder_hidden
 
         decoder_input = torch.LongTensor(
                 [[self.sos_token_idx]]).to(self.device)
@@ -369,9 +373,14 @@ def build_vae(params, vocab_size, emb_matrix, label_dims, device,
             bidirectional=params["bidirectional_encoder"])
     encoder.set_device(device)
 
+    num_decoder_layers = params["num_rnn_layers"]
+    # TODO: I need this for the AE objective, but it breaks models trained
+    #       before this option was introduced.
+    # if encoder.bidirectional is True:
+    #     num_decoder_layers *= 2
     decoder = VariationalDecoder(
             vocab_size, params["embedding_dim"], params["hidden_dim"],
-            params["num_rnn_layers"], dropout_rate=params["decoder_dropout"],
+            num_decoder_layers, dropout_rate=params["decoder_dropout"],
             emb_matrix=emb_matrix)
     decoder.set_device(device)
 
@@ -386,6 +395,7 @@ def build_vae(params, vocab_size, emb_matrix, label_dims, device,
 
     vae = VariationalSeq2Seq(encoder, decoder, discriminators,
                              params["latent_dims"]["total"],
-                             sos_token_idx, eos_token_idx)
+                             sos_token_idx, eos_token_idx,
+                             objective=params["objective"])
     vae.set_device(device)
     return vae
