@@ -140,6 +140,73 @@ class DenoisingTextDataset(torch.utils.data.Dataset):
         return tensorized
 
 
+class DenoisingTextDatasetBert(torch.utils.data.Dataset):
+    """
+    Like LabeledTextDataset but the input text is a corrupted
+    version of the original and the goal is to denoise it in
+    order to reconstruct the original, optionally classifying
+    the labels as an auxilliary task.
+    """
+
+    def __init__(self, noisy_docs, orig_docs, labels, ids,
+                 bert_model_str, label_encoders):
+        from transformers import BertTokenizerFast
+        super(DenoisingTextDatasetBert, self).__init__()
+        self._dims = None
+        assert len(noisy_docs) == len(orig_docs)
+        assert len(noisy_docs) == len(labels)
+        assert len(noisy_docs) == len(ids)
+        self.noisy_docs = noisy_docs
+        self.orig_docs = orig_docs
+        assert isinstance(labels[0], dict)
+        self.labels = labels
+        self.ids = ids
+        self.tokenizer = BertTokenizerFast.from_pretrained(bert_model_str)
+        self.label_encoders = label_encoders
+        self.noisy_Xs = self.tokenizer(self.noisy_docs, padding=True)
+        self.orig_Xs = self.tokenizer(self.orig_docs, padding=True)
+        self.Ys = [self.label2tensor(lab) for lab in self.labels]
+
+    def _get_bert_item(self, encodings, idx):
+        return {key: torch.tensor(val[idx]) for (key, val) in encodings.items()}
+
+    def __getitem__(self, idx):
+        return {"noisy": self._get_bert_item(self.noisy_Xs, idx),
+                "orig": self._get_bert_item(self.orig_Xs, idx),
+                "labels": self.Ys[idx],
+                "ids": self.ids[idx]}
+
+    def __len__(self):
+        return len(self.labels)
+
+    @property
+    def y_dims(self):
+        if self._dims is not None:
+            return self._dims
+        dims = dict()
+        for (label_name, encoder) in self.label_encoders.items():
+            num_classes = len(encoder.classes_)
+            if num_classes == 2:
+                num_classes = 1
+            dims[label_name] = num_classes
+        self._dims = dims
+        return dims
+
+    def label2tensor(self, label_dict):
+        tensorized = dict()
+        for (label_name, label) in label_dict.items():
+            encoder = self.label_encoders[label_name]
+            # CrossEntropy requires LongTensors
+            # BCELoss requires FloatTensors
+            if len(encoder.classes_) > 2:
+                tensor_fn = torch.LongTensor
+            else:
+                tensor_fn = torch.FloatTensor
+            enc = encoder.transform([label])
+            tensorized[label_name] = tensor_fn(enc)
+        return tensorized
+
+
 def get_sentences_labels(path, label_keys=None, N=-1, shuffle=True):
     sentence_ids = []
     sentences = []
@@ -166,7 +233,7 @@ def get_sentences_labels(path, label_keys=None, N=-1, shuffle=True):
         sentences, labels, sentence_ids = zip(*tmp)
     if N == -1:
         N = len(sentences)
-    return sentences[:N], labels[:N], sentence_ids[:N], label_counts
+    return list(sentences[:N]), list(labels[:N]), list(sentence_ids[:N]), label_counts
 
 
 def preprocess_sentences(sentences, SOS, EOS, lowercase=True):
