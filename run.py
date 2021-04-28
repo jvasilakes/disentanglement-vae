@@ -46,8 +46,22 @@ def reconstruction_loss(targets, logits, target_lengths):
     return recon_loss
 
 
-def kl_divergence(mu, logvar):
+def kl_divergence_old(mu, logvar):
     kl = 0.5 * (torch.exp(logvar) + torch.pow(mu, 2) - 1 - logvar)
+    kl = kl.mean(0).sum()
+    return kl
+
+
+def kl_divergence(params1, params2=None):
+    mu1, logvar1 = params1.mu, params1.logvar
+    var1 = torch.exp(logvar1)
+    if params2 is None:
+        kl = 0.5 * (var1 + torch.pow(mu1, 2) - 1 - logvar1)
+    else:
+        mu2, logvar2 = params2.mu, params2.logvar
+        var2 = torch.exp(logvar2)
+        kl = 0.5 * ((var1 / var2) + (1 / var2) *
+                    torch.pow((mu2 - mu1), 2) - 1 + (logvar2 - logvar1))
     kl = kl.mean(0).sum()
     return kl
 
@@ -81,7 +95,7 @@ def compute_losses(model, model_outputs, Xbatch, Ybatch, lengths, params,
     # tensor scalar for backward pass
     total_weighted_kl = torch.tensor(0.0).to(model.device)
     for (latent_name, latent_params) in model_outputs["latent_params"].items():
-        kl = kl_divergence(latent_params.mu, latent_params.logvar)
+        kl = kl_divergence(latent_params)
         idv_kls[latent_name] = kl.item()
         # NB we weight the KL term here.
         # This is so we can easily plug in learnable weights later
@@ -89,7 +103,6 @@ def compute_losses(model, model_outputs, Xbatch, Ybatch, lengths, params,
             weight = params["lambdas"][latent_name]
         except KeyError:
             weight = params["lambdas"]["default"]
-
         total_weighted_kl += weight * kl
         total_kl += kl.item()
 
@@ -147,6 +160,7 @@ def log_params(params_dict, example_ids, logdir, dataset_name, epoch):
 
 
 def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
+              cycle_optimizer=None,
               verbose=True, summary_writer=None, logdir=None):
 
     if summary_writer is None:
@@ -204,12 +218,6 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
         for (latent_name, latent_kl) in losses_dict["idv_kls"].items():
             idv_kls[latent_name].append(latent_kl)
 
-        # Update model
-        total_loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.trainable_parameters(), 5)
-        optimizer.step()
-        optimizer.zero_grad()
-
         # Log latents
         all_sent_ids.extend(batch_ids)
         for (l_name, l_params) in output["latent_params"].items():
@@ -223,11 +231,31 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
                 x_prime, lengths,
                 teacher_forcing_prob=params["teacher_forcing_prob"])
 
+        total_kl_div = torch.tensor(0.0).to(model.device)
         for (l_name, l_params) in output_prime["latent_params"].items():
-            orig_z = output["latent_params"][l_name].z
-            z_prime = l_params.z
-            diff = torch.norm(z_prime - orig_z, p=None, dim=1).mean()
-            idv_ae[l_name].append(diff.item())
+            # orig_z = output["latent_params"][l_name].z
+            # z_prime = l_params.z
+            # diff = torch.norm(z_prime - orig_z, p=None, dim=1).mean()
+            # idv_ae[l_name].append(diff.item())
+            kl_div = kl_divergence(output["latent_params"][l_name],
+                                   output_prime["latent_params"][l_name])
+            idv_ae[l_name].append(kl_div.item())
+            total_kl_div += kl_div
+
+        # Update model
+        total_loss.backward(retain_graph=True)
+        if cycle_optimizer is not None:
+            total_kl_div.backward()
+        torch.nn.utils.clip_grad_norm_(model.trainable_parameters(), 5)
+        optimizer.step()
+        optimizer.zero_grad()
+        print(model.encoder.recurrent.weight_ih_l0)
+        if cycle_optimizer is not None:
+            cycle_optimizer.step()
+            cycle_optimizer.zero_grad()
+        print()
+        print(model.encoder.recurrent.weight_ih_l0)
+        input()
 
         # Measure self-BLEU
         bleu = compute_bleu(target_Xbatch, x_prime, idx2word,
@@ -504,6 +532,8 @@ def run(params_file, verbose=False):
 
     optimizer = torch.optim.Adam(vae.trainable_parameters(),
                                  lr=params["learn_rate"])
+    cycle_optimizer = torch.optim.Adam(vae.decoder.trainable_parameters(),
+                                       lr=3e-4)
 
     # If there is a checkpoint at checkpoint_dir, we load it and continue
     # training/evaluating from there.
@@ -536,7 +566,8 @@ def run(params_file, verbose=False):
             try:
                 vae, optimizer = trainstep(
                         vae, optimizer, train_dataloader, params, epoch,
-                        idx2word, verbose=verbose, summary_writer=train_writer,
+                        idx2word, cycle_optimizer=cycle_optimizer,
+                        verbose=verbose, summary_writer=train_writer,
                         logdir=logdir)
                 # Log train inputs and their reconstructions
                 utils.log_reconstructions(vae, train_data, idx2word,

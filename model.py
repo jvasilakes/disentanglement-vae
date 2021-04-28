@@ -108,6 +108,10 @@ class VariationalDecoder(nn.Module):
         self._device = value
         self.to(value)
 
+    def trainable_parameters(self):
+        return [param for param in self.parameters()
+                if param.requires_grad is True]
+
     def forward(self, inputs, lengths, hidden):
         embedded = self.dropout(self.embedding(inputs))
         # embedded: [batch_size, len(inputs), emb_dim]
