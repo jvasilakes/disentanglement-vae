@@ -41,9 +41,10 @@ def validate_params(params):
             "objective": str,  # 'vi' or 'ae'
             "lambdas": dict,  # KL div weights for each latent space.
             "train": bool,
-            "finetune": bool,
             "validate": bool,
-            "test": bool}
+            "test": bool,
+            "finetune-train": bool,
+            "finetune-val": bool}
     valid = True
     if params["train"] is True and params["finetune"] is True:
         logging.critical("train and finetune cannot both be True.")

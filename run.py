@@ -275,7 +275,7 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
 
         if verbose is True:
             pbar.update(1)
-            pbar.set_description(f"EPOCH: {epoch}")
+            pbar.set_description(f"EPOCH (ft): {epoch}")
         if step % 5 == 0:
             summary_writer.add_scalar(
                     "total_loss_step", total_loss.item(), step)
@@ -411,7 +411,7 @@ def finetune_trainstep(model, optimizer, dataloader, params, epoch, idx2word,
 
         if verbose is True:
             pbar.update(1)
-            pbar.set_description(f"EPOCH: {epoch}")
+            pbar.set_description(f"EPOCH (ft): {epoch}")
         if step % 5 == 0:
             summary_writer.add_scalar(
                     "total_loss_step", total_loss.item(), step)
@@ -642,7 +642,9 @@ def run(params_file, verbose=False):
 
     # Set logging directory
     logdir = os.path.join("logs", params["name"])
-    if params["finetune"] is True:
+    finetune = False
+    if params["finetune-train"] is True or params["finetune-val"] is True:
+        finetune = True
         logdir = os.path.join(logdir, "finetune")
     os.makedirs(logdir, exist_ok=True)
     logfile = os.path.join(logdir, "run.log")
@@ -684,7 +686,7 @@ def run(params_file, verbose=False):
             dev_labs, label_encoders=label_encoders)
 
     vocab_path = os.path.join(logdir, "vocab.txt")
-    if params["finetune"] is True:
+    if finetune is True:
         vocab_path = os.path.join(logdir, "../vocab.txt")
     if params["train"] is True:
         # Get token vocabulary
@@ -725,12 +727,12 @@ def run(params_file, verbose=False):
             collate_fn=utils.pad_sequence_denoising)
     logging.info(f"Training examples: {len(train_data)}")
     summary_writer_path = os.path.join("runs", params["name"])
-    if params["finetune"] is True:
+    if finetune is True:
         summary_writer_path = os.path.join(summary_writer_path, "finetune")
     train_writer_path = os.path.join(summary_writer_path, "train")
     train_writer = SummaryWriter(log_dir=train_writer_path)
 
-    if params["validate"] is True:
+    if params["validate"] is True or params["finetune-val"] is True:
         dev_data = data_utils.DenoisingTextDataset(
                 noisy_dev_sents, dev_sents, dev_labs, dev_ids,
                 word2idx, label_encoders)
@@ -772,7 +774,7 @@ def run(params_file, verbose=False):
         checkpoint_found = True
         logging.info(f"Loaded checkpoint '{ckpt_fname}'")
     # If we're finetuning, we want to save the new checkpoints separately
-    if params["finetune"] is True:
+    if finetune is True:
         start_epoch = 0
         ckpt_dir = os.path.join(ckpt_dir, "finetune")
         os.makedirs(ckpt_dir, exist_ok=True)
@@ -820,13 +822,13 @@ def run(params_file, verbose=False):
         checkpoint_found = True
         start_epoch = epoch
 
-    if params["validate"] is True and params["finetune"] is False:
+    if params["validate"] is True:
         evalstep(vae, dev_dataloader, params, start_epoch, idx2word,
                  verbose=verbose, summary_writer=dev_writer, logdir=logdir)
         utils.log_reconstructions(vae, dev_data, idx2word,
                                   "dev", start_epoch, logdir, n=30)
 
-    if params["finetune"] is True:
+    if params["finetune-train"] is True:
         logging.info("Fine-tuning")
         if checkpoint_found is False:
             ValueError("No checkpoint found! Nothing to fine-tune.")
@@ -847,7 +849,7 @@ def run(params_file, verbose=False):
                 # Log train inputs and their reconstructions
                 utils.log_reconstructions(vae, train_data, idx2word,
                                           "train", epoch, logdir, n=20)
-                if params["validate"] is True:
+                if params["finetune-val"] is True:
                     finetune_evalstep(vae, dev_dataloader, params, epoch,
                                       idx2word, verbose=verbose,
                                       summary_writer=dev_writer,
@@ -868,6 +870,13 @@ def run(params_file, verbose=False):
                    ckpt_path)
         checkpoint_found = True
         start_epoch = epoch
+
+    if params["finetune-val"] is True:
+        finetune_evalstep(vae, dev_dataloader, params, start_epoch, idx2word,
+                          verbose=verbose, summary_writer=dev_writer,
+                          logdir=logdir)
+        utils.log_reconstructions(vae, dev_data, idx2word,
+                                  "dev", start_epoch, logdir, n=30)
 
     now = datetime.now()
     now_str = now.strftime("%Y-%m-%d_%H:%M:%S")

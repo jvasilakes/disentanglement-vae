@@ -120,7 +120,7 @@ def main(params_file):
 
     vae, optimizer, start_epoch, ckpt_fname = utils.load_latest_checkpoint(
             vae, optimizer, ckpt_dir)
-    logging.info(f"Loaded checkpoint from '{os.path.join(ckpt_dir, ckpt_fname}'")  # noqa
+    logging.info(f"Loaded checkpoint from '{os.path.join(ckpt_dir, ckpt_fname)}'")  # noqa
 
     logging.info(f"Successfully loaded model {params['name']}")
     logging.info(vae)
