@@ -128,14 +128,18 @@ def compute_bleu(Xbatch, pred_batch, idx2word, eos_token_idx):
     return bleu
 
 
-def log_params(params_dict, example_ids, logdir, dataset_name, epoch):
+def log_params(params_dict, example_ids, logdir, dataset_name, epoch,
+               dir_suffix=None):
     """
     :param defaultdict params_dict: {latent_name: {parameter: [p1...pN]}}
     :param str logdir:
     :param str dataset_name:
     :param int epoch:
     """
-    metadata_dir = os.path.join(logdir, "metadata")
+    if dir_suffix is not None:
+        metadata_dir = os.path.join(logdir, f"metadata_{dir_suffix}")
+    else:
+        metadata_dir = os.path.join(logdir, "metadata")
     os.makedirs(metadata_dir, exist_ok=True)
 
     # Log example IDs in the same order as their parameters.
@@ -187,6 +191,7 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
     # Log example IDs in same order as latent parameters
     all_sent_ids = []
     all_latent_params = defaultdict(lambda: defaultdict(list))
+    all_latent_params_prime = defaultdict(lambda: defaultdict(list))
 
     model.train()
     if verbose is True:
@@ -226,13 +231,16 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
                 all_latent_params[l_name][param_name].extend(param_batch)
 
         # Measure Autoencoding by reencoding the reconstructed output.
-        x_prime = output["decoder_logits"].argmax(-1)
+        x_prime = output["token_predictions"].to(model.device)
         output_prime = model(
                 x_prime, lengths,
                 teacher_forcing_prob=params["teacher_forcing_prob"])
 
-        total_kl_div = torch.tensor(0.0).to(model.device)
+        cycle_loss = torch.tensor(0.0).to(model.device)
         for (l_name, l_params) in output_prime["latent_params"].items():
+            for (param_name, param_batch) in l_params._asdict().items():
+                param_batch = param_batch.detach().cpu().tolist()
+                all_latent_params_prime[l_name][param_name].extend(param_batch)
             # orig_z = output["latent_params"][l_name].z
             # z_prime = l_params.z
             # diff = torch.norm(z_prime - orig_z, p=None, dim=1).mean()
@@ -240,22 +248,14 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
             kl_div = kl_divergence(output["latent_params"][l_name],
                                    output_prime["latent_params"][l_name])
             idv_ae[l_name].append(kl_div.item())
-            total_kl_div += kl_div
+        #    cycle_loss += kl_div
+        #total_loss = total_loss + 10 * cycle_loss
 
         # Update model
-        total_loss.backward(retain_graph=True)
-        if cycle_optimizer is not None:
-            total_kl_div.backward()
+        total_loss.backward()
         torch.nn.utils.clip_grad_norm_(model.trainable_parameters(), 5)
         optimizer.step()
         optimizer.zero_grad()
-        print(model.encoder.recurrent.weight_ih_l0)
-        if cycle_optimizer is not None:
-            cycle_optimizer.step()
-            cycle_optimizer.zero_grad()
-        print()
-        print(model.encoder.recurrent.weight_ih_l0)
-        input()
 
         # Measure self-BLEU
         bleu = compute_bleu(target_Xbatch, x_prime, idx2word,
@@ -309,6 +309,8 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
                 f"avg_ae_{latent_name}", avg_ae, epoch)
 
     log_params(all_latent_params, all_sent_ids, logdir, "train", epoch)
+    log_params(all_latent_params_prime, all_sent_ids, logdir, "train", epoch,
+               dir_suffix="prime")
 
     logstr = f"TRAIN ({epoch}) TOTAL: {np.mean(losses):.4f} +/- {np.std(losses):.4f}"  # noqa
     logstr += f" | RECON: {np.mean(recon_losses):.4f} +/- {np.std(recon_losses):.4f}"  # noqa
