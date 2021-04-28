@@ -275,7 +275,7 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
 
         if verbose is True:
             pbar.update(1)
-            pbar.set_description(f"EPOCH (ft): {epoch}")
+            pbar.set_description(f"EPOCH: {epoch}")
         if step % 5 == 0:
             summary_writer.add_scalar(
                     "total_loss_step", total_loss.item(), step)

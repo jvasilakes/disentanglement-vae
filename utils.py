@@ -46,9 +46,6 @@ def validate_params(params):
             "finetune-train": bool,
             "finetune-val": bool}
     valid = True
-    if params["train"] is True and params["finetune"] is True:
-        logging.critical("train and finetune cannot both be True.")
-        valid = False
     for (key, val) in valid_params.items():
         if key not in params.keys():
             logging.critical(f"parameter file missing '{key}'")

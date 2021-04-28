@@ -376,8 +376,8 @@ def build_vae(params, vocab_size, emb_matrix, label_dims, device,
     num_decoder_layers = params["num_rnn_layers"]
     # TODO: I need this for the AE objective, but it breaks models trained
     #       before this option was introduced.
-    # if encoder.bidirectional is True:
-    #     num_decoder_layers *= 2
+    if encoder.bidirectional is True:
+        num_decoder_layers *= 2
     decoder = VariationalDecoder(
             vocab_size, params["embedding_dim"], params["hidden_dim"],
             num_decoder_layers, dropout_rate=params["decoder_dropout"],
