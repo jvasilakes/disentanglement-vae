@@ -82,8 +82,8 @@ def compute_losses(model, model_outputs, Xbatch, Ybatch, lengths, params,
         targets = Ybatch[dsc_name].to(model.device)
         dsc_loss = dsc.compute_loss(dsc_logits, targets)
         dsc_acc = dsc.compute_accuracy(dsc_logits, targets)
-        idv_dsc_losses[dsc_name] = dsc_loss.item()
-        idv_dsc_accs[dsc_name] = dsc_acc.item()
+        idv_dsc_losses[dsc_name] = dsc_loss
+        idv_dsc_accs[dsc_name] = dsc_acc
         total_dsc_loss += dsc_loss
 
     # KL for each latent space
@@ -96,7 +96,7 @@ def compute_losses(model, model_outputs, Xbatch, Ybatch, lengths, params,
     total_weighted_kl = torch.tensor(0.0).to(model.device)
     for (latent_name, latent_params) in model_outputs["latent_params"].items():
         kl = kl_divergence(latent_params)
-        idv_kls[latent_name] = kl.item()
+        idv_kls[latent_name] = kl
         # NB we weight the KL term here.
         # This is so we can easily plug in learnable weights later
         try:
@@ -104,17 +104,17 @@ def compute_losses(model, model_outputs, Xbatch, Ybatch, lengths, params,
         except KeyError:
             weight = params["lambdas"]["default"]
         total_weighted_kl += weight * kl
-        total_kl += kl.item()
+        total_kl += kl
 
     # Compute loss function and do backward pass/update parameters
     loss = recon_loss + total_dsc_loss + total_weighted_kl
-    output = {"total_loss": loss,  # Scalar tensor
-              "recon_loss": recon_loss.item(),  # scalar
-              "total_dsc_loss": total_dsc_loss.item(),  # scalar
+    output = {"total_loss": loss,  # Scalar
+              "recon_loss": recon_loss,  # scalar
+              "total_dsc_loss": total_dsc_loss,  # scalar
               "idv_dsc_losses": idv_dsc_losses,  # dict
               "idv_dsc_accs": idv_dsc_accs,  # dict
               "total_kl": total_kl,  # scalar
-              "total_weighted_kl": total_weighted_kl.item(),  # scalar
+              "total_weighted_kl": total_weighted_kl,  # scalar
               "idv_kls": idv_kls}  # dict
     return output
 
@@ -212,16 +212,16 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
                                      Ybatch, lengths, params, step)
         total_loss = losses_dict["total_loss"]
         losses.append(total_loss.item())
-        recon_losses.append(losses_dict["recon_loss"])
-        total_dsc_losses.append(losses_dict["total_dsc_loss"])
-        total_kls.append(losses_dict["total_kl"])
-        total_weighted_kls.append(losses_dict["total_weighted_kl"])
+        recon_losses.append(losses_dict["recon_loss"].item())
+        total_dsc_losses.append(losses_dict["total_dsc_loss"].item())
+        total_kls.append(losses_dict["total_kl"].item())
+        total_weighted_kls.append(losses_dict["total_weighted_kl"].item())
         for (dsc_name, dsc_loss) in losses_dict["idv_dsc_losses"].items():
             dsc_acc = losses_dict["idv_dsc_accs"][dsc_name]
-            idv_dsc_losses[dsc_name].append(dsc_loss)
+            idv_dsc_losses[dsc_name].append(dsc_loss.item())
             idv_dsc_accs[dsc_name].append(dsc_acc)
         for (latent_name, latent_kl) in losses_dict["idv_kls"].items():
-            idv_kls[latent_name].append(latent_kl)
+            idv_kls[latent_name].append(latent_kl.item())
 
         # Log latents
         all_sent_ids.extend(batch_ids)
@@ -248,14 +248,26 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
             kl_div = kl_divergence(output["latent_params"][l_name],
                                    output_prime["latent_params"][l_name])
             idv_ae[l_name].append(kl_div.item())
-        #    cycle_loss += kl_div
-        #total_loss = total_loss + 10 * cycle_loss
+            cycle_loss += kl_div
+        # total_loss = total_loss + 0.1 * cycle_loss
 
         # Update model
-        total_loss.backward()
+        # total_loss = losses_dict["total_loss"]
+        # total_loss.backward()
+        # torch.nn.utils.clip_grad_norm_(model.trainable_parameters(), 5)
+        # optimizer.step()
+        # optimizer.zero_grad()
+
+        encoding_loss = losses_dict["total_dsc_loss"] + \
+            losses_dict["total_weighted_kl"]
+        decoding_loss = losses_dict["recon_loss"] + 0.1 * cycle_loss
+        encoding_loss.backward(retain_graph=True)
+        decoding_loss.backward()
         torch.nn.utils.clip_grad_norm_(model.trainable_parameters(), 5)
         optimizer.step()
         optimizer.zero_grad()
+        cycle_optimizer.step()
+        cycle_optimizer.zero_grad()
 
         # Measure self-BLEU
         bleu = compute_bleu(target_Xbatch, x_prime, idx2word,
@@ -532,10 +544,14 @@ def run(params_file, verbose=False):
                           DEVICE, sos_idx, eos_idx)
     logging.info(vae)
 
-    optimizer = torch.optim.Adam(vae.trainable_parameters(),
-                                 lr=params["learn_rate"])
-    cycle_optimizer = torch.optim.Adam(vae.decoder.trainable_parameters(),
-                                       lr=3e-4)
+    enc_params = [p for (name, p) in vae.trainable_parameters(return_names=True)
+              if not name.startswith("decoder")]
+    encoder_optimizer = torch.optim.Adam(enc_params, lr=params["learn_rate"])
+    decoder_optimizer = torch.optim.Adam(vae.decoder.trainable_parameters(),
+                                         lr=params["learn_rate"])
+    #encoder_optimizer = torch.optim.Adam(vae.trainable_parameters(),
+    #                             lr=params["learn_rate"])
+    #decoder_optimizer = None
 
     # If there is a checkpoint at checkpoint_dir, we load it and continue
     # training/evaluating from there.
@@ -545,7 +561,7 @@ def run(params_file, verbose=False):
     logging.info("Trying to load latest model checkpoint from")
     logging.info(f"  {ckpt_dir}")
     vae, optimizer, start_epoch, ckpt_fname = utils.load_latest_checkpoint(
-            vae, optimizer, ckpt_dir)
+            vae, encoder_optimizer, ckpt_dir)
     if ckpt_fname is None:
         logging.warning("No checkpoint found!")
     else:
@@ -567,8 +583,8 @@ def run(params_file, verbose=False):
         for epoch in epoch_range:
             try:
                 vae, optimizer = trainstep(
-                        vae, optimizer, train_dataloader, params, epoch,
-                        idx2word, cycle_optimizer=cycle_optimizer,
+                        vae, encoder_optimizer, train_dataloader, params, epoch,
+                        idx2word, cycle_optimizer=decoder_optimizer,
                         verbose=verbose, summary_writer=train_writer,
                         logdir=logdir)
                 # Log train inputs and their reconstructions

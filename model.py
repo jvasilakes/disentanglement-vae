@@ -233,9 +233,13 @@ class VariationalSeq2Seq(nn.Module):
         self._device = value
         self.to(value)
 
-    def trainable_parameters(self):
-        return [param for param in self.parameters()
-                if param.requires_grad is True]
+    def trainable_parameters(self, return_names=False):
+        if return_names is True:
+            return [(name, param) for (name, param) in self.named_parameters()
+                    if param.requires_grad is True]
+        else:
+            return [param for param in self.parameters()
+                    if param.requires_grad is True]
 
     def encode(self, inputs, lengths):
         batch_size = inputs.size(0)
