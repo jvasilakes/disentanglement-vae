@@ -227,7 +227,7 @@ class VariationalSeq2Seq(nn.Module):
                              [polarity_dsc, modality_dsc], sos, eos)
     """
     def __init__(self, encoder, decoder, discriminators, latent_dim,
-                 sos_token_idx, eos_token_idx):
+                 sos_token_idx, eos_token_idx, use_adversaries=True):
         super(VariationalSeq2Seq, self).__init__()
         self._device = torch.device("cpu")
         self.encoder = encoder
@@ -257,7 +257,11 @@ class VariationalSeq2Seq(nn.Module):
             self.context2params["content"] = leftover_layer
             assert self.dsc_latent_dim + leftover_latent_dim == self.latent_dim
 
-        self.adversaries = self._get_adversaries()
+        self.use_adversaries = use_adversaries
+        if self.use_adversaries is True:
+            self.adversaries = self._get_adversaries()
+        else:
+            self.adversaries = dict()
 
         self.z2hidden = nn.Linear(
                 self.latent_dim, 2 * decoder.hidden_size * decoder.num_layers)
@@ -452,6 +456,7 @@ def build_vae(params, vocab_size, emb_matrix, label_dims, device,
 
     vae = VariationalSeq2Seq(encoder, decoder, discriminators,
                              params["latent_dims"]["total"],
-                             sos_token_idx, eos_token_idx)
+                             sos_token_idx, eos_token_idx,
+                             use_adversaries=False)
     vae.set_device(device)
     return vae
