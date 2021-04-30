@@ -52,16 +52,30 @@ def kl_divergence(mu, logvar):
     return kl
 
 
-def compute_losses(model, model_outputs, Xbatch, Ybatch, lengths, params,
-                   iteration):
-    recon_loss = reconstruction_loss(
-            Xbatch, model_outputs["decoder_logits"], lengths)
+def compute_kl_divergence_losses(model, model_outputs, params):
+    # KL for each latent space
+    idv_kls = dict()
+    # total kl over all latent spaces
+    total_kl = 0.0  # scalar for logging
+    # tensor scalar for backward pass
+    total_weighted_kl = torch.tensor(0.0).to(model.device)
+    for (latent_name, latent_params) in model_outputs["latent_params"].items():
+        kl = kl_divergence(latent_params.mu, latent_params.logvar)
+        idv_kls[latent_name] = kl.item()
+        total_kl += kl.item()
+        try:
+            weight = params["lambdas"][latent_name]
+        except KeyError:
+            weight = params["lambdas"]["default"]
+        total_weighted_kl += weight * kl
+    return total_weighted_kl, total_kl, idv_kls
 
+
+def compute_discriminator_losses(model, model_outputs, Ybatch):
     # Loss and accuracy for each discriminator
     idv_dsc_losses = dict()
     idv_dsc_accs = dict()
     # total loss over all discriminators
-    # used in backward pass
     total_dsc_loss = torch.tensor(0.0).to(model.device)
     for (dsc_name, dsc_logits) in model_outputs["dsc_logits"].items():
         dsc = model.discriminators[dsc_name]
@@ -71,39 +85,63 @@ def compute_losses(model, model_outputs, Xbatch, Ybatch, lengths, params,
         idv_dsc_losses[dsc_name] = dsc_loss.item()
         idv_dsc_accs[dsc_name] = dsc_acc.item()
         total_dsc_loss += dsc_loss
+    return total_dsc_loss, idv_dsc_losses, idv_dsc_accs
 
-    # KL for each latent space
-    idv_kls = dict()
-    # total kl over all latent spaces
-    # used in backward pass
-    # total_kl = torch.tensor(0.0).to(model.device)
-    total_kl = 0.0  # scalar for logging
-    # tensor scalar for backward pass
-    total_weighted_kl = torch.tensor(0.0).to(model.device)
-    for (latent_name, latent_params) in model_outputs["latent_params"].items():
-        kl = kl_divergence(latent_params.mu, latent_params.logvar)
-        idv_kls[latent_name] = kl.item()
-        # NB we weight the KL term here.
-        # This is so we can easily plug in learnable weights later
-        try:
-            weight = params["lambdas"][latent_name]
-        except KeyError:
-            weight = params["lambdas"]["default"]
 
-        total_weighted_kl += weight * kl
-        total_kl += kl.item()
+def compute_adversarial_losses(model, model_outputs, Ybatch):
+    # Adversarial loss for each individual adversary
+    idv_adv_losses = dict()
+    # Discriminator loss for each individual adversary
+    idv_dsc_losses = dict()
+    # Accuracies of the discriminators
+    idv_dsc_accs = dict()
+    # total loss over all adversarial discriminators
+    total_adv_loss = torch.tensor(0.0).to(model.device)
+    for (adv_name, adv_logits) in model_outputs["adv_logits"].items():
+        adv = model.adversaries[adv_name]
+        latent_name, label_name = adv_name.split('-')
+        targets = Ybatch[label_name].to(model.device)
+        adv_loss = adv.compute_adversarial_loss(adv_logits)
+        idv_adv_losses[adv_name] = adv_loss.item()
+        total_adv_loss += adv_loss
+        # This will be used to update the adversaries
+        dsc_loss = adv.compute_discriminator_loss(adv_logits, targets)
+        idv_dsc_losses[adv_name] = dsc_loss
+        dsc_acc = adv.compute_accuracy(adv_logits, targets)
+        idv_dsc_accs[adv_name] = dsc_acc.item()
+    return total_adv_loss, idv_adv_losses, idv_dsc_losses, idv_dsc_accs
 
-    # Compute loss function and do backward pass/update parameters
-    loss = recon_loss + total_dsc_loss + total_weighted_kl
-    output = {"total_loss": loss,  # Scalar tensor
-              "recon_loss": recon_loss.item(),  # scalar
-              "total_dsc_loss": total_dsc_loss.item(),  # scalar
-              "idv_dsc_losses": idv_dsc_losses,  # dict
-              "idv_dsc_accs": idv_dsc_accs,  # dict
-              "total_kl": total_kl,  # scalar
-              "total_weighted_kl": total_weighted_kl.item(),  # scalar
-              "idv_kls": idv_kls}  # dict
-    return output
+
+# def compute_losses(model, model_outputs, Xbatch, Ybatch, lengths, params,
+#                    iteration):
+#     recon_loss = reconstruction_loss(
+#             Xbatch, model_outputs["decoder_logits"], lengths)
+#
+#     print("===")
+#     for adv_name in model_outputs["adv_logits"].keys():
+#         adv = model.adversaries[adv_name]
+#         print(adv_name, adv.linear.weight)
+#     print("===\n")
+#     print("---")
+#     for adv_name in model_outputs["adv_logits"].keys():
+#         adv = model.adversaries[adv_name]
+#         print(adv_name, adv.linear.weight)
+#     print("---\n")
+#
+#
+#     # Compute loss function and do backward pass/update parameters
+#     # loss = recon_loss + total_dsc_loss + total_weighted_kl
+#     loss = recon_loss + total_dsc_loss + total_weighted_kl + total_adv_loss
+#     output = {"total_loss": loss,  # Scalar tensor
+#               "recon_loss": recon_loss.item(),  # scalar
+#               "total_dsc_loss": total_dsc_loss.item(),  # scalar
+#               "idv_dsc_losses": idv_dsc_losses,  # dict
+#               "idv_dsc_accs": idv_dsc_accs,  # dict
+#               "total_adv_loss": total_adv_loss,
+#               "total_kl": total_kl,  # scalar
+#               "total_weighted_kl": total_weighted_kl.item(),  # scalar
+#               "idv_kls": idv_kls}  # dict
+#     return output
 
 
 def compute_bleu(Xbatch, pred_batch, idx2word, eos_token_idx):
@@ -160,9 +198,15 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
     recon_losses = []
     # Total discriminator losses over discriminators per step
     total_dsc_losses = []
+    # Total adversarial losses per step
+    total_adv_losses = []
     # losses, accuracies per discriminator per step
     idv_dsc_losses = defaultdict(list)
     idv_dsc_accs = defaultdict(list)
+    # losses, accuracies per adversary per step
+    idv_adv_losses = defaultdict(list)
+    idv_adv_dsc_accs = defaultdict(list)
+    idv_adv_dsc_losses = defaultdict(list)
     # Total KL over latent spaces per step
     total_kls = []
     total_weighted_kls = []
@@ -189,26 +233,77 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
         #           "token_predictions": [batch_size, target_length]
         output = model(in_Xbatch, lengths,
                        teacher_forcing_prob=params["teacher_forcing_prob"])
-        losses_dict = compute_losses(model, output, target_Xbatch,
-                                     Ybatch, lengths, params, step)
-        total_loss = losses_dict["total_loss"]
-        losses.append(total_loss.item())
-        recon_losses.append(losses_dict["recon_loss"])
-        total_dsc_losses.append(losses_dict["total_dsc_loss"])
-        total_kls.append(losses_dict["total_kl"])
-        total_weighted_kls.append(losses_dict["total_weighted_kl"])
-        for (dsc_name, dsc_loss) in losses_dict["idv_dsc_losses"].items():
-            dsc_acc = losses_dict["idv_dsc_accs"][dsc_name]
+        # losses_dict = compute_losses(model, output, target_Xbatch,
+        #                              Ybatch, lengths, params, step)
+        # total_loss = losses_dict["total_loss"]
+        # losses.append(total_loss.item())
+        # recon_losses.append(losses_dict["recon_loss"])
+        # total_dsc_losses.append(losses_dict["total_dsc_loss"])
+        # total_kls.append(losses_dict["total_kl"])
+        # total_weighted_kls.append(losses_dict["total_weighted_kl"])
+        # for (dsc_name, dsc_loss) in losses_dict["idv_dsc_losses"].items():
+        #     dsc_acc = losses_dict["idv_dsc_accs"][dsc_name]
+        #     idv_dsc_losses[dsc_name].append(dsc_loss)
+        #     idv_dsc_accs[dsc_name].append(dsc_acc)
+        # for (latent_name, latent_kl) in losses_dict["idv_kls"].items():
+        #     idv_kls[latent_name].append(latent_kl)
+
+        # COMPUTE MANY MANY LOSSES
+        recon_loss = reconstruction_loss(
+                in_Xbatch, output["decoder_logits"], lengths)
+        recon_losses.append(recon_loss)
+
+        total_dsc_loss, idv_dsc_loss, idv_dsc_acc = \
+            compute_discriminator_losses(model, output, Ybatch)
+        total_dsc_losses.append(total_dsc_loss)
+        for (dsc_name, dsc_loss) in idv_dsc_loss.items():
             idv_dsc_losses[dsc_name].append(dsc_loss)
+            dsc_acc = idv_dsc_acc[dsc_name]
             idv_dsc_accs[dsc_name].append(dsc_acc)
-        for (latent_name, latent_kl) in losses_dict["idv_kls"].items():
+
+        total_adv_loss, idv_adv_loss, idv_adv_dsc_loss, idv_adv_dsc_acc = \
+            compute_adversarial_losses(model, output, Ybatch)
+        total_adv_losses.append(total_adv_loss)
+        for (adv_name, adv_loss) in idv_adv_loss.items():
+            idv_adv_losses[adv_name].append(adv_loss)
+            adv_dsc_loss = idv_adv_dsc_loss[adv_name]
+            idv_adv_dsc_losses[adv_name].append(adv_dsc_loss)
+            adv_dsc_acc = idv_adv_dsc_acc[adv_name]
+            idv_adv_dsc_accs[adv_name].append(adv_dsc_acc)
+
+        total_weighted_kl, total_kl, idv_kl = \
+            compute_kl_divergence_losses(model, output, params)
+        total_weighted_kls.append(total_weighted_kl)
+        total_kls.append(total_kl)
+        for (latent_name, latent_kl) in idv_kl.items():
             idv_kls[latent_name].append(latent_kl)
 
-        # Update model
-        total_loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.trainable_parameters(), 5)
+        total_loss = recon_loss + total_dsc_loss + \
+            total_adv_loss + total_weighted_kl
+
+        # Update the model
+        # I don't exactly know why I need to call backward, update all
+        # the adversaries, and then call step(), but it works and I've
+        # checked that everything updates properly.
+        print('===')
+        print(model.encoder.recurrent.weight_ih_l0)
+        total_loss.backward(retain_graph=True)
+        for (adv_name, adv_dsc_loss) in idv_adv_dsc_loss.items():
+            # Update only the adversaries
+            model.adversaries[adv_name].optimizer_step(adv_dsc_loss)
+        print('---')
+        print(model.encoder.recurrent.weight_ih_l0)
         optimizer.step()
         optimizer.zero_grad()
+        print('+++')
+        print(model.encoder.recurrent.weight_ih_l0)
+        input()
+
+        # Update model
+        # total_loss.backward()
+        # torch.nn.utils.clip_grad_norm_(model.trainable_parameters(), 5)
+        # optimizer.step()
+        # optimizer.zero_grad()
 
         # Log latents
         all_sent_ids.extend(batch_ids)
@@ -241,7 +336,7 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
             summary_writer.add_scalar(
                     "total_loss_step", total_loss.item(), step)
             summary_writer.add_scalar(
-                    "recon_loss_step", losses_dict["recon_loss"], step)
+                    "recon_loss_step", recon_loss, step)
             for dsc_name in idv_dsc_losses.keys():
                 dsc_loss = idv_dsc_losses[dsc_name][-1]
                 dsc_acc = idv_dsc_accs[dsc_name][-1]

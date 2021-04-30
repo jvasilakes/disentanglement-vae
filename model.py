@@ -152,6 +152,7 @@ class Discriminator(nn.Module):
         self.to(value)
 
     def forward(self, inputs):
+        inputs = inputs.detach()
         return self.linear(inputs)
 
     # TODO: add parameter to pass label weights for balancing
@@ -173,6 +174,47 @@ class Discriminator(nn.Module):
         targets = targets.squeeze()
         acc = torch.mean((preds == targets).float())
         return acc
+
+
+class AdversarialDiscriminator(Discriminator):
+    def __init__(self, latent_name, label_name, latent_dim, output_dim):
+        name = f"{latent_name}-{label_name}"
+        super(AdversarialDiscriminator, self).__init__(
+            name, latent_dim, output_dim)
+        self.latent_name = latent_name
+        self.label_name = label_name
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=3e-4)
+        self.detached_inputs = None
+
+    def forward(self, inputs):
+        self.detached_inputs = inputs.clone().detach()
+        return self.linear(inputs)
+
+    def compute_discriminator_loss(self, logits, targets):
+        detached_logits = self.forward(self.detached_inputs)
+        if self.output_dim > 1:
+            targets = targets.squeeze()
+        return self.loss_fn(detached_logits, targets)
+
+    def optimizer_step(self, dsc_loss):
+        """
+        dsc_loss: output of compute_discriminator_loss
+        """
+        dsc_loss.backward(retain_graph=True)
+        self.optimizer.step()
+        self.optimizer.zero_grad()
+
+    def compute_adversarial_loss(self, logits):
+        """
+        We want to maximise the entropy of the logits.
+        """
+        if len(logits.size()) == 1:
+            logits = logits.unsqueeze(1)
+        elif len(logits.size()) > 2:
+            raise ValueError(f"Got unexpected logits shape {logits.size()}")
+        probs = self.activation(logits, *self.activation_args)
+        H = -torch.sum(probs * torch.log(probs), dim=1).mean()
+        return -H  # Negate just to be clear we want to maximise it.
 
 
 class VariationalSeq2Seq(nn.Module):
@@ -215,10 +257,26 @@ class VariationalSeq2Seq(nn.Module):
             self.context2params["content"] = leftover_layer
             assert self.dsc_latent_dim + leftover_latent_dim == self.latent_dim
 
+        self.adversaries = self._get_adversaries()
+
         self.z2hidden = nn.Linear(
                 self.latent_dim, 2 * decoder.hidden_size * decoder.num_layers)
         self.sos_token_idx = sos_token_idx
         self.eos_token_idx = eos_token_idx
+
+    def _get_adversaries(self):
+        adversaries = nn.ModuleDict()
+        for (latent_name, layer) in self.context2params.items():
+            latent_size = int(layer.out_features / 2)
+            for (label_name, dsc) in self.discriminators.items():
+                if latent_name == label_name:
+                    continue
+                # Try to predict label_name from latent_name
+                adversary = AdversarialDiscriminator(
+                    latent_name, label_name, latent_size, dsc.output_dim)
+                name = f"{latent_name}-{label_name}"
+                adversaries[name] = adversary
+        return adversaries
 
     @property
     def device(self):
@@ -230,8 +288,9 @@ class VariationalSeq2Seq(nn.Module):
         self.to(value)
 
     def trainable_parameters(self):
-        return [param for param in self.parameters()
-                if param.requires_grad is True]
+        return [param for (name, param) in self.named_parameters()
+                if param.requires_grad is True
+                and not name.startswith("adversaries")]
 
     def encode(self, inputs, lengths):
         batch_size = inputs.size(0)
@@ -286,6 +345,12 @@ class VariationalSeq2Seq(nn.Module):
             dlogits = dsc(latent_params[name].z)
             dsc_logits[name] = dlogits
 
+        adv_logits = {}
+        for (name, adv) in self.adversaries.items():
+            latent_name = name.split('-')[0]
+            alogits = adv(latent_params[latent_name].z)
+            adv_logits[name] = alogits
+
         zs = [param.z for param in latent_params.values()]
         z = torch.cat(zs, dim=1)
         decoder_hidden = self.compute_hidden(z, batch_size)
@@ -326,6 +391,7 @@ class VariationalSeq2Seq(nn.Module):
         output = {"decoder_logits": out_logits,
                   "latent_params": latent_params,  # Params(z, mu, logvar)
                   "dsc_logits": dsc_logits,
+                  "adv_logits": adv_logits,
                   "token_predictions": out_predictions}
         return output
 
