@@ -7,6 +7,16 @@
 `tqdm`
 `numpy`
 
+An example config file is at `config_example.json`. Check out `utils.validate_params()` for more documentation.
+Some things to note, the value of the `latent_dims` parameter is a mapping from label names (in the training data)
+to latent dimensions. The overall dimensionality of the model is specified using the `total` key. All other keys
+should match label names in the dataset. The number left over after subtracting the dimensionality of all labeled
+spaces from `total` is assigne to a generic, unsupervised "content" space.
+
+The `lambdas` keyword specifies the KL divergence weight for each of the latent spaces specified under `latent_dims`.
+Any latent_spaces without a corresponding entry in `lambdas` will fall back to the value of the `default` key.
+
+For the most part, the hyperparameters given in `config_example.json` are a good starting point.
 
 After editing `config_example.json` to your liking, run
 
@@ -34,6 +44,7 @@ python scripts/plot_zs.py logs/experiment1/metadata/zs train polarity logs/exper
 ```
 
 This produces a plot of the aggregated approximate posterior ∫q(z|x)p(x)dx for each dimension of the specified latent space.
+Warning, this plots all dimensions separately, so its only adviseable to run this for small latents.
 
 
 ### Reproducing Experiments
