@@ -302,7 +302,7 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
 
         # COMPUTE MANY MANY LOSSES
         total_loss, losses_dict = compute_all_losses(
-            model, output, in_Xbatch, Ybatch, lengths, params)
+            model, output, target_Xbatch, Ybatch, lengths, params)
         loss_logger.update({"total_loss": total_loss})
         loss_logger.update(losses_dict)
 
