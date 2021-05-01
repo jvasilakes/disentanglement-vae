@@ -152,7 +152,6 @@ class Discriminator(nn.Module):
         self.to(value)
 
     def forward(self, inputs):
-        inputs = inputs.detach()
         return self.linear(inputs)
 
     # TODO: add parameter to pass label weights for balancing
