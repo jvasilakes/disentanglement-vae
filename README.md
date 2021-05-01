@@ -76,18 +76,28 @@ Once a model has been trained, you can inspect it using the interactive sampling
 python sample.py config.json
 ```
 
-Type a sentence at the prompt to get a few reconstructions. Press ENTER with no input to generate a few sentences
-randomly from the latent space.
+Type a sentence at the prompt to get a few reconstructions, the norm of their representations,
+and the latent space classifiers' predictions given these representations.
+Press ENTER with no input to generate a few sentences randomly from the latent space.
 
 
 ### Measuring Disentanglement
 
 The first script will estimate the Mutual Information Gap (MIG) for each latent space by sampling multiple
 times from each space and then computing the mutual information between the latents and the ground truth generative factor values
-(i.e. the labels). The second command will then summarize these results, saving to `logs/<model_name>/evaluation`.
+(i.e. the labels). The second command will then summarize these results, printing out some stats and saving
+some plots to `logs/<model_name>/evaluation`.
 
 ```
-python scripts/disentanglement.py compute logs/<model_name>/metadata data/<dataset>/processed logs/<model_name>/ \
-																					{train,dev,test} logs/<model_name>/evaluation
+python scripts/disentanglement.py compute logs/<model_name>/metadata data/<dataset>/processed {train,dev,test} logs/<model_name>/evaluation
 python scripts/disentanglement.py summarize {train,dev,test} logs/<model_name>/evaluation
+```
+
+### Encoder - Decoder Consistency
+Consistency of the decoder and the encoder can be computed and measured with the following script.
+Again, plots and detailed stats are saved to the evaluation directory.
+
+```
+python decoding.py compute logs/<model_name>/<config_file>.json logs/<model_name>/evaluation {train,dev,test}
+python decoding.py summarize logs/<model_name>/evaluation {train,dev,test}
 ```
