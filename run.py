@@ -367,7 +367,8 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
     logstr = f"TRAIN ({epoch}) TOTAL: {tlmu:.4f} +/- {tlsig:.4f}"
     logstr += f" | RECON: {rcmu:.4f} +/- {rcsig:.4f}"
     logstr += f" | DISCRIM: {dscmu:.4f} +/- {dscsig:.4f}"
-    logstr += f" | ADVERSE: {advmu:.4f} +/- {advsig:.4f}"
+    if model.use_adversaries is True:
+        logstr += f" | ADVERSE: {advmu:.4f} +/- {advsig:.4f}"
     logstr += f" | KL: {klmu:.4f} +/- {klsig:.4f}"
     logging.info(logstr)
 
