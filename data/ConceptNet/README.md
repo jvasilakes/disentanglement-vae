@@ -12,3 +12,5 @@ Then preprocess the data using
 ```
 python get_polarity_data.py --indir interim/conceptnet_split/ --outdir processed/
 ```
+
+Finally, specify `path/to/ConceptNet/processed/` in your config file to use the data.
