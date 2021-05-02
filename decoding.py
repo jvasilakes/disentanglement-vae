@@ -161,12 +161,8 @@ def compute(args):
 
             # Get the discriminators' predictions for each latent space.
             for (label_name, logits) in output["dsc_logits"].items():
-                print(label_name)
-                print(output["latent_params"][label_name].z.flatten())
-                print(logits.flatten())
                 preds = vae.discriminators[label_name].predict(logits)
                 latent_predictions[label_name][i].extend(preds.cpu().tolist())
-            print("----")
 
             # Get the decoded reconstructions ...
             Xbatch_hat = output["token_predictions"]
@@ -182,13 +178,8 @@ def compute(args):
 
             # ... and get the discriminators' predictions for the new input.
             for (label_name, logits) in output_hat["dsc_logits"].items():
-                print(label_name)
-                print(output_hat["latent_params"][label_name].z.flatten())
-                print(logits.flatten())
                 preds = vae.discriminators[label_name].predict(logits)
                 latent_predictions_hat[label_name][i].extend(preds.cpu().tolist())  # noqa
-            input()
-            print()
         pbar.update(1)
 
     results = []

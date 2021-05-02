@@ -122,7 +122,8 @@ def compute(args, model=None):
                 # print(f"{latent_name} |-> {lab_name}")
                 # Precision, recall, f1
                 model, (p, r, f, _) = train_lr(latent_name, id2z,
-                                               lab_name, id2labels)
+                                               lab_name, id2labels,
+                                               random_state=i)
                 pred_results.append([i, latent_name, lab_name, p, r, f])
 
                 if lab_name not in Hvs.keys():
@@ -172,26 +173,28 @@ def get_labels(data_dir, dataset, latent_names):
     return id2labels, labels_set
 
 
-def train_lr(latent_name, id2z, label_name, id2labels):
+def train_lr(latent_name, id2z, label_name, id2labels, random_state=0):
     ordered_ids = list(id2z.keys())
     np.random.shuffle(ordered_ids)
     V = np.array([id2labels[uuid][label_name] for uuid in ordered_ids])
     Z = np.array([id2z[uuid] for uuid in ordered_ids])
     if len(Z.shape) == 1:
         Z = np.expand_dims(Z, axis=-1)
-        # plot_z_v(Z, V)
+        # plot_z_v(Z, V, title=f"{latent_name} |-> {label_name}")
     Z = StandardScaler().fit_transform(Z)
-    clf = LogisticRegression(random_state=10, class_weight="balanced",
+    clf = LogisticRegression(random_state=random_state,
+                             class_weight="balanced",
                              penalty="none").fit(Z, V)
     preds = clf.predict(Z)
     return clf, precision_recall_fscore_support(V, preds, average="macro")
 
 
-def plot_z_v(Z, V):
+def plot_z_v(Z, V, title=""):
     Z = Z.flatten()
     for v in set(V):
         zv = Z[V == v]
-        sns.kdeplot(zv, label=str(v))
+        ax = sns.kdeplot(zv, label=str(v))
+    ax.set_title(title)
     plt.show()
 
 
@@ -443,7 +446,9 @@ def summarize_preds(preds_df):
         df = preds_df.loc[preds_df.latent_name == latent_name, :]
         means = df.groupby("label_name").mean().drop(
             "sample_num", axis="columns")
-        means.plot.bar(ax=axs[i], ylim=(0.2, 1.0), rot=0)
+        errs = df.groupby("label_name").std().drop(
+            "sample_num", axis="columns")
+        means.plot.bar(ax=axs[i], yerr=errs, ylim=(0.2, 1.0), rot=0)
         axs[i].set_title(f"Latent: {latent_name}")
         i += 1
     plt.tight_layout()
