@@ -130,8 +130,6 @@ def compute(args, model=None):
 
                 mi = compute_mi(zs, Vs[lab_name])
                 mis[lab_name][latent_name] = mi
-                print(lab_name, latent_name, mis[lab_name][latent_name])
-                input()
         migs = compute_migs(mis, Hvs)
         with open(migs_outfile, 'a') as outF:
             migs["sample_num"] = i

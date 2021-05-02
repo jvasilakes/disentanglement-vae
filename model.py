@@ -212,6 +212,7 @@ class AdversarialDiscriminator(Discriminator):
         elif len(logits.size()) > 2:
             raise ValueError(f"Got unexpected logits shape {logits.size()}")
         probs = self.activation(logits, *self.activation_args)
+        probs = torch.clamp(probs, min=1e-8, max=1 - 1e-8)
         H = -torch.sum(probs * torch.log(probs), dim=1).mean()
         return -H  # Negate just to be clear we want to maximise it.
 

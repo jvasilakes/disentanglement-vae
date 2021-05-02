@@ -70,6 +70,7 @@ class LossLogger(object):
             else:
                 if key not in to_update.keys():
                     to_update[key] = []
+                val = self._to_scalar(val)
                 to_update[key].append(val)
 
     def _log(self, i, subdict=None, base_keystr='',
@@ -84,7 +85,7 @@ class LossLogger(object):
                           collapse_fn=collapse_fn,
                           collapse_fn_args=collapse_fn_args)
             elif isinstance(val, list):
-                val = self._to_numpy(val)
+                val = self._to_scalar(val)
                 logval = collapse_fn(val, *collapse_fn_args)
                 self.summary_writer.add_scalar(keystr, logval, i)
             else:
@@ -100,17 +101,23 @@ class LossLogger(object):
 
     def summarize(self, key):
         val = self.losses[key]
-        val = self._to_numpy(val)
+        val = self._to_scalar(val)
         return np.mean(val), np.std(val)
 
-    @staticmethod
-    def _to_numpy(xs):
-        out = []
-        for x in xs:
-            if isinstance(x, torch.Tensor):
-                x = x.cpu().detach().numpy()
-            out.append(x)
-        return out
+    @classmethod
+    def _to_scalar(cls, xs):
+        try:
+            out = []
+            for x in xs:
+                out.append(cls._to_scalar(x))
+            return out
+        except TypeError:
+            if isinstance(xs, torch.Tensor):
+                return xs.cpu().detach().item()
+            elif isinstance(xs, np.ndarray):
+                return xs.item()
+            else:
+                return xs
 
 
 def safe_dict_update(d1, d2):
@@ -310,12 +317,14 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
         # I don't exactly know why I need to call backward, update all
         # the adversaries, and then call step(), but it works and I've
         # checked that everything updates properly.
-        total_loss.backward(retain_graph=True)
+        with utils.AutogradDebugger():
+            total_loss.backward(retain_graph=True)
+        torch.nn.utils.clip_grad_norm_(model.trainable_parameters(), 5.0)
         key = "idv_adv_dsc_losses"
-        for (adv_name, adv_dsc_loss) in loss_logger[key].items():
+        for (adv_name, adv_dsc_loss) in losses_dict[key].items():
             # Update only the adversaries
-            adv_dsc_loss = adv_dsc_loss[-1]
-            model.adversaries[adv_name].optimizer_step(adv_dsc_loss)
+            with utils.AutogradDebugger():
+                model.adversaries[adv_name].optimizer_step(adv_dsc_loss)
         optimizer.step()
         optimizer.zero_grad()
 
