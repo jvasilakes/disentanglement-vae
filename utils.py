@@ -1,7 +1,9 @@
 import os
+import pdb
 import pickle
 import random
 import logging
+import traceback
 from collections import defaultdict
 
 import torch
@@ -15,6 +17,32 @@ def set_seed(seed):
     random.seed(seed)
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
+
+
+class AutogradDebugger(torch.autograd.detect_anomaly):
+
+    def __init__(self):
+        super(AutogradDebugger, self).__init__()
+
+    def __enter__(self):
+        super(AutogradDebugger, self).__enter__()
+        return self
+
+    def __exit__(self, type, value, trace):
+        super(AutogradDebugger, self).__exit__()
+        if isinstance(value, RuntimeError):
+            traceback.print_tb(trace)
+            self.halt(str(value))
+
+    @staticmethod
+    def halt(msg):
+        print()
+        print("==========================================")
+        print("     Failure! Left mouse to continue.")
+        print("==========================================")
+        print()
+        print(msg)
+        pdb.set_trace()
 
 
 def validate_params(params):
