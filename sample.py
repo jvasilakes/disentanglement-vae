@@ -7,9 +7,7 @@ import argparse
 import torch
 
 # Local imports
-import utils
-import data_utils
-import model
+from vae import utils, data_utils, model
 
 
 if torch.cuda.is_available():

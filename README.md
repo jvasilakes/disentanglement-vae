@@ -2,10 +2,13 @@
 
 ### Requirements
 
-`scikit-learn`
-`pytorch`
-`tqdm`
-`numpy`
+See `requirements.txt`.
+
+### Installation
+
+```
+python setup.py develop
+```
 
 An example config file is at `config_example.json`. Check out `utils.validate_params()` for more documentation.
 Some things to note, the value of the `latent_dims` parameter is a mapping from label names (in the training data)

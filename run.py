@@ -17,9 +17,7 @@ from torch.utils.tensorboard import SummaryWriter
 from torchtext.data.metrics import bleu_score
 
 # Local packages
-import utils
-import data_utils
-import model
+from vae import utils, data_utils, model
 
 
 torch.autograd.set_detect_anomaly(True)
