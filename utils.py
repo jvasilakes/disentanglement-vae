@@ -67,6 +67,7 @@ def validate_params(params):
             "decoder_dropout": float,
             "teacher_forcing_prob": float,
             "lambdas": dict,  # KL div weights for each latent space.
+            "adversarial_loss": bool,
             "train": bool,
             "validate": bool,
             "test": bool}

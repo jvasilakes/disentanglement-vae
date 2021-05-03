@@ -20,6 +20,7 @@
  "teacher_forcing_prob": 0.5,
  "lambdas": {"default": 0.01,
 						 "polarity": 0.005},
+ "adversarial_loss": true,
  "train": true,
  "validate": false,
  "test": false

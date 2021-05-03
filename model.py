@@ -457,6 +457,6 @@ def build_vae(params, vocab_size, emb_matrix, label_dims, device,
     vae = VariationalSeq2Seq(encoder, decoder, discriminators,
                              params["latent_dims"]["total"],
                              sos_token_idx, eos_token_idx,
-                             use_adversaries=True)
+                             use_adversaries=params["adversarial_loss"])
     vae.set_device(device)
     return vae
