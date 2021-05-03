@@ -152,9 +152,9 @@ def compute_all_losses(model, model_outputs, Xbatch,
             model, model_outputs["adv_logits"], Ybatch)
     )
     total_loss = (L["reconstruction_loss"] +
+                  L["total_weighted_kl"] +
                   L["total_dsc_loss"] +
-                  L["total_adv_loss"] +
-                  L["total_weighted_kl"])
+                  L["total_adv_loss"])
     return total_loss, L
 
 
@@ -317,14 +317,14 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
         # I don't exactly know why I need to call backward, update all
         # the adversaries, and then call step(), but it works and I've
         # checked that everything updates properly.
-        with utils.AutogradDebugger():
-            total_loss.backward(retain_graph=True)
+        # with utils.AutogradDebugger():
+        total_loss.backward(retain_graph=True)
         torch.nn.utils.clip_grad_norm_(model.trainable_parameters(), 5.0)
         key = "idv_adv_dsc_losses"
         for (adv_name, adv_dsc_loss) in losses_dict[key].items():
             # Update only the adversaries
-            with utils.AutogradDebugger():
-                model.adversaries[adv_name].optimizer_step(adv_dsc_loss)
+            # with utils.AutogradDebugger():
+            model.adversaries[adv_name].optimizer_step(adv_dsc_loss)
         optimizer.step()
         optimizer.zero_grad()
 
@@ -336,7 +336,7 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
                 all_latent_params[l_name][param_name].extend(param_batch)
 
         # Measure Autoencoding by reencoding the reconstructed output.
-        x_prime = output["decoder_logits"].argmax(-1)
+        x_prime = output["token_predictions"].to(model.device)
         output_prime = model(
                 x_prime, lengths,
                 teacher_forcing_prob=params["teacher_forcing_prob"])
@@ -413,7 +413,7 @@ def evalstep(model, dataloader, params, epoch, idx2word, name="dev",
         loss_logger.update(losses_dict)
 
         # Measure self-BLEU
-        x_prime = output["decoder_logits"].argmax(-1)
+        x_prime = output["token_predictions"].to(model.device)
         bleu = compute_bleu(target_Xbatch, x_prime, idx2word,
                             model.eos_token_idx)
         loss_logger.update({"bleu": bleu})
