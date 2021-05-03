@@ -37,13 +37,13 @@ tensorboard --logdir runs
 You can generate plots of the latent spaces using
 
 ```
-python scripts/plot_zs.py zs_dir dataset latent_name outdir
+python scripts/evaluation/plot_zs.py zs_dir dataset latent_name outdir
 ```
 
 For example, if your experiment is named `experiment1`,
 
 ```
-python scripts/plot_zs.py logs/experiment1/metadata/zs train polarity logs/experiment1/metadata/plots
+python scripts/evaluation/plot_zs.py logs/experiment1/metadata/zs train polarity logs/experiment1/metadata/plots
 ```
 
 This produces a plot of the aggregated approximate posterior ∫q(z|x)p(x)dx for each dimension of the specified latent space.
@@ -92,8 +92,8 @@ times from each space and then computing the mutual information between the late
 some plots to `logs/<model_name>/evaluation`.
 
 ```
-python scripts/disentanglement.py compute logs/<model_name>/metadata data/<dataset>/processed {train,dev,test} logs/<model_name>/evaluation
-python scripts/disentanglement.py summarize {train,dev,test} logs/<model_name>/evaluation
+python scripts/evaluation/disentanglement.py compute logs/<model_name>/metadata data/<dataset>/processed {train,dev,test} logs/<model_name>/evaluation
+python scripts/evaluation/disentanglement.py summarize {train,dev,test} logs/<model_name>/evaluation
 ```
 
 ### Encoder - Decoder Consistency
@@ -101,6 +101,6 @@ Consistency of the decoder and the encoder can be computed and measured with the
 Again, plots and detailed stats are saved to the evaluation directory.
 
 ```
-python decoding.py compute logs/<model_name>/<config_file>.json logs/<model_name>/evaluation {train,dev,test}
-python decoding.py summarize logs/<model_name>/evaluation {train,dev,test}
+python scripts/evaluation/decoding.py compute logs/<model_name>/<config_file>.json logs/<model_name>/evaluation {train,dev,test}
+python scripts/evaluation/decoding.py summarize logs/<model_name>/evaluation {train,dev,test}
 ```
