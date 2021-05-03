@@ -4,6 +4,7 @@ from collections import defaultdict
 
 import nltk
 import numpy as np
+from tqdm import tqdm
 
 import data_utils
 
@@ -23,6 +24,7 @@ def estimate(args):
     all_train_sents = {}
     all_dev_sents = {}
     all_test_sents = {}
+    print("Loading data.")
     for data_dir in args.data_dirs:
         train_path = os.path.join(data_dir, "train.jsonl")
         dev_path = os.path.join(data_dir, "dev.jsonl")
@@ -47,9 +49,14 @@ def estimate(args):
     train_sents = [s for dataset in all_train_sents.values() for s in dataset]
     dev_sents = [s for dataset in all_dev_sents.values() for s in dataset]
     test_sents = [s for dataset in all_test_sents.values() for s in dataset]
+    print("Estimating ngram probabilities...")
     train_lm, train_vocab = estimate_ngram_lm(train_sents, n=n)
+    print("Perplexities")
+    print("train")
     train_ppl, train_num_unks = compute_ppl(train_lm, train_sents, n)
+    print("dev")
     dev_ppl, dev_num_unks = compute_ppl(train_lm, dev_sents, n)
+    print("test")
     test_ppl, test_num_unks = compute_ppl(train_lm, test_sents, n)
     print(f"TRAIN ngram vocab size: {len(train_vocab)}")
     print(f"TRAIN PPL: {train_ppl:.4f}, UNKS: {train_num_unks}")
@@ -74,7 +81,7 @@ def estimate_ngram_lm(sentences, n=1):
     smoothed_model = defaultdict(lambda: defaultdict(lambda: 1e-8))
     ngram_vocab = set()
     # Count
-    for sent in sentences:
+    for sent in tqdm(sentences):
         ngrams = nltk.ngrams(sent, n)
         for grams in ngrams:
             counts[grams[:-1]][grams[-1]] += 1
@@ -91,7 +98,7 @@ def estimate_ngram_lm(sentences, n=1):
 def compute_ppl(model, sentences, n):
     num_unks = 0
     sent_entropies = []
-    for sent in sentences:
+    for sent in tqdm(sentences):
         ngrams = nltk.ngrams(sent, n)
         logprobs = []
         for grams in ngrams:
