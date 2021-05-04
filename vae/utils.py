@@ -50,6 +50,8 @@ def validate_params(params):
             "name": str,  # experiment name
             "random_seed": int,
             "data_dir": str,  # directory with {train,dev,test}.jsonl
+            "combined_dataset": bool,  # whether data_dir contains a "data_source" key  # noqa
+            "dataset_minibatch_ratios": dict,  # {data_source_value: [0,1]}
             "checkpoint_dir": str,
             "glove_path": str,
             "num_train_examples": int,  # -1 for all examples

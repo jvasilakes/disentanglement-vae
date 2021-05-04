@@ -315,7 +315,7 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
         # I don't exactly know why I need to call backward, update all
         # the adversaries, and then call step(), but it works and I've
         # checked that everything updates properly.
-        # with utils.AutogradDebugger():
+        # with utils.AutogradDebugger():  # uncomment for interactive debugging
         total_loss.backward(retain_graph=True)
         torch.nn.utils.clip_grad_norm_(model.trainable_parameters(), 5.0)
         key = "idv_adv_dsc_losses"
@@ -478,6 +478,8 @@ def run(params_file, verbose=False):
         os.makedirs(ckpt_dir)
 
     label_keys = [lk for lk in params["latent_dims"].keys() if lk != "total"]
+    if "combined_dataset" in params.keys():
+        label_keys.append("source_dataset")  # We need it for batching
     # Read train data
     train_file = os.path.join(params["data_dir"], "train.jsonl")
     tmp = data_utils.get_sentences_labels(
@@ -533,9 +535,17 @@ def run(params_file, verbose=False):
     train_data = data_utils.DenoisingTextDataset(
             noisy_train_sents, train_sents, train_labs, train_ids,
             word2idx, label_encoders)
+    dataloader_kwargs = {"shuffle": True, "batch_size": params["batch_size"]}
+    if params["combined_dataset"] is True:
+        train_sampler = data_utils.RatioSampler(
+            train_labs, split_key="source_dataset",
+            ratios=params["dataset_minibatch_ratios"],
+            batch_size=params["batch_size"])
+        dataloader_kwargs = {"batch_sampler": train_sampler}
     train_dataloader = torch.utils.data.DataLoader(
-            train_data, shuffle=True, batch_size=params["batch_size"],
-            collate_fn=utils.pad_sequence_denoising)
+            train_data, collate_fn=utils.pad_sequence_denoising,
+            **dataloader_kwargs)
+
     logging.info(f"Training examples: {len(train_data)}")
     train_writer_path = os.path.join("runs", params["name"], "train")
     train_writer = SummaryWriter(log_dir=train_writer_path)
