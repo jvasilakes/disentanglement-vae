@@ -247,16 +247,18 @@ def get_sentences_labels(path, label_keys=None, N=-1, shuffle=True):
     return sentences[:N], labels[:N], sentence_ids[:N], label_counts
 
 
-def preprocess_sentences(sentences, SOS, EOS, lowercase=True):
+def preprocess_sentences(sentences, SOS=None, EOS=None, lowercase=True):
     sents = []
     for sent in sentences:
         sent = sent.strip()
         if lowercase is True:
             sent = sent.lower()
+        sent = re.sub(r"(n't)", r" \1", sent)
         sent = re.sub(r"([.!?])", r" \1", sent)
-        sent = re.sub(r"[^a-zA-Z.!?]+", r" ", sent)
+        sent = re.sub(r"[^a-zA-Z.!?']+", r" ", sent)
         sent = sent.split()
-        sent = [SOS] + sent + [EOS]
+        if SOS is not None and EOS is not None:
+            sent = [SOS] + sent + [EOS]
         sents.append(sent)
     return sents
 

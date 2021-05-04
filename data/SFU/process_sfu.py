@@ -98,10 +98,6 @@ def read_xml(file, attrs={}):
                      "was_split": was_split,
                      **sent_attr, **attrs}
 
-            # if len(subwords) > 1:
-            #     print(file)
-            #     print(sent_txt)
-            #     input()
             out_sentences.append(datum)
     return out_sentences
 
@@ -146,6 +142,10 @@ def split_sentence(elements):
             subwords, subattrs = split_sentence(elem.findall("./"))
             if subwords[0]:
                 curr.extend(subwords[0])
+                if subattrs[0]["uncertainty"] == "uncertain":
+                    attrs.update({"uncertainty": "uncertain"})
+                if subattrs[0]["polarity"] == "negative":
+                    attrs.update({"polarity": "negative"})
     sentences.append(curr)
     sent_attrs.append(attrs)
     return sentences, sent_attrs
