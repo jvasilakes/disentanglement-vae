@@ -115,7 +115,7 @@ def compute(args):
         glove, _ = utils.load_glove(params["glove_path"])
         emb_matrix, word2idx = utils.get_embedding_matrix(vocab, glove)
         logging.info(f"Loaded embeddings with size {emb_matrix.shape}")
-    idx2word = {idx: word for (word, idx) in word2idx.items()}  # noqa F841 local variable 'idx2word' is assigned to but never used
+    idx2word = {idx: word for (word, idx) in word2idx.items()}
 
     # Build the VAE
     label_dims_dict = train_data.y_dims
@@ -142,6 +142,7 @@ def compute(args):
     list_fn = lambda: [[] for _ in range(args.num_resamples)]  # noqa
     latent_predictions = defaultdict(list_fn)
     latent_predictions_hat = defaultdict(list_fn)
+    bleus = list_fn()
     pbar = tqdm(total=len(dataloader))
     for (i, batch) in enumerate(dataloader):
         in_Xbatch, target_Xbatch, Ybatch, lengths, batch_ids = batch
@@ -150,17 +151,19 @@ def compute(args):
         in_Xbatch = in_Xbatch.to(vae.device)
         target_Xbatch = target_Xbatch.to(vae.device)
         lengths = lengths.to(vae.device)
-        for i in range(args.num_resamples):
+        for resample in range(args.num_resamples):
             # output = {"decoder_logits": [batch_size, target_length, vocab_size]  # noqa
             #           "latent_params": [Params(z, mu, logvar)] * batch_size
             #           "dsc_logits": {latent_name: [batch_size, n_classes]}
+            #           "adv_logits": {latent_name-label_name: [batch_size, n_classes]}  # noqa
             #           "token_predictions": [batch_size, target_length]
             output = vae(in_Xbatch, lengths, teacher_forcing_prob=0.0)
 
             # Get the discriminators' predictions for each latent space.
             for (label_name, logits) in output["dsc_logits"].items():
                 preds = vae.discriminators[label_name].predict(logits)
-                latent_predictions[label_name][i].extend(preds.cpu().tolist())
+                latent_predictions[label_name][resample].extend(
+                    preds.cpu().tolist())
 
             # Get the decoded reconstructions ...
             Xbatch_hat = output["token_predictions"]
@@ -174,10 +177,16 @@ def compute(args):
             # ... and encode them again ...
             output_hat = vae(Xbatch_hat, lengths_hat, teacher_forcing_prob=0.0)
 
+            # Measure self-BLEU
+            bleu = utils.compute_bleu(
+                target_Xbatch, Xbatch_hat, idx2word, vae.eos_token_idx)
+            bleus[resample].append(bleu)
+
             # ... and get the discriminators' predictions for the new input.
             for (label_name, logits) in output_hat["dsc_logits"].items():
                 preds = vae.discriminators[label_name].predict(logits)
-                latent_predictions_hat[label_name][i].extend(preds.cpu().tolist())  # noqa
+                latent_predictions_hat[label_name][resample].extend(
+                    preds.cpu().tolist())
         pbar.update(1)
 
     results = []
@@ -206,10 +215,18 @@ def compute(args):
         args.outdir, f"decoder_predictions_{args.dataset}.csv")
     with open(outfile, 'w') as outF:
         writer = csv.writer(outF, delimiter=',')
-        writer.writerow(["sample_num", "label", "true", "pred",
+        writer.writerow(["batch", "sample_num", "label", "true", "pred",
                          "precision", "recall", "F1"])
-        for row in results:
-            writer.writerow(row)
+        for (batch, row) in enumerate(results):
+            writer.writerow([batch] + row)
+
+    bleu_outfile = os.path.join(args.outdir, "self_bleus.csv")
+    with open(bleu_outfile, 'w') as outF:
+        writer = csv.writer(outF, delimiter=',')
+        writer.writerow(["batch", "sample_num", "BLEU"])
+        for (resample, sample_bleus) in enumerate(bleus):
+            for (batch, b) in enumerate(sample_bleus):
+                writer.writerow([batch, resample, b])
 
 
 def summarize(args):
@@ -217,14 +234,14 @@ def summarize(args):
         args.outdir, f"decoder_predictions_{args.dataset}.csv")
     df = pd.read_csv(infile)
     summ_df = df.groupby(["label", "true", "pred"]).agg(
-        ["mean", "std"]).drop("sample_num", axis="columns")
+        ["mean", "std"]).drop(["sample_num", "batch"], axis="columns")
     print(summ_df.to_string())
 
     fig, ax = plt.subplots(figsize=(10, 4))
     means = df.groupby(["label", "true", "pred"]).mean().drop(
-        "sample_num", axis="columns")
+        ["sample_num", "batch"], axis="columns")
     errs = df.groupby(["label", "true", "pred"]).std().drop(
-        "sample_num", axis="columns")
+        ["sample_num", "batch"], axis="columns")
     plots = means.plot.barh(yerr=errs, rot=0, subplots=True,
                             ax=ax, sharey=True, layout=(1, 3), legend=False)
 

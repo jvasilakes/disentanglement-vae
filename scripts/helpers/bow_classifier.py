@@ -42,6 +42,10 @@ def parse_args():
     return args
 
 
+def tokenizer(string):
+    return data_utils.preprocess_sentences([string])[0]
+
+
 def estimate(args):
     outfile = os.path.join(args.logdir, "results.log")
     if os.path.exists(outfile):
@@ -57,7 +61,8 @@ def estimate(args):
     dev_sents, dev_labels, sent_ids, _ = tmp
 
     vectorizer = CountVectorizer(stop_words=None, ngram_range=(1, 1),
-                                 binary=True)
+                                 binary=True, preprocessor=None,
+                                 tokenizer=tokenizer)
     X = {}
     X["train"] = vectorizer.fit_transform(train_sents)
     X["dev"] = vectorizer.transform(dev_sents)
@@ -68,10 +73,8 @@ def estimate(args):
         y_train = [train_labels[i][lab_name] for i in range(len(train_sents))]
         y_dev = [dev_labels[i][lab_name] for i in range(len(dev_sents))]
 
-        # Checking k in the range(2, 30) found that these perform best.
-        k = 20  # uncertainty
-        if lab_name == "polarity":
-            k = 10
+        # Checking k in the range(2, 30) found that 20 performs best.
+        k = 20
         feature_selector = SelectKBest(f_classif, k=k)
         X_train = feature_selector.fit_transform(X["train"], y_train)
         X_dev = feature_selector.transform(X["dev"])
