@@ -95,8 +95,6 @@ class LossLogger(object):
                   collapse_fn=np.mean)
 
     def log_step(self, step, subdict=None, base_keystr="step"):
-        if self.summary_writer is None:
-            return
         self._log(i=step, subdict=subdict, base_keystr=base_keystr,
                   collapse_fn=list.__getitem__, collapse_fn_args=[-1])
 
