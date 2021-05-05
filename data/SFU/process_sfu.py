@@ -45,6 +45,7 @@ def main(args):
     train, evals = train_test_split(out_data, test_size=0.3)
     dev, test = train_test_split(evals, test_size=0.5)
 
+    os.makedirs(args.outdir)
     train_file = os.path.join(args.outdir, "train.jsonl")
     dev_file = os.path.join(args.outdir, "dev.jsonl")
     test_file = os.path.join(args.outdir, "test.jsonl")
@@ -113,6 +114,8 @@ def split_sentence(elements):
     attrs = {"uncertainty": "certain", "polarity": "positive"}
     for elem in elements:
         if elem.tag == 'W':
+            if elem.text.lower() == "n't":
+                attrs["polarity"] = "negative"
             curr.append(elem)
         # Sometimes cues are wrapped in a <C> tag, sometimes not.
         elif elem.tag in ['C', "cue"]:

@@ -1,0 +1,1 @@
+python scripts/helpers/bow_classifier.py estimate data/SFU/processed data/SFU/bow_classifier_logs

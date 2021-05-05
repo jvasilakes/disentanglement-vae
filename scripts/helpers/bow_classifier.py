@@ -1,5 +1,6 @@
 import os
 import json
+import string
 import argparse
 import numpy as np
 
@@ -7,7 +8,6 @@ import joblib
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.naive_bayes import BernoulliNB
-from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_recall_fscore_support
 
 from vae import data_utils
@@ -42,8 +42,10 @@ def parse_args():
     return args
 
 
-def tokenizer(string):
-    return data_utils.preprocess_sentences([string])[0]
+def tokenizer(s):
+    toks = data_utils.preprocess_sentences([s])[0]
+    toks = [t for t in toks if t not in string.punctuation]
+    return toks
 
 
 def estimate(args):
