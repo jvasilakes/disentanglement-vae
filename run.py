@@ -2,10 +2,11 @@
 import os
 import csv
 import json
+import time
 import logging
 import argparse
+import datetime
 from pprint import pformat
-from datetime import datetime
 from collections import defaultdict
 
 # External packages
@@ -24,6 +25,8 @@ torch.autograd.set_detect_anomaly(True)
 
 if torch.cuda.is_available():
     DEVICE = torch.device("cuda")
+    for i in range(torch.cuda.device_count()):
+        print(torch.cuda.get_device_name(0))
 else:
     DEVICE = torch.device("cpu")
 
@@ -94,6 +97,8 @@ class LossLogger(object):
                   collapse_fn=np.mean)
 
     def log_step(self, step, subdict=None, base_keystr="step"):
+        if self.summary_writer is None:
+            return
         self._log(i=step, subdict=subdict, base_keystr=base_keystr,
                   collapse_fn=list.__getitem__, collapse_fn_args=[-1])
 
@@ -278,6 +283,8 @@ def log_params(params_dict, example_ids, logdir, dataset_name, epoch):
 def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
               verbose=True, summary_writer=None, logdir=None):
 
+    epoch_start = time.time()
+
     if summary_writer is None:
         summary_writer = SummaryWriter()
     if logdir is None:
@@ -362,6 +369,9 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
     if verbose is True:
         pbar.close()
 
+    epoch_time = time.time() - epoch_start
+    difftime_str = str(datetime.timedelta(seconds=epoch_time))
+
     loss_logger.log_epoch()
     log_params(all_latent_params, all_sent_ids, logdir, "train", epoch)
 
@@ -377,6 +387,7 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
     if model.use_adversaries is True:
         logstr += f" | ADVERSE: {advmu:.4f} +/- {advsig:.4f}"
     logstr += f" | KL: {klmu:.4f} +/- {klsig:.4f}"
+    logstr += f" | Epoch time: {difftime_str}"
     logging.info(logstr)
 
     return model, optimizer
@@ -465,7 +476,7 @@ def run(params_file, verbose=False):
     logging.basicConfig(filename=logfile, level=logging.INFO)
 
     # Log parameters
-    now = datetime.now()
+    now = datetime.datetime.now()
     now_str = now.strftime("%Y-%m-%d_%H:%M:%S")
     logging.info(f"START: {now_str}")
     logging.info("PARAMETERS:")
@@ -623,7 +634,7 @@ def run(params_file, verbose=False):
         utils.log_reconstructions(vae, dev_data, idx2word,
                                   "dev", start_epoch, logdir, n=30)
 
-    now = datetime.now()
+    now = datetime.datetime.now()
     now_str = now.strftime("%Y-%m-%d_%H:%M:%S")
     logging.info(f"END: {now_str}")
 
