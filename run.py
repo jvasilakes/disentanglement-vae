@@ -266,11 +266,19 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
             target_Xbatch, x_prime, idx2word, model.eos_token_idx)
         loss_logger.update({"bleu": bleu})
 
+        if step % 5 == 0:
+            loss_logger.log_step(step)
         if verbose is True:
             pbar.update(1)
             pbar.set_description(f"EPOCH: {epoch}")
-        if step % 5 == 0:
-            loss_logger.log_step(step)
+        if step == (epoch * len(dataloader)) and verbose is False:
+            time_so_far = time.time() - epoch_start
+            seconds_2_completion = time_so_far * len(dataloader)
+            estimated_timedelta = str(datetime.timedelta(
+                seconds=seconds_2_completion))
+            logstr = f"Estimated epoch duration: {estimated_timedelta}"
+            logging.info(logstr)
+
         step += 1
 
     if verbose is True:
