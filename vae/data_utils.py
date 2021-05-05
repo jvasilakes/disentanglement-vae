@@ -1,11 +1,89 @@
 import re
 import json
 import random
+import itertools
 from collections import defaultdict
 
 # External packages
 import torch
 from sklearn.preprocessing import LabelEncoder
+
+
+class RatioSampler(torch.utils.data.sampler.Sampler):
+
+    def __init__(self, dataset, split_key, ratios=None, batch_size=16):
+        """
+        Split self.dataset into subsets on the value of split_key.
+        Each batch is randomly sampled from each subset according to ratios.
+        If ratios=None, it is uniform.
+        """
+        self.dataset = dataset
+        self.split_key = split_key
+        self.batch_size = batch_size
+        self.split_idxs = self._get_split_idxs()
+        self.max_dataset_len = max(len(idxs) for idxs
+                                   in self.split_idxs.values())
+        if ratios is None:
+            self.ratios = {k: 1/len(self.split_idxs)
+                           for k in self.split_idxs.keys()}
+        else:
+            self.ratios = ratios
+
+    def __iter__(self):
+        """
+        Randomly sample from datasets according to self.ratios
+        up to self.batch_size.
+        """
+        self.groupers = self._get_groupers()
+        while True:
+            try:
+                batch = []
+                for key in self.split_idxs.keys():
+                    sub_batch = next(self.groupers[key])
+                    batch.extend(sub_batch)
+                batch = [i for i in batch if i is not None]
+                batch = torch.tensor(batch)
+                yield batch
+            except StopIteration:
+                break
+
+    def __len__(self):
+        max_dataset_len = ("", 0)
+        for (key, idxs) in self.split_idxs.items():
+            if len(idxs) > max_dataset_len[1]:
+                max_dataset_len = (key, len(idxs))
+        ratio = self.ratios[max_dataset_len[0]]
+        group_size = int(torch.round(torch.tensor(self.batch_size * ratio)))
+        num_epochs = torch.ceil(torch.tensor(max_dataset_len[1] / group_size))
+        return int(num_epochs)
+
+    def _get_split_idxs(self):
+        keyval2idxs = defaultdict(list)
+        for (i, datum) in enumerate(self.dataset):
+            val = datum[self.split_key]
+            keyval2idxs[val].append(i)
+        for (val, idxs) in keyval2idxs.items():
+            keyval2idxs[val] = torch.tensor(idxs)
+        return keyval2idxs
+
+    def _get_groupers(self):
+        groupers = {}
+        for (k, ratio) in self.ratios.items():
+            group_size = torch.round(torch.tensor(self.batch_size * ratio))
+            group_size = int(group_size)
+            order = torch.randperm(len(self.split_idxs[k]))
+            idxs = self.split_idxs[k][order]
+            if len(idxs) < self.max_dataset_len:
+                idxs = idxs.repeat(self.max_dataset_len // len(idxs))
+                idxs = torch.cat(
+                    [idxs, idxs[:(self.max_dataset_len % len(idxs))]])
+            groupers[k] = self.grouper(idxs, group_size)
+        return groupers
+
+    @staticmethod
+    def grouper(iterable, n, fillvalue=None):
+        args = [iter(iterable)] * n
+        return itertools.zip_longest(fillvalue=fillvalue, *args)
 
 
 class LabeledTextDataset(torch.utils.data.Dataset):
@@ -169,16 +247,18 @@ def get_sentences_labels(path, label_keys=None, N=-1, shuffle=True):
     return sentences[:N], labels[:N], sentence_ids[:N], label_counts
 
 
-def preprocess_sentences(sentences, SOS, EOS, lowercase=True):
+def preprocess_sentences(sentences, SOS=None, EOS=None, lowercase=True):
     sents = []
     for sent in sentences:
         sent = sent.strip()
         if lowercase is True:
             sent = sent.lower()
+        sent = re.sub(r"(n't)", r" \1", sent)
         sent = re.sub(r"([.!?])", r" \1", sent)
-        sent = re.sub(r"[^a-zA-Z.!?]+", r" ", sent)
+        sent = re.sub(r"[^a-zA-Z.!?']+", r" ", sent)
         sent = sent.split()
-        sent = [SOS] + sent + [EOS]
+        if SOS is not None and EOS is not None:
+            sent = [SOS] + sent + [EOS]
         sents.append(sent)
     return sents
 

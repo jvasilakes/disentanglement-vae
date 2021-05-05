@@ -53,7 +53,7 @@ def main(args):
 def split_and_process(pos_sents, neg_sents, max_length=15):
     # [train, dev, test]
     splits = [[], [], []]
-    ps = [0.7, 0.15, 0.15]  # train, dev, test proportions
+    ps = [0.98, 0.01, 0.01]  # train, dev, test proportions
     seen_ids = set()
     num_duplicates = 0
     num_too_long = 0

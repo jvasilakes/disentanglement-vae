@@ -12,10 +12,8 @@ from collections import defaultdict
 # External packages
 import torch
 import numpy as np
-import texar.torch as tx
 from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
-from torchtext.data.metrics import bleu_score
 
 # Local packages
 from vae import utils, data_utils, model
@@ -139,19 +137,19 @@ def compute_all_losses(model, model_outputs, Xbatch,
     #   "token_predictions": [batch_size, target_length]}
     L = dict()
     safe_dict_update(
-        L, reconstruction_loss(
+        L, utils.reconstruction_loss(
             Xbatch, model_outputs["decoder_logits"], lengths)
     )
     safe_dict_update(
-        L, compute_kl_divergence_losses(
+        L, utils.compute_kl_divergence_losses(
             model, model_outputs["latent_params"], config_params)
     )
     safe_dict_update(
-        L, compute_discriminator_losses(
+        L, utils.compute_discriminator_losses(
             model, model_outputs["dsc_logits"], Ybatch)
     )
     safe_dict_update(
-        L, compute_adversarial_losses(
+        L, utils.compute_adversarial_losses(
             model, model_outputs["adv_logits"], Ybatch)
     )
     total_loss = (L["reconstruction_loss"] +
@@ -159,94 +157,6 @@ def compute_all_losses(model, model_outputs, Xbatch,
                   L["total_dsc_loss"] +
                   L["total_adv_loss"])
     return total_loss, L
-
-
-def reconstruction_loss(targets, logits, target_lengths):
-    recon_loss = tx.losses.sequence_sparse_softmax_cross_entropy(
-            labels=targets, logits=logits, sequence_length=target_lengths)
-    return {"reconstruction_loss": recon_loss}
-
-
-def kl_divergence(mu, logvar):
-    kl = 0.5 * (torch.exp(logvar) + torch.pow(mu, 2) - 1 - logvar)
-    kl = kl.mean(0).sum()
-    return kl
-
-
-def compute_kl_divergence_losses(model, latent_params, config_params):
-    # KL for each latent space
-    idv_kls = dict()
-    # total kl over all latent spaces
-    total_kl = 0.0  # scalar for logging
-    # tensor scalar for backward pass
-    total_weighted_kl = torch.tensor(0.0).to(model.device)
-    for (latent_name, latent_params) in latent_params.items():
-        kl = kl_divergence(latent_params.mu, latent_params.logvar)
-        idv_kls[latent_name] = kl.item()
-        total_kl += kl.item()
-        try:
-            weight = config_params["lambdas"][latent_name]
-        except KeyError:
-            weight = config_params["lambdas"]["default"]
-        total_weighted_kl += weight * kl
-    return {"total_weighted_kl": total_weighted_kl,
-            "total_kl": total_kl,
-            "idv_kls": idv_kls}
-
-
-def compute_discriminator_losses(model, discriminator_logits, Ybatch):
-    # Loss and accuracy for each discriminator
-    idv_dsc_losses = dict()
-    idv_dsc_accs = dict()
-    # total loss over all discriminators
-    total_dsc_loss = torch.tensor(0.0).to(model.device)
-    for (dsc_name, dsc_logits) in discriminator_logits.items():
-        dsc = model.discriminators[dsc_name]
-        targets = Ybatch[dsc_name].to(model.device)
-        dsc_loss = dsc.compute_loss(dsc_logits, targets)
-        dsc_acc = dsc.compute_accuracy(dsc_logits, targets)
-        idv_dsc_losses[dsc_name] = dsc_loss.item()
-        idv_dsc_accs[dsc_name] = dsc_acc.item()
-        total_dsc_loss += dsc_loss
-    return {"total_dsc_loss": total_dsc_loss,
-            "idv_dsc_losses": idv_dsc_losses,
-            "idv_dsc_accs": idv_dsc_accs}
-
-
-def compute_adversarial_losses(model, adversary_logits, Ybatch):
-    # Adversarial loss for each individual adversary
-    idv_adv_losses = dict()
-    # Discriminator loss for each individual adversary
-    idv_dsc_losses = dict()
-    # Accuracies of the discriminators
-    idv_dsc_accs = dict()
-    # total loss over all adversarial discriminators
-    total_adv_loss = torch.tensor(0.0).to(model.device)
-    for (adv_name, adv_logits) in adversary_logits.items():
-        adv = model.adversaries[adv_name]
-        latent_name, label_name = adv_name.split('-')
-        targets = Ybatch[label_name].to(model.device)
-        adv_loss = adv.compute_adversarial_loss(adv_logits)
-        idv_adv_losses[adv_name] = adv_loss.item()
-        total_adv_loss += adv_loss
-        # This will be used to update the adversaries
-        dsc_loss = adv.compute_discriminator_loss(adv_logits, targets)
-        idv_dsc_losses[adv_name] = dsc_loss
-        dsc_acc = adv.compute_accuracy(adv_logits, targets)
-        idv_dsc_accs[adv_name] = dsc_acc.item()
-    return {"total_adv_loss": total_adv_loss,
-            "idv_adv_losses": idv_adv_losses,
-            "idv_adv_dsc_losses": idv_dsc_losses,
-            "idv_adv_dsc_accs": idv_dsc_accs}
-
-
-def compute_bleu(Xbatch, pred_batch, idx2word, eos_token_idx):
-    Xtext = [[utils.tensor2text(X, idx2word, eos_token_idx)[1:-1]]  # RM SOS and EOS   # noqa
-             for X in Xbatch.cpu().detach()]
-    pred_text = [utils.tensor2text(pred, idx2word, eos_token_idx)[1:-1]
-                 for pred in pred_batch.cpu().detach()]
-    bleu = bleu_score(pred_text, Xtext)
-    return bleu
 
 
 def log_params(params_dict, example_ids, logdir, dataset_name, epoch):
@@ -322,7 +232,7 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
         # I don't exactly know why I need to call backward, update all
         # the adversaries, and then call step(), but it works and I've
         # checked that everything updates properly.
-        # with utils.AutogradDebugger():
+        # with utils.AutogradDebugger():  # uncomment for interactive debugging
         total_loss.backward(retain_graph=True)
         torch.nn.utils.clip_grad_norm_(model.trainable_parameters(), 5.0)
         key = "idv_adv_dsc_losses"
@@ -354,10 +264,9 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
             # idv_ae[l_name].append(diff.item())
 
         # Measure self-BLEU
-        bleu = compute_bleu(target_Xbatch, x_prime, idx2word,
-                            model.eos_token_idx)
+        bleu = utils.compute_bleu(
+            target_Xbatch, x_prime, idx2word, model.eos_token_idx)
         loss_logger.update({"bleu": bleu})
-        # bleus.append(bleu)
 
         if verbose is True:
             pbar.update(1)
@@ -423,8 +332,8 @@ def evalstep(model, dataloader, params, epoch, idx2word, name="dev",
 
         # Measure self-BLEU
         x_prime = output["token_predictions"].to(model.device)
-        bleu = compute_bleu(target_Xbatch, x_prime, idx2word,
-                            model.eos_token_idx)
+        bleu = utils.compute_bleu(target_Xbatch, x_prime, idx2word,
+                                  model.eos_token_idx)
         loss_logger.update({"bleu": bleu})
 
         # Log latents
@@ -489,6 +398,8 @@ def run(params_file, verbose=False):
         os.makedirs(ckpt_dir)
 
     label_keys = [lk for lk in params["latent_dims"].keys() if lk != "total"]
+    if "combined_dataset" in params.keys():
+        label_keys.append("source_dataset")  # We need it for batching
     # Read train data
     train_file = os.path.join(params["data_dir"], "train.jsonl")
     tmp = data_utils.get_sentences_labels(
@@ -544,9 +455,17 @@ def run(params_file, verbose=False):
     train_data = data_utils.DenoisingTextDataset(
             noisy_train_sents, train_sents, train_labs, train_ids,
             word2idx, label_encoders)
+    dataloader_kwargs = {"shuffle": True, "batch_size": params["batch_size"]}
+    if params["combined_dataset"] is True:
+        train_sampler = data_utils.RatioSampler(
+            train_labs, split_key="source_dataset",
+            ratios=params["dataset_minibatch_ratios"],
+            batch_size=params["batch_size"])
+        dataloader_kwargs = {"batch_sampler": train_sampler}
     train_dataloader = torch.utils.data.DataLoader(
-            train_data, shuffle=True, batch_size=params["batch_size"],
-            collate_fn=utils.pad_sequence_denoising)
+            train_data, collate_fn=utils.pad_sequence_denoising,
+            **dataloader_kwargs)
+
     logging.info(f"Training examples: {len(train_data)}")
     train_writer_path = os.path.join("runs", params["name"], "train")
     train_writer = SummaryWriter(log_dir=train_writer_path)

@@ -104,3 +104,55 @@ Again, plots and detailed stats are saved to the evaluation directory.
 python scripts/evaluation/decoding.py compute logs/<model_name>/<config_file>.json logs/<model_name>/evaluation {train,dev,test}
 python scripts/evaluation/decoding.py summarize logs/<model_name>/evaluation {train,dev,test}
 ```
+
+### Weak Supervision of Negation and Uncertainty
+
+Since sentence level negation and uncertainty annotations are fairly straightforward, we leverage a simple Naive Bayes classifier
+with BOW features to automatically annotate Amazon reviews. First, train and evaluate the classifier on SFU,
+
+```
+python scripts/helpers/bow_classifier.py estimate data/SFU/processed data/SFU/bow_classifier_logs
+```
+
+The models are saved at `data/SFU/bow_classifier_logs/models/`. The evaluation results are
+
+```
+$> cat data/SFU/bow_classifier_logs/results.log
+
+uncertainty
+Features:
+['be' 'can' 'could' 'if' 'it' 'may' 'maybe' 'might' 'must' 'or' 'perhaps'
+ 'probably' 'seem' 'seemed' 'seems' 'should' 'think' 'want' 'would' 'you']
+           precision  recall     F1        
+train      0.9261     0.8949     0.9097    
+dev        0.9131     0.8861     0.8990    
+
+polarity
+Features:
+['ca' 'cannot' 'did' 'do' 'does' 'either' 'never' 'no' 'not' 'without']
+           precision  recall     F1        
+train      0.8943     0.8538     0.8727    
+dev        0.9240     0.8534     0.8846    
+
+```
+
+Then apply this model on the Amazon data
+
+```
+python scripts/helpers/bow_classifier.py apply data/SFU/bow_classifier_logs data/Amazon/processed data/Amazon/neg_unc_labels
+```
+
+This command updates the Amazon dataset with labels and probabilities predicted by the classifier trained on SFU.
+
+Now, since SFU and Amazon both have annotations for negation and uncertainty, we can combined them into a single dataset to
+use in training. The following command puts all the SFU data and 100k examples from Amazon into a new dataset
+at `data/combined/sfu_amazon_100k/`.
+
+```
+python scripts/helpers/combine_datasets.py --data_dirs data/SFU/processed data/Amazon/neg_unc_labels/ --dataset_names sfu amazon --Ns -1 100000 --outdir data/combined/sfu_amazon_100k/
+```
+
+Now we can train a VAE on the combined dataset by setting `"combined_dataset": true` and
+`"dataset_minibatch_ratios": {"sfu": float, "amazon": float}` (where the floats sum to 1) in the config file.
+The `dataset_minibatch_ratios` parameter specifies the percentage of examples in each minibatch that should be
+taken from each dataset.

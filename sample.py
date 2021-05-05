@@ -5,6 +5,7 @@ import argparse
 
 # External packages
 import torch
+import torch.distributions as D
 
 # Local imports
 from vae import utils, data_utils, model
@@ -138,7 +139,17 @@ def main(params_file):
                     params_copy = dict(latent_params)
                     for (name, param) in params_copy.items():
                         param_dict = param._asdict()
-                        param_dict['z'] = torch.randn(param.z.size()).to(vae.device)  # noqa
+                        if name == "polarity":
+                            z = torch.tensor([[1.5]]).to(vae.device)
+                        elif name == "uncertainty":
+                            z = torch.tensor([[1.5]]).to(vae.device)
+                        elif name == "content":
+                            dim = param.z.size(1)
+                            mu = torch.zeros(dim)
+                            sigma = torch.eye(dim) * torch.tensor(0.5)
+                            d = D.MultivariateNormal(mu, sigma)
+                            z = d.sample().unsqueeze(0).to(vae.device)
+                        param_dict['z'] = z
                         params_copy[name] = param.__class__(**param_dict)
                     latent_params = params_copy
                     all_params.append(latent_params)

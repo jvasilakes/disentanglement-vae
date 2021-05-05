@@ -1,0 +1,15 @@
+uncertainty
+Features:
+['be' 'can' 'could' 'if' 'it' 'may' 'maybe' 'might' 'must' 'or' 'perhaps'
+ 'probably' 'seem' 'seemed' 'seems' 'should' 'think' 'want' 'would' 'you']
+           precision  recall     F1        
+train      0.9261     0.8949     0.9097    
+dev        0.9131     0.8861     0.8990    
+
+polarity
+Features:
+['ca' 'cannot' 'did' 'do' 'does' 'either' 'never' 'no' 'not' 'without']
+           precision  recall     F1        
+train      0.8943     0.8538     0.8727    
+dev        0.9240     0.8534     0.8846    
+
