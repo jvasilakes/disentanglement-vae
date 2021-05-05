@@ -271,9 +271,10 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
         if verbose is True:
             pbar.update(1)
             pbar.set_description(f"EPOCH: {epoch}")
-        if step == (epoch * len(dataloader)) and verbose is False:
+        # After 20 step warmup, get an estimate of time to epoch completion
+        if step == (epoch * len(dataloader)) + 20 and verbose is False:
             time_so_far = time.time() - epoch_start
-            seconds_2_completion = time_so_far * len(dataloader)
+            seconds_2_completion = time_so_far * (len(dataloader) / 20)
             estimated_timedelta = str(datetime.timedelta(
                 seconds=seconds_2_completion))
             logstr = f"Estimated epoch duration: {estimated_timedelta}"
