@@ -22,6 +22,8 @@ torch.autograd.set_detect_anomaly(True)
 
 if torch.cuda.is_available():
     DEVICE = torch.device("cuda")
+    for i in range(torch.cuda.device_count()):
+        logging.info(torch.cuda.get_device_name(0))
 else:
     DEVICE = torch.device("cpu")
 
