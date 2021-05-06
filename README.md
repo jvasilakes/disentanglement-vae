@@ -18,9 +18,10 @@ spaces from `total` is assigne to a generic, unsupervised "content" space.
 
 The `lambdas` keyword specifies the KL divergence weight for each of the latent spaces specified under `latent_dims`.
 Any latent_spaces without a corresponding entry in `lambdas` will fall back to the value of the `default` key.
+Set a weight to `"cyclic"` to use cyclic KL annealing for that latent. It will complete 4 cycles of linear increase
+with a ratio of 0.5.
 
 For the most part, the hyperparameters given in `config_example.json` are a good starting point.
-
 After editing `config_example.json` to your liking, run
 
 ```
@@ -87,7 +88,7 @@ Press ENTER with no input to generate a few sentences randomly from the latent s
 ### Measuring Disentanglement
 
 The first script will estimate the Mutual Information Gap (MIG) for each latent space by sampling multiple
-times from each space and then computing the mutual information between the latents and the ground truth generative factor values
+times from each space. It will then compute the mutual information between the latents and the ground truth generative factor values
 (i.e. the labels). The second command will then summarize these results, printing out some stats and saving
 some plots to `logs/<model_name>/evaluation`.
 
@@ -121,18 +122,20 @@ $> cat data/SFU/bow_classifier_logs/results.log
 
 uncertainty
 Features:
-['be' 'can' 'could' 'if' 'it' 'may' 'maybe' 'might' 'must' 'or' 'perhaps'
- 'probably' 'seem' 'seemed' 'seems' 'should' 'think' 'want' 'would' 'you']
+['be' 'can' 'could' 'either' 'i' 'if' 'may' 'maybe' 'might' 'must' 'or'
+ 'perhaps' 'probably' 'seem' 'seemed' 'seems' 'should' 'think' 'would'
+ 'you']
            precision  recall     F1        
-train      0.9261     0.8949     0.9097    
-dev        0.9131     0.8861     0.8990    
+train      0.9515     0.9414     0.9464    
+dev        0.9585     0.9526     0.9555    
 
 polarity
 Features:
-['ca' 'cannot' 'did' 'do' 'does' 'either' 'never' 'no' 'not' 'without']
+['any' 'but' 'ca' 'cannot' 'did' 'do' 'does' 'dont' 'either' 'even' 'have'
+ 'i' 'it' "n't" 'need' 'never' 'no' 'not' 'without' 'wo']
            precision  recall     F1        
-train      0.8943     0.8538     0.8727    
-dev        0.9240     0.8534     0.8846    
+train      0.9377     0.9018     0.9187    
+dev        0.9422     0.8766     0.9060    
 
 ```
 

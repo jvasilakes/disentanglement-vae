@@ -1,4 +1,5 @@
 pytorch
+tensorboard
 torchtext
 texar
 scikit-learn
