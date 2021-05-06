@@ -520,7 +520,7 @@ def run(params_file, verbose=False):
 
     if params["train"] is True:
         logging.info("TRAINING")
-        logging.info("Ctrl-C to interrupt and save most recent model.")
+        logging.info("Ctrl-C to interrupt and keep most recent model.")
         if checkpoint_found is False:
             logging.warning("No checkpoint found! Training from base model.")
 
@@ -540,19 +540,20 @@ def run(params_file, verbose=False):
                     # Log dev inputs and their reconstructions
                     utils.log_reconstructions(vae, dev_data, idx2word,
                                               "dev", epoch, logdir, n=20)
-            except KeyboardInterrupt:
-                break
+                # Save the model
+                logging.info(f"Saving model checkpoint to {ckpt_dir}")
+                ckpt_fname = f"model.pt"
+                ckpt_path = os.path.join(ckpt_dir, ckpt_fname)
+                logging.info(f"Saving trained model to {ckpt_path}")
+                torch.save({"model_state_dict": vae.state_dict(),
+                            "optimizer_state_dict": optimizer.state_dict(),
+                            "epoch": epoch},
+                           ckpt_path)
+                checkpoint_found = True
 
-        # Save the model
-        ckpt_fname = f"model_{epoch}.pt"
-        ckpt_path = os.path.join(ckpt_dir, ckpt_fname)
-        logging.info(f"Saving trained model to {ckpt_path}")
-        torch.save({"model_state_dict": vae.state_dict(),
-                    "optimizer_state_dict": optimizer.state_dict(),
-                    "epoch": epoch},
-                   ckpt_path)
-        checkpoint_found = True
-        start_epoch = epoch
+            except KeyboardInterrupt:
+                logging.warn(f"Training interrupted at epoch {epoch}!")
+                break
 
     if params["validate"] is True:
         evalstep(vae, dev_dataloader, params, start_epoch, idx2word,
