@@ -126,7 +126,7 @@ def safe_dict_update(d1, d2):
 
 
 def compute_all_losses(model, model_outputs, Xbatch,
-                       Ybatch, lengths, config_params):
+                       Ybatch, lengths, kl_weights_dict):
     # model_outputs = {
     #   "decoder_logits": [batch_size, target_length, vocab_size],
     #   "latent_params": [Params(z, mu, logvar)] * batch_size,
@@ -138,9 +138,10 @@ def compute_all_losses(model, model_outputs, Xbatch,
         L, utils.reconstruction_loss(
             Xbatch, model_outputs["decoder_logits"], lengths)
     )
+
     safe_dict_update(
         L, utils.compute_kl_divergence_losses(
-            model, model_outputs["latent_params"], config_params)
+            model, model_outputs["latent_params"], kl_weights_dict)
     )
     safe_dict_update(
         L, utils.compute_discriminator_losses(
@@ -207,6 +208,7 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
     if verbose is True:
         pbar = tqdm(total=len(dataloader))
     step = epoch * len(dataloader)
+    total_steps = params["epochs"] * len(dataloader)
     for (i, batch) in enumerate(dataloader):
         in_Xbatch, target_Xbatch, Ybatch, lengths, batch_ids = batch
         in_Xbatch = in_Xbatch.to(model.device)
@@ -220,9 +222,17 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
         output = model(in_Xbatch, lengths,
                        teacher_forcing_prob=params["teacher_forcing_prob"])
 
+        kl_weights_dict = {}
+        for (latent_name, weight) in params["lambdas"].items():
+            weight_val = weight
+            if weight_val == "cyclic":
+                weight_val = utils.get_cyclic_kl_weight(step, total_steps)
+            kl_weights_dict[latent_name] = weight_val
+            loss_logger.update({"kl_weights": kl_weights_dict})
+
         # COMPUTE MANY MANY LOSSES
         total_loss, losses_dict = compute_all_losses(
-            model, output, target_Xbatch, Ybatch, lengths, params)
+            model, output, target_Xbatch, Ybatch, lengths, kl_weights_dict)
         loss_logger.update({"total_loss": total_loss})
         loss_logger.update(losses_dict)
 
@@ -266,8 +276,7 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
             target_Xbatch, x_prime, idx2word, model.eos_token_idx)
         loss_logger.update({"bleu": bleu})
 
-        if step % 5 == 0:
-            loss_logger.log_step(step)
+        loss_logger.log_step(step)
         if verbose is True:
             pbar.update(1)
             pbar.set_description(f"EPOCH: {epoch}")
@@ -332,8 +341,15 @@ def evalstep(model, dataloader, params, epoch, idx2word, name="dev",
         lengths = lengths.to(model.device)
         output = model(in_Xbatch, lengths, teacher_forcing_prob=0.0)
 
+        kl_weights_dict = {}
+        for (latent_name, weight) in params["lambdas"].items():
+            weight_val = weight
+            if weight_val == "cyclic":
+                weight_val = 1.0
+            kl_weights_dict[latent_name] = weight_val
+
         total_loss, losses_dict = compute_all_losses(
-            model, output, target_Xbatch, Ybatch, lengths, params)
+            model, output, target_Xbatch, Ybatch, lengths, kl_weights_dict)
         loss_logger.update({"total_loss": total_loss})
         loss_logger.update(losses_dict)
 
