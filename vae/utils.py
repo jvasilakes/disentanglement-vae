@@ -159,17 +159,17 @@ def load_latest_checkpoint(model, optimizer, checkpoint_dir):
     """
     ls = os.listdir(checkpoint_dir)
     ckpts = [fname for fname in ls if fname.endswith(".pt")]
-    if ckpts == []:
+    if len(ckpts) == 0:
         return model, optimizer, 0, None
-
-    latest_ckpt_idx = 0
-    latest_epoch = 0
-    for (i, ckpt) in enumerate(ckpts):
-        epoch = ckpt.replace("model_", '').replace(".pt", '')
-        epoch = int(epoch)
-        if epoch > latest_epoch:
-            latest_epoch = epoch
-            latest_ckpt_idx = i
+    else:
+        latest_ckpt_idx = 0
+        latest_epoch = 0
+        for (i, ckpt) in enumerate(ckpts):
+            epoch = ckpt.replace("model_", '').replace(".pt", '')
+            epoch = int(epoch)
+            if epoch > latest_epoch:
+                latest_epoch = epoch
+                latest_ckpt_idx = i
 
     ckpt = torch.load(os.path.join(checkpoint_dir, ckpts[latest_ckpt_idx]))
     model.load_state_dict(ckpt["model_state_dict"])

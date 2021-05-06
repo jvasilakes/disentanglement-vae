@@ -558,7 +558,7 @@ def run(params_file, verbose=False):
                                               "dev", epoch, logdir, n=20)
                 # Save the model
                 logging.info(f"Saving model checkpoint to {ckpt_dir}")
-                ckpt_fname = f"model.pt"
+                ckpt_fname = f"model_{epoch}.pt"
                 ckpt_path = os.path.join(ckpt_dir, ckpt_fname)
                 logging.info(f"Saving trained model to {ckpt_path}")
                 torch.save({"model_state_dict": vae.state_dict(),
