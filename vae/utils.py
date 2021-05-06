@@ -282,13 +282,24 @@ def reconstruction_loss(targets, logits, target_lengths):
     return {"reconstruction_loss": recon_loss}
 
 
+def get_cyclic_kl_weight(step, total_steps):
+    denom = total_steps / 4  # total_cycles = 4
+    numer = step % np.ceil(denom)
+    tau = numer / denom
+    rate = 0.5
+    if tau <= rate:
+        return tau / rate
+    else:
+        return 1
+
+
 def kl_divergence(mu, logvar):
     kl = 0.5 * (torch.exp(logvar) + torch.pow(mu, 2) - 1 - logvar)
     kl = kl.mean(0).sum()
     return kl
 
 
-def compute_kl_divergence_losses(model, latent_params, config_params):
+def compute_kl_divergence_losses(model, latent_params, kl_weights_dict):
     # KL for each latent space
     idv_kls = dict()
     # total kl over all latent spaces
@@ -300,9 +311,9 @@ def compute_kl_divergence_losses(model, latent_params, config_params):
         idv_kls[latent_name] = kl.item()
         total_kl += kl.item()
         try:
-            weight = config_params["lambdas"][latent_name]
+            weight = kl_weights_dict[latent_name]
         except KeyError:
-            weight = config_params["lambdas"]["default"]
+            weight = kl_weights_dict["default"]
         total_weighted_kl += weight * kl
     return {"total_weighted_kl": total_weighted_kl,
             "total_kl": total_kl,
