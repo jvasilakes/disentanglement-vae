@@ -15,7 +15,7 @@ from tqdm import tqdm
 from sklearn.metrics import precision_recall_fscore_support
 
 # Local imports
-from vae import utils, data_utils, model
+from vae import utils, data_utils, model, losses
 
 
 if torch.cuda.is_available():
@@ -178,7 +178,7 @@ def compute(args):
             output_hat = vae(Xbatch_hat, lengths_hat, teacher_forcing_prob=0.0)
 
             # Measure self-BLEU
-            bleu = utils.compute_bleu(
+            bleu = losses.compute_bleu(
                 target_Xbatch, Xbatch_hat, idx2word, vae.eos_token_idx)
             bleus[resample].append(bleu)
 

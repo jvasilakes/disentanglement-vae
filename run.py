@@ -16,7 +16,7 @@ from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
 
 # Local packages
-from vae import utils, data_utils, model
+from vae import utils, data_utils, model, losses
 
 
 torch.autograd.set_detect_anomaly(True)
@@ -125,8 +125,8 @@ def safe_dict_update(d1, d2):
             d1.update({key: val})
 
 
-def compute_all_losses(model, model_outputs, Xbatch,
-                       Ybatch, lengths, kl_weights_dict):
+def compute_all_losses(model, model_outputs, Xbatch, Ybatch,
+                       lengths, kl_weights_dict):
     # model_outputs = {
     #   "decoder_logits": [batch_size, target_length, vocab_size],
     #   "latent_params": [Params(z, mu, logvar)] * batch_size,
@@ -135,26 +135,31 @@ def compute_all_losses(model, model_outputs, Xbatch,
     #   "token_predictions": [batch_size, target_length]}
     L = dict()
     safe_dict_update(
-        L, utils.reconstruction_loss(
+        L, losses.reconstruction_loss(
             Xbatch, model_outputs["decoder_logits"], lengths)
     )
 
     safe_dict_update(
-        L, utils.compute_kl_divergence_losses(
+        L, losses.compute_kl_divergence_losses(
             model, model_outputs["latent_params"], kl_weights_dict)
     )
     safe_dict_update(
-        L, utils.compute_discriminator_losses(
+        L, losses.compute_discriminator_losses(
             model, model_outputs["dsc_logits"], Ybatch)
     )
     safe_dict_update(
-        L, utils.compute_adversarial_losses(
+        L, losses.compute_adversarial_losses(
             model, model_outputs["adv_logits"], Ybatch)
+    )
+    safe_dict_update(
+        L, losses.compute_mi_losses(
+            model, model_outputs["latent_params"])
     )
     total_loss = (L["reconstruction_loss"] +
                   L["total_weighted_kl"] +
                   L["total_dsc_loss"] +
-                  L["total_adv_loss"])
+                  L["total_adv_loss"] +
+                  L["total_mi"])
     return total_loss, L
 
 
@@ -226,13 +231,14 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
         for (latent_name, weight) in params["lambdas"].items():
             weight_val = weight
             if weight_val == "cyclic":
-                weight_val = utils.get_cyclic_kl_weight(step, total_steps)
+                weight_val = losses.get_cyclic_kl_weight(step, total_steps)
             kl_weights_dict[latent_name] = weight_val
             loss_logger.update({"kl_weights": kl_weights_dict})
 
         # COMPUTE MANY MANY LOSSES
         total_loss, losses_dict = compute_all_losses(
-            model, output, target_Xbatch, Ybatch, lengths, kl_weights_dict)
+            model, output, target_Xbatch, Ybatch,
+            lengths, kl_weights_dict)
         loss_logger.update({"total_loss": total_loss})
         loss_logger.update(losses_dict)
 
@@ -250,6 +256,20 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
             model.adversaries[adv_name].optimizer_step(adv_dsc_loss)
         optimizer.step()
         optimizer.zero_grad()
+
+        # Update the MI estimators
+        key = "idv_mi_estimates"
+        for (latent_pair_name, mi_loss) in losses_dict[key].items():
+            mi_estimator = model.mi_estimators[latent_pair_name]
+            mi_estimator.train()
+            latent_name_1, latent_name_2 = latent_pair_name.split('-')
+            params1 = output["latent_params"][latent_name_1]
+            params2 = output["latent_params"][latent_name_2]
+            mi_loss = mi_estimator.learning_loss(
+                params1.z.detach(), params2.z.detach())
+            mi_estimator.optimizer_step(mi_loss)
+            loss_logger.update({"mi_estimator_loss": {latent_pair_name: mi_loss}})  # noqa
+            mi_estimator.eval()
 
         # Log latents
         all_sent_ids.extend(batch_ids)
@@ -269,10 +289,9 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
             z_prime = l_params.z
             diff = torch.norm(z_prime - orig_z, p=None, dim=1).mean()
             loss_logger.update({"idv_ae": {l_name: diff.item()}})
-            # idv_ae[l_name].append(diff.item())
 
         # Measure self-BLEU
-        bleu = utils.compute_bleu(
+        bleu = losses.compute_bleu(
             target_Xbatch, x_prime, idx2word, model.eos_token_idx)
         loss_logger.update({"bleu": bleu})
 
@@ -302,16 +321,19 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
 
     tlmu, tlsig = loss_logger.summarize("total_loss")
     rcmu, rcsig = loss_logger.summarize("reconstruction_loss")
+    klmu, klsig = loss_logger.summarize("total_kl")
     dscmu, dscsig = loss_logger.summarize("total_dsc_loss")
     advmu, advsig = loss_logger.summarize("total_adv_loss")
-    klmu, klsig = loss_logger.summarize("total_kl")
+    mimu, misig = loss_logger.summarize("total_mi")
 
     logstr = f"TRAIN ({epoch}) TOTAL: {tlmu:.4f} +/- {tlsig:.4f}"
     logstr += f" | RECON: {rcmu:.4f} +/- {rcsig:.4f}"
-    logstr += f" | DISCRIM: {dscmu:.4f} +/- {dscsig:.4f}"
-    if model.use_adversaries is True:
-        logstr += f" | ADVERSE: {advmu:.4f} +/- {advsig:.4f}"
     logstr += f" | KL: {klmu:.4f} +/- {klsig:.4f}"
+    logstr += f" | DISCRIM: {dscmu:.4f} +/- {dscsig:.4f}"
+    if model.adversarial_loss is True:
+        logstr += f" | ADVERSE: {advmu:.4f} +/- {advsig:.4f}"
+    if model.mi_loss is True:
+        logstr += f" | MI: {mimu:.4f} +/- {misig:.4f}"
     logstr += f" | Epoch time: {difftime_str}"
     logging.info(logstr)
 
@@ -355,8 +377,8 @@ def evalstep(model, dataloader, params, epoch, idx2word, name="dev",
 
         # Measure self-BLEU
         x_prime = output["token_predictions"].to(model.device)
-        bleu = utils.compute_bleu(target_Xbatch, x_prime, idx2word,
-                                  model.eos_token_idx)
+        bleu = losses.compute_bleu(target_Xbatch, x_prime, idx2word,
+                                   model.eos_token_idx)
         loss_logger.update({"bleu": bleu})
 
         # Log latents
@@ -566,6 +588,7 @@ def run(params_file, verbose=False):
                             "epoch": epoch},
                            ckpt_path)
                 checkpoint_found = True
+                start_epoch = epoch
 
             except KeyboardInterrupt:
                 logging.warn(f"Training interrupted at epoch {epoch}!")

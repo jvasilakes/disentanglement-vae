@@ -7,6 +7,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from vae import losses
+
 
 class VariationalEncoder(nn.Module):
     """
@@ -227,7 +229,8 @@ class VariationalSeq2Seq(nn.Module):
                              [polarity_dsc, modality_dsc], sos, eos)
     """
     def __init__(self, encoder, decoder, discriminators, latent_dim,
-                 sos_token_idx, eos_token_idx, use_adversaries=True):
+                 sos_token_idx, eos_token_idx, adversarial_loss=False,
+                 mi_loss=False):
         super(VariationalSeq2Seq, self).__init__()
         self._device = torch.device("cpu")
         self.encoder = encoder
@@ -235,6 +238,8 @@ class VariationalSeq2Seq(nn.Module):
         self.latent_dim = latent_dim
         self.discriminators = nn.ModuleDict()  # Name: Discriminator
         self.context2params = nn.ModuleDict()  # Name: (mu,logvar) linear layer
+
+        # Classifier heads
         # Total latent dimensions of the discriminators
         self.dsc_latent_dim = 0
         linear_insize = encoder.hidden_size * \
@@ -253,15 +258,23 @@ class VariationalSeq2Seq(nn.Module):
         if self.dsc_latent_dim < self.latent_dim:
             leftover_latent_dim = self.latent_dim - self.dsc_latent_dim
             leftover_layer = nn.Linear(
-                    linear_insize, 2 * leftover_latent_dim)
+                linear_insize, 2 * leftover_latent_dim)
             self.context2params["content"] = leftover_layer
             assert self.dsc_latent_dim + leftover_latent_dim == self.latent_dim
 
-        self.use_adversaries = use_adversaries
-        if self.use_adversaries is True:
+        # Adversarial heads
+        self.adversarial_loss = adversarial_loss
+        if self.adversarial_loss is True:
             self.adversaries = self._get_adversaries()
         else:
             self.adversaries = dict()
+
+        # MI Estimators
+        self.mi_loss = mi_loss
+        if self.mi_loss is True:
+            self.mi_estimators = self._get_mi_estimators()
+        else:
+            self.mi_estimators = dict()
 
         self.z2hidden = nn.Linear(
                 self.latent_dim, 2 * decoder.hidden_size * decoder.num_layers)
@@ -282,6 +295,26 @@ class VariationalSeq2Seq(nn.Module):
                 adversaries[name] = adversary
         return adversaries
 
+    def _get_mi_estimators(self):
+        mi_estimators = dict()
+        seen_combos = set()
+        for (latent_name_i, layer_i) in self.context2params.items():
+            latent_size_i = int(layer_i.out_features / 2)
+            for (latent_name_j, layer_j) in self.context2params.items():
+                if latent_name_i == latent_name_j:
+                    continue
+                if (latent_name_j, latent_name_i) in seen_combos:
+                    continue
+                seen_combos.add((latent_name_i, latent_name_j))
+                latent_size_j = int(layer_j.out_features / 2)
+                mi_hidden_size = max([latent_size_i, latent_size_j, 5])
+                # mi_estimator = losses.CLUBSample(
+                mi_estimator = losses.CLUB(
+                    latent_size_i, latent_size_j, mi_hidden_size)
+                name = f"{latent_name_i}-{latent_name_j}"
+                mi_estimators[name] = mi_estimator
+        return mi_estimators
+
     @property
     def device(self):
         return self._device
@@ -290,6 +323,8 @@ class VariationalSeq2Seq(nn.Module):
         assert isinstance(value, torch.device)
         self._device = value
         self.to(value)
+        for mi_estimator in self.mi_estimators.values():
+            mi_estimator.to(value)
 
     def trainable_parameters(self):
         return [param for (name, param) in self.named_parameters()
@@ -313,12 +348,21 @@ class VariationalSeq2Seq(nn.Module):
         for (name, layer) in self.context2params.items():
             params = layer(context)
             mu, logvar = params.chunk(2, dim=1)
+            logvar = torch.tanh(logvar)
             if self.training is True:
                 z = mu + torch.randn_like(logvar) * torch.exp(logvar)
             else:
                 z = mu
             z = mu + torch.randn_like(logvar) * torch.exp(logvar)
             latent_params[name] = Params(z, mu, logvar)
+        #     print("==========================")
+        #     print("z ", name, torch.max(torch.abs(z)))
+        #     print("--------------------------")
+        #     print("mu ", name, torch.max(torch.abs(mu)))
+        #     print("--------------------------")
+        #     print("sig ", name, torch.max(torch.abs(logvar)))
+        # input()
+
         return latent_params
 
     def compute_hidden(self, z, batch_size):
@@ -457,6 +501,7 @@ def build_vae(params, vocab_size, emb_matrix, label_dims, device,
     vae = VariationalSeq2Seq(encoder, decoder, discriminators,
                              params["latent_dims"]["total"],
                              sos_token_idx, eos_token_idx,
-                             use_adversaries=params["adversarial_loss"])
+                             adversarial_loss=params["adversarial_loss"],
+                             mi_loss=True)
     vae.set_device(device)
     return vae
