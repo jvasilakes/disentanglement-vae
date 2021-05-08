@@ -172,10 +172,10 @@ def load_latest_checkpoint(model, optimizer, checkpoint_dir,
                 latest_epoch = epoch
                 latest_ckpt_idx = i
 
-    ckpt = torch.load(os.path.join(checkpoint_dir, ckpts[latest_ckpt_idx]))
-    model.load_state_dict(ckpt["model_state_dict"], map_location=map_location)
-    optimizer.load_state_dict(ckpt["optimizer_state_dict"],
-                              map_location=map_location)
+    ckpt = torch.load(os.path.join(checkpoint_dir, ckpts[latest_ckpt_idx]),
+                      map_location=map_location))
+    model.load_state_dict(ckpt["model_state_dict"])
+    optimizer.load_state_dict(ckpt["optimizer_state_dict"])
     next_epoch = ckpt["epoch"] + 1
     return model, optimizer, next_epoch, ckpts[latest_ckpt_idx]
 
