@@ -149,7 +149,8 @@ def get_embedding_matrix(vocab, glove):
     return matrix, word2idx
 
 
-def load_latest_checkpoint(model, optimizer, checkpoint_dir):
+def load_latest_checkpoint(model, optimizer, checkpoint_dir,
+                           map_location=None):
     """
     Find the most recent (in epochs) checkpoint in checkpoint dir and load
     it into the model and optimizer. Return the model and optimizer
@@ -172,8 +173,9 @@ def load_latest_checkpoint(model, optimizer, checkpoint_dir):
                 latest_ckpt_idx = i
 
     ckpt = torch.load(os.path.join(checkpoint_dir, ckpts[latest_ckpt_idx]))
-    model.load_state_dict(ckpt["model_state_dict"])
-    optimizer.load_state_dict(ckpt["optimizer_state_dict"])
+    model.load_state_dict(ckpt["model_state_dict"], map_location=map_location)
+    optimizer.load_state_dict(ckpt["optimizer_state_dict"],
+                              map_location=map_location)
     next_epoch = ckpt["epoch"] + 1
     return model, optimizer, next_epoch, ckpts[latest_ckpt_idx]
 

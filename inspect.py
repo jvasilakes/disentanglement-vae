@@ -241,7 +241,7 @@ def main(params_file):
     if not os.path.isdir(ckpt_dir):
         raise OSError(f"No checkpoint found at '{ckpt_dir}'!")
     vae, optimizer, start_epoch, ckpt_fname = utils.load_latest_checkpoint(
-            vae, optimizer, ckpt_dir)
+            vae, optimizer, ckpt_dir, map_location=DEVICE)
     logging.info(f"Loaded checkpoint from '{ckpt_fname}'")
 
     logging.info(f"Successfully loaded model {params['name']}")
