@@ -90,13 +90,23 @@ def parse_input(input_args):
     samp_parser.add_argument("--uncz", type=float, required=False,
                              help="scalar z value for uncertainty latent")
 
-    int_parser = subparsers.add_parser(
-        "interpolate",
-        description="""Compute n interpolatated latents between
-                       between the given sentences and decode them.""")
-    int_parser.set_defaults(cmd="interpolate")
-    int_parser.add_argument("sentence1", type=str)
-    int_parser.add_argument("sentence2", type=str)
+    diff_parser = subparsers.add_parser(
+        "difference",
+        description="""Compute the element-wise difference between the
+                       latent values of the given sentences.""")
+    diff_parser.set_defaults(cmd="difference")
+    diff_parser.add_argument("sentence1", type=str)
+    diff_parser.add_argument("sentence2", type=str)
+    diff_parser.add_argument("-n", type=int, required=False, default=1,
+                             help="""Number of resamples.""")
+
+    z_parser = subparsers.add_parser(
+        "encode",
+        description="""Encode the given sentence n times.""")
+    z_parser.set_defaults(cmd="encode")
+    z_parser.add_argument("sentence", type=str)
+    z_parser.add_argument("-n", type=int, required=False, default=1,
+                          help="""Number of resamples.""")
 
     args = cmd_parser.parse_args(input_args)
     return args
@@ -116,7 +126,7 @@ def reconstruct(sentence, polz, uncz, vae, do_lowercase,
         if uncz is not None:
             d["uncertainty"] = torch.tensor([[uncz]]).to(vae.device)
         all_zs.append(d)
-        zs = [param.z for param in latent_params.values()]
+        zs = list(d.values())
         z = torch.cat(zs, dim=1)
         decoded_tokens = decode(z, vae, idx2word, vae.eos_token_idx)[:-1]
         all_decoded_tokens.append(decoded_tokens)
@@ -155,6 +165,39 @@ def sample(n, polz, uncz, vae, idx2word):
         decoded_tokens = decode(z, vae, idx2word, vae.eos_token_idx)[:-1]
         all_decoded_tokens.append(decoded_tokens)
     return all_decoded_tokens, all_zs
+
+
+def difference(sentence1, sentence2, vae, do_lowercase,
+               doc2tensor_fn, idx2word, n=5):
+
+    context1 = encode(sentence1, vae, "<SOS>", "<EOS>",
+                      do_lowercase, doc2tensor_fn)
+    context2 = encode(sentence2, vae, "<SOS>", "<EOS>",
+                      do_lowercase, doc2tensor_fn)
+
+    diffs = []
+    for i in range(n):
+        to_diff = []
+        for context in [context1, context2]:
+            latent_params = vae.compute_latent_params(context)
+            zs = [param.z for param in latent_params.values()]
+            z = torch.cat(zs, dim=1)
+            to_diff.append(z)
+        diff = to_diff[0] - to_diff[1]
+        diffs.append(diff)
+    return diffs
+
+
+def encode_many(sentence, vae, do_lowercase, doc2tensor_fn, idx2word, n=5):
+    context = encode(sentence, vae, "<SOS>", "<EOS>",
+                     do_lowercase, doc2tensor_fn)
+    all_zs = []
+    for i in range(n):
+        latent_params = vae.compute_latent_params(context)
+        zs = [param.z for param in latent_params.values()]
+        z = torch.cat(zs, dim=1)
+        all_zs.append(z)
+    return all_zs
 
 
 def interpolate(sentence1, sentence2, vae):
@@ -252,7 +295,14 @@ def main(params_file):
                                 {"do_lowercase": params["lowercase"],
                                  "doc2tensor_fn": train_data.doc2tensor}),
                 "sample": (sample, {}),
-                "interpolate": (interpolate, )}
+                "difference": (difference,
+                               {"do_lowercase": params["lowercase"],
+                                "doc2tensor_fn": train_data.doc2tensor}),
+                "encode": (encode_many,
+                           {"do_lowercase": params["lowercase"],
+                            "doc2tensor_fn": train_data.doc2tensor}),
+
+                }
 
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print("Enter a sentence at the prompt.")
@@ -261,7 +311,8 @@ def main(params_file):
     print("Help")
     print("  reconstruct -h")
     print("  sample -h")
-    print("  interpolate -h")
+    print("  encode -h")
+    print("  difference -h")
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print()
 
@@ -279,11 +330,16 @@ def main(params_file):
             action, cmd_kwargs = value
             header = parsed.cmd.upper()
 
-            kwargs = vars(parsed)
+            kwargs = dict(vars(parsed))
             kwargs.pop("cmd")
             kwargs.update(cmd_kwargs)
-            decoded_tokens, zs = action(**kwargs, vae=vae, idx2word=idx2word)
-            print_decoded_tokens(vae, decoded_tokens, zs, header)
+            result = action(**kwargs, vae=vae, idx2word=idx2word)
+            if len(result) > 1:
+                decoded_tokens, zs = result
+                print_decoded_tokens(vae, decoded_tokens, zs, header)
+            else:
+                for i in result:
+                    print(i)
 
         except EOFError:
             return
