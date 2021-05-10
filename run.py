@@ -567,9 +567,10 @@ def run(params_file, verbose=False):
                             "epoch": epoch},
                            ckpt_path)
                 checkpoint_found = True
+                start_epoch = epoch
 
             except KeyboardInterrupt:
-                logging.warn(f"Training interrupted at epoch {epoch}!")
+                logging.warning(f"Training interrupted at epoch {epoch}!")
                 break
 
     if params["validate"] is True:

@@ -73,22 +73,17 @@ def validate_params(params):
             "train": bool,
             "validate": bool,
             "test": bool}
-    valid = True
     for (key, val) in valid_params.items():
         if key not in params.keys():
-            logging.critical(f"parameter file missing '{key}'")
-            valid = False
+            raise ValueError(f"parameter file missing '{key}'")
         if not isinstance(params[key], val):
             param_type = type(params[key])
-            logging.critical(f"Parameter '{key}' of incorrect type!")
-            logging.critical(f"  Expected '{val}' but got '{param_type}'.")
-            valid = False
-    if valid is False:
-        raise ValueError("Found incorrectly specified parameters.")
+            raise ValueError(f"Parameter '{key}' of incorrect type!")
+            raise ValueError(f"  Expected '{val}' but got '{param_type}'.")
 
     for key in params.keys():
         if key not in valid_params.keys():
-            logging.warning(f"Ignoring unused parameter '{key}' in parameter file.")  # noqa
+            print(f"WARNING: Ignoring unused parameter '{key}' in parameter file.")  # noqa
 
 
 def load_glove(path):
