@@ -552,7 +552,8 @@ def run(params_file, verbose=False):
                                           "train", epoch, logdir, n=20)
                 if params["validate"] is True:
                     evalstep(vae, dev_dataloader, params, epoch, idx2word,
-                             verbose=verbose, summary_writer=dev_writer)
+                             verbose=verbose, summary_writer=dev_writer,
+                             logdir=logdir)
                     # Log dev inputs and their reconstructions
                     utils.log_reconstructions(vae, dev_data, idx2word,
                                               "dev", epoch, logdir, n=20)
