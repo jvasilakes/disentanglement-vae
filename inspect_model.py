@@ -108,6 +108,19 @@ def parse_input(input_args):
     z_parser.add_argument("-n", type=int, required=False, default=1,
                           help="""Number of resamples.""")
 
+    trans_parser = subparsers.add_parser(
+        "transfer",
+        description="""Transfer latents from one sentence to another.""")
+    trans_parser.set_defaults(cmd="transfer")
+    trans_parser.add_argument("source", type=str,
+                              help="sentence to transfer from")
+    trans_parser.add_argument("target", type=str,
+                              help="sentence to transfer to")
+    trans_parser.add_argument("--latent_names", nargs='+', type=str,
+                              help="1 or more names of latents to transfer.")
+    trans_parser.add_argument("-n", type=int, required=False, default=1,
+                              help="""Number of resamples.""")
+
     args = cmd_parser.parse_args(input_args)
     return args
 
@@ -198,6 +211,32 @@ def encode_many(sentence, vae, do_lowercase, doc2tensor_fn, idx2word, n=5):
         z = torch.cat(zs, dim=1)
         all_zs.append(z)
     return all_zs
+
+
+def transfer(source, target, latent_names, vae, do_lowercase,
+             doc2tensor_fn, idx2word, n=5):
+    src_context = encode(source, vae, "<SOS>", "<EOS>",
+                         do_lowercase, doc2tensor_fn)
+    trg_context = encode(target, vae, "<SOS>", "<EOS>",
+                         do_lowercase, doc2tensor_fn)
+
+    all_zs = []
+    all_decoded_tokens = []
+    for i in range(n):
+        src_params = vae.compute_latent_params(src_context)
+        src_d = {name: param.z for (name, param) in src_params.items()}
+        trg_params = vae.compute_latent_params(trg_context)
+        trg_d = {name: param.z for (name, param) in trg_params.items()}
+        # Transfer specified latents from source to target
+        for (name, z) in trg_d.items():
+            if name in latent_names:
+                trg_d[name] = src_d[name]
+        all_zs.append(trg_d)
+        zs = list(trg_d.values())
+        z = torch.cat(zs, dim=1)
+        decoded_tokens = decode(z, vae, idx2word, vae.eos_token_idx)[:-1]
+        all_decoded_tokens.append(decoded_tokens)
+    return all_decoded_tokens, all_zs
 
 
 def interpolate(sentence1, sentence2, vae):
@@ -301,7 +340,9 @@ def main(params_file):
                 "encode": (encode_many,
                            {"do_lowercase": params["lowercase"],
                             "doc2tensor_fn": train_data.doc2tensor}),
-
+                "transfer": (transfer,
+                             {"do_lowercase": params["lowercase"],
+                              "doc2tensor_fn": train_data.doc2tensor}),
                 }
 
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -313,6 +354,7 @@ def main(params_file):
     print("  sample -h")
     print("  encode -h")
     print("  difference -h")
+    print("  transfer -h")
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print()
 
@@ -334,7 +376,7 @@ def main(params_file):
             kwargs.pop("cmd")
             kwargs.update(cmd_kwargs)
             result = action(**kwargs, vae=vae, idx2word=idx2word)
-            if len(result) > 1:
+            if parsed.cmd in ["reconstruct", "sample", "transfer"]:
                 decoded_tokens, zs = result
                 print_decoded_tokens(vae, decoded_tokens, zs, header)
             else:
