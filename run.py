@@ -126,7 +126,7 @@ def safe_dict_update(d1, d2):
 
 
 def compute_all_losses(model, model_outputs, Xbatch, Ybatch,
-                       lengths, kl_weights_dict):
+                       lengths, kl_weights_dict, mi_loss_weight):
     # model_outputs = {
     #   "decoder_logits": [batch_size, target_length, vocab_size],
     #   "latent_params": [Params(z, mu, logvar)] * batch_size,
@@ -235,10 +235,15 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
             kl_weights_dict[latent_name] = weight_val
             loss_logger.update({"kl_weights": kl_weights_dict})
 
+        # Linear increase
+        #mi_loss_weight = losses.get_cyclic_kl_weight(
+        #    step, total_steps, cycles=1, rate=2.0)
+        mi_loss_weight = 0.001
+
         # COMPUTE MANY MANY LOSSES
         total_loss, losses_dict = compute_all_losses(
             model, output, target_Xbatch, Ybatch,
-            lengths, kl_weights_dict)
+            lengths, kl_weights_dict, mi_loss_weight)
         loss_logger.update({"total_loss": total_loss})
         loss_logger.update(losses_dict)
 
@@ -368,11 +373,14 @@ def evalstep(model, dataloader, params, epoch, idx2word, name="dev",
             weight_val = weight
             # During evaluation we don't want cyclic annealing.
             if weight_val == "cyclic":
-                weight_val = 1.0
+                weight_val = 1.0  # Don't weight it on eval.
             kl_weights_dict[latent_name] = weight_val
 
+        mi_loss_weight = 1.0
+
         total_loss, losses_dict = compute_all_losses(
-            model, output, target_Xbatch, Ybatch, lengths, kl_weights_dict)
+            model, output, target_Xbatch, Ybatch, lengths,
+            kl_weights_dict, mi_loss_weight)
         loss_logger.update({"total_loss": total_loss})
         loss_logger.update(losses_dict)
 
