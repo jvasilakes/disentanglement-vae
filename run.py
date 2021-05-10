@@ -153,7 +153,7 @@ def compute_all_losses(model, model_outputs, Xbatch, Ybatch,
     )
     safe_dict_update(
         L, losses.compute_mi_losses(
-            model, model_outputs["latent_params"])
+            model, model_outputs["latent_params"], beta=0.1)
     )
     total_loss = (L["reconstruction_loss"] +
                   L["total_weighted_kl"] +
@@ -366,6 +366,7 @@ def evalstep(model, dataloader, params, epoch, idx2word, name="dev",
         kl_weights_dict = {}
         for (latent_name, weight) in params["lambdas"].items():
             weight_val = weight
+            # During evaluation we don't want cyclic annealing.
             if weight_val == "cyclic":
                 weight_val = 1.0
             kl_weights_dict[latent_name] = weight_val
@@ -400,15 +401,19 @@ def evalstep(model, dataloader, params, epoch, idx2word, name="dev",
 
     tlmu, tlsig = loss_logger.summarize("total_loss")
     rcmu, rcsig = loss_logger.summarize("reconstruction_loss")
+    klmu, klsig = loss_logger.summarize("total_kl")
     dscmu, dscsig = loss_logger.summarize("total_dsc_loss")
     advmu, advsig = loss_logger.summarize("total_adv_loss")
-    klmu, klsig = loss_logger.summarize("total_kl")
+    mimu, misig = loss_logger.summarize("total_mi")
 
     logstr = f"{name.upper()} ({epoch}) TOTAL: {tlmu:.4f} +/- {tlsig:.4f}"
     logstr += f" | RECON: {rcmu:.4f} +/- {rcsig:.4f}"
     logstr += f" | DISCRIM: {dscmu:.4f} +/- {dscsig:.4f}"
-    logstr += f" | ADVERSE: {advmu:.4f} +/- {advsig:.4f}"
     logstr += f" | KL: {klmu:.4f} +/- {klsig:.4f}"
+    if model.adversarial_loss is True:
+        logstr += f" | ADVERSE: {advmu:.4f} +/- {advsig:.4f}"
+    if model.mi_loss is True:
+        logstr += f" | MI: {mimu:.4f} +/- {misig:.4f}"
     logging.info(logstr)
 
 

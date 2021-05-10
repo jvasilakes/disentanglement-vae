@@ -308,8 +308,8 @@ class VariationalSeq2Seq(nn.Module):
                 seen_combos.add((latent_name_i, latent_name_j))
                 latent_size_j = int(layer_j.out_features / 2)
                 mi_hidden_size = max([latent_size_i, latent_size_j, 5])
-                # mi_estimator = losses.CLUBSample(
-                mi_estimator = losses.CLUB(
+                mi_estimator = losses.CLUBSample(
+                # mi_estimator = losses.CLUB(
                     latent_size_i, latent_size_j, mi_hidden_size)
                 name = f"{latent_name_i}-{latent_name_j}"
                 mi_estimators[name] = mi_estimator
@@ -502,6 +502,6 @@ def build_vae(params, vocab_size, emb_matrix, label_dims, device,
                              params["latent_dims"]["total"],
                              sos_token_idx, eos_token_idx,
                              adversarial_loss=params["adversarial_loss"],
-                             mi_loss=True)
+                             mi_loss=params["mi_loss"])
     vae.set_device(device)
     return vae
