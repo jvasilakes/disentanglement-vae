@@ -16,7 +16,7 @@ from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
 
 # Local packages
-from vae import utils, data_utils, model
+from vae import utils, data_utils, model, losses
 
 
 torch.autograd.set_detect_anomaly(True)
@@ -135,20 +135,20 @@ def compute_all_losses(model, model_outputs, Xbatch,
     #   "token_predictions": [batch_size, target_length]}
     L = dict()
     safe_dict_update(
-        L, utils.reconstruction_loss(
+        L, losses.reconstruction_loss(
             Xbatch, model_outputs["decoder_logits"], lengths)
     )
 
     safe_dict_update(
-        L, utils.compute_kl_divergence_losses(
+        L, losses.compute_kl_divergence_losses(
             model, model_outputs["latent_params"], kl_weights_dict)
     )
     safe_dict_update(
-        L, utils.compute_discriminator_losses(
+        L, losses.compute_discriminator_losses(
             model, model_outputs["dsc_logits"], Ybatch)
     )
     safe_dict_update(
-        L, utils.compute_adversarial_losses(
+        L, losses.compute_adversarial_losses(
             model, model_outputs["adv_logits"], Ybatch)
     )
     total_loss = (L["reconstruction_loss"] +
@@ -226,7 +226,7 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
         for (latent_name, weight) in params["lambdas"].items():
             weight_val = weight
             if weight_val == "cyclic":
-                weight_val = utils.get_cyclic_kl_weight(step, total_steps)
+                weight_val = losses.get_cyclic_kl_weight(step, total_steps)
             kl_weights_dict[latent_name] = weight_val
             loss_logger.update({"kl_weights": kl_weights_dict})
 
@@ -272,7 +272,7 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
             # idv_ae[l_name].append(diff.item())
 
         # Measure self-BLEU
-        bleu = utils.compute_bleu(
+        bleu = losses.compute_bleu(
             target_Xbatch, x_prime, idx2word, model.eos_token_idx)
         loss_logger.update({"bleu": bleu})
 
@@ -355,8 +355,8 @@ def evalstep(model, dataloader, params, epoch, idx2word, name="dev",
 
         # Measure self-BLEU
         x_prime = output["token_predictions"].to(model.device)
-        bleu = utils.compute_bleu(target_Xbatch, x_prime, idx2word,
-                                  model.eos_token_idx)
+        bleu = losses.compute_bleu(target_Xbatch, x_prime, idx2word,
+                                   model.eos_token_idx)
         loss_logger.update({"bleu": bleu})
 
         # Log latents
