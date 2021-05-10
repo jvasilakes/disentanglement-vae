@@ -386,6 +386,9 @@ def main(params_file):
         except EOFError:
             return
 
+        except KeyboardInterrupt:
+            continue
+
         except SystemExit:
             continue
 

@@ -75,7 +75,6 @@ def compute(args, model=None):
     os.makedirs(args.outdir, exist_ok=True)
 
     zs_dir = os.path.join(args.metadata_dir, 'z')
-    ids_dir = os.path.join(args.metadata_dir, "ordered_ids")
     if args.epoch == -1:
         epoch = get_last_epoch(zs_dir)
     else:
