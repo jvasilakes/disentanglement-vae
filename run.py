@@ -125,8 +125,8 @@ def safe_dict_update(d1, d2):
             d1.update({key: val})
 
 
-def compute_all_losses(model, model_outputs, Xbatch,
-                       Ybatch, lengths, kl_weights_dict):
+def compute_all_losses(model, model_outputs, Xbatch, Ybatch,
+                       lengths, kl_weights_dict, mi_loss_weight):
     # model_outputs = {
     #   "decoder_logits": [batch_size, target_length, vocab_size],
     #   "latent_params": [Params(z, mu, logvar)] * batch_size,
@@ -151,10 +151,15 @@ def compute_all_losses(model, model_outputs, Xbatch,
         L, losses.compute_adversarial_losses(
             model, model_outputs["adv_logits"], Ybatch)
     )
+    safe_dict_update(
+        L, losses.compute_mi_losses(
+            model, model_outputs["latent_params"], beta=mi_loss_weight)
+    )
     total_loss = (L["reconstruction_loss"] +
                   L["total_weighted_kl"] +
                   L["total_dsc_loss"] +
-                  L["total_adv_loss"])
+                  L["total_adv_loss"] +
+                  L["total_mi"])
     return total_loss, L
 
 
@@ -230,9 +235,14 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
             kl_weights_dict[latent_name] = weight_val
             loss_logger.update({"kl_weights": kl_weights_dict})
 
+        # DO NOT CHANGE MI LOSS WEIGHT! IT WORKS NOW BUT WONT IF YOU CHANGE IT!
+        mi_loss_weight = 0.01
+        loss_logger.update({"mi_loss_weight": mi_loss_weight})
+
         # COMPUTE MANY MANY LOSSES
         total_loss, losses_dict = compute_all_losses(
-            model, output, target_Xbatch, Ybatch, lengths, kl_weights_dict)
+            model, output, target_Xbatch, Ybatch,
+            lengths, kl_weights_dict, mi_loss_weight)
         loss_logger.update({"total_loss": total_loss})
         loss_logger.update(losses_dict)
 
@@ -250,6 +260,20 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
             model.adversaries[adv_name].optimizer_step(adv_dsc_loss)
         optimizer.step()
         optimizer.zero_grad()
+
+        # Update the MI estimators
+        key = "idv_mi_estimates"
+        for (latent_pair_name, mi_loss) in losses_dict[key].items():
+            mi_estimator = model.mi_estimators[latent_pair_name]
+            mi_estimator.train()
+            latent_name_1, latent_name_2 = latent_pair_name.split('-')
+            params1 = output["latent_params"][latent_name_1]
+            params2 = output["latent_params"][latent_name_2]
+            mi_loss = mi_estimator.learning_loss(
+                params1.z.detach(), params2.z.detach())
+            mi_estimator.optimizer_step(mi_loss)
+            loss_logger.update({"mi_estimator_loss": {latent_pair_name: mi_loss}})  # noqa
+            mi_estimator.eval()
 
         # Log latents
         all_sent_ids.extend(batch_ids)
@@ -269,7 +293,6 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
             z_prime = l_params.z
             diff = torch.norm(z_prime - orig_z, p=None, dim=1).mean()
             loss_logger.update({"idv_ae": {l_name: diff.item()}})
-            # idv_ae[l_name].append(diff.item())
 
         # Measure self-BLEU
         bleu = losses.compute_bleu(
@@ -302,16 +325,19 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
 
     tlmu, tlsig = loss_logger.summarize("total_loss")
     rcmu, rcsig = loss_logger.summarize("reconstruction_loss")
+    klmu, klsig = loss_logger.summarize("total_kl")
     dscmu, dscsig = loss_logger.summarize("total_dsc_loss")
     advmu, advsig = loss_logger.summarize("total_adv_loss")
-    klmu, klsig = loss_logger.summarize("total_kl")
+    mimu, misig = loss_logger.summarize("total_mi")
 
     logstr = f"TRAIN ({epoch}) TOTAL: {tlmu:.4f} +/- {tlsig:.4f}"
     logstr += f" | RECON: {rcmu:.4f} +/- {rcsig:.4f}"
-    logstr += f" | DISCRIM: {dscmu:.4f} +/- {dscsig:.4f}"
-    if model.use_adversaries is True:
-        logstr += f" | ADVERSE: {advmu:.4f} +/- {advsig:.4f}"
     logstr += f" | KL: {klmu:.4f} +/- {klsig:.4f}"
+    logstr += f" | DISCRIM: {dscmu:.4f} +/- {dscsig:.4f}"
+    if model.adversarial_loss is True:
+        logstr += f" | ADVERSE: {advmu:.4f} +/- {advsig:.4f}"
+    if model.mi_loss is True:
+        logstr += f" | MI: {mimu:.4f} +/- {misig:.4f}"
     logstr += f" | Epoch time: {difftime_str}"
     logging.info(logstr)
 
@@ -344,12 +370,15 @@ def evalstep(model, dataloader, params, epoch, idx2word, name="dev",
         kl_weights_dict = {}
         for (latent_name, weight) in params["lambdas"].items():
             weight_val = weight
+            # During evaluation we don't want cyclic annealing.
             if weight_val == "cyclic":
-                weight_val = 1.0
+                weight_val = 1.0  # Don't weight it on eval.
             kl_weights_dict[latent_name] = weight_val
 
+        mi_loss_weight = 1.0
         total_loss, losses_dict = compute_all_losses(
-            model, output, target_Xbatch, Ybatch, lengths, kl_weights_dict)
+            model, output, target_Xbatch, Ybatch, lengths,
+            kl_weights_dict, mi_loss_weight)
         loss_logger.update({"total_loss": total_loss})
         loss_logger.update(losses_dict)
 
@@ -378,15 +407,19 @@ def evalstep(model, dataloader, params, epoch, idx2word, name="dev",
 
     tlmu, tlsig = loss_logger.summarize("total_loss")
     rcmu, rcsig = loss_logger.summarize("reconstruction_loss")
+    klmu, klsig = loss_logger.summarize("total_kl")
     dscmu, dscsig = loss_logger.summarize("total_dsc_loss")
     advmu, advsig = loss_logger.summarize("total_adv_loss")
-    klmu, klsig = loss_logger.summarize("total_kl")
+    mimu, misig = loss_logger.summarize("total_mi")
 
     logstr = f"{name.upper()} ({epoch}) TOTAL: {tlmu:.4f} +/- {tlsig:.4f}"
     logstr += f" | RECON: {rcmu:.4f} +/- {rcsig:.4f}"
     logstr += f" | DISCRIM: {dscmu:.4f} +/- {dscsig:.4f}"
-    logstr += f" | ADVERSE: {advmu:.4f} +/- {advsig:.4f}"
     logstr += f" | KL: {klmu:.4f} +/- {klsig:.4f}"
+    if model.adversarial_loss is True:
+        logstr += f" | ADVERSE: {advmu:.4f} +/- {advsig:.4f}"
+    if model.mi_loss is True:
+        logstr += f" | MI: {mimu:.4f} +/- {misig:.4f}"
     logging.info(logstr)
 
 

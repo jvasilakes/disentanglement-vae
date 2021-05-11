@@ -69,7 +69,8 @@ def validate_params(params):
             "decoder_dropout": float,
             "teacher_forcing_prob": float,
             "lambdas": dict,  # KL div weights for each latent space.
-            "adversarial_loss": bool,
+            "adversarial_loss": bool,  # Use adversarial objective.
+            "mi_loss": bool,   # Use mutual info minimization objective.
             "train": bool,
             "validate": bool,
             "test": bool}

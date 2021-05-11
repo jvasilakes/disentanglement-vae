@@ -38,7 +38,8 @@ class CLUB(nn.Module):
                                       nn.ReLU(),
                                       nn.Linear(hidden_size//2, y_dim),
                                       nn.Tanh())
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=3e-5)
+        # DO NOT CHANGE LEARNING RATE! IT WORKS NOW BUT WONT IF YOU CHANGE IT!
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=5e-4)
 
     def optimizer_step(self, loss):
         self.optimizer.zero_grad()
