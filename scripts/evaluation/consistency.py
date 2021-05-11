@@ -3,6 +3,7 @@ import csv
 import json
 import logging
 import argparse
+import datetime
 from collections import defaultdict
 
 # External packages
@@ -43,6 +44,8 @@ def parse_args():
                                 required=False,
                                 help="""Number of times to resample Z and
                                         decode for a given input example.""")
+    compute_parser.add_argument("--verbose", action="store_true", default=False,
+                                help="""Show a progress bar.""")
 
     summ_parser = subparsers.add_parser("summarize")
     summ_parser.set_defaults(compute=False, summarize=True)
@@ -57,6 +60,9 @@ def parse_args():
 
 def compute(args):
     logging.basicConfig(level=logging.INFO)
+    now = datetime.datetime.now()
+    now_str = now.strftime("%Y-%m-%d_%H:%M:%S")
+    logging.info(f"START: {now_str}")
 
     SOS = "<SOS>"
     EOS = "<EOS>"
@@ -143,7 +149,8 @@ def compute(args):
     latent_predictions = defaultdict(list_fn)
     latent_predictions_hat = defaultdict(list_fn)
     bleus = list_fn()
-    pbar = tqdm(total=len(dataloader))
+    if args.verbose is True:
+        pbar = tqdm(total=len(dataloader))
     for (i, batch) in enumerate(dataloader):
         in_Xbatch, target_Xbatch, Ybatch, lengths, batch_ids = batch
         for (label_name, ys) in Ybatch.items():
@@ -187,7 +194,11 @@ def compute(args):
                 preds = vae.discriminators[label_name].predict(logits)
                 latent_predictions_hat[label_name][resample].extend(
                     preds.cpu().tolist())
-        pbar.update(1)
+
+        if args.verbose is True:
+            pbar.update(1)
+        else:
+            logging.info(f"{i}/{len(dataloader)}.")
 
     results = []
     for label_name in latent_predictions.keys():
@@ -220,7 +231,7 @@ def compute(args):
         for (batch, row) in enumerate(results):
             writer.writerow([batch] + row)
 
-    bleu_outfile = os.path.join(args.outdir, "self_bleus.csv")
+    bleu_outfile = os.path.join(args.outdir, f"self_bleus_{args.dataset}.csv")
     with open(bleu_outfile, 'w') as outF:
         writer = csv.writer(outF, delimiter=',')
         writer.writerow(["batch", "sample_num", "BLEU"])
