@@ -75,7 +75,6 @@ def compute(args, model=None):
     os.makedirs(args.outdir, exist_ok=True)
 
     zs_dir = os.path.join(args.metadata_dir, 'z')
-    ids_dir = os.path.join(args.metadata_dir, "ordered_ids")
     if args.epoch == -1:
         epoch = get_last_epoch(zs_dir)
     else:
@@ -263,7 +262,7 @@ def compute_mi(zs, vs, discrete_z=False):
     if len(zs.shape) == 1:
         zs = zs.reshape(-1, 1)
     MIs = mutual_info_classif(zs, vs, discrete_features=discrete_z)
-    return MIs.mean()
+    return MIs.sum()
 
 
 def compute_migs(mi_dict, Hvs):
@@ -291,8 +290,8 @@ def compute_migs(mi_dict, Hvs):
 #    Testing functions
 # ===========================
 
-def test_random(N):
-    zs = np.random.randn(N).reshape(-1, 1)
+def test_random(N, n_features=1):
+    zs = np.random.randn(N, n_features)
     vs = np.random.binomial(1, 0.5, size=N)
     clf = LogisticRegression(random_state=10, class_weight="balanced",
                              penalty="none").fit(zs, vs)
@@ -303,9 +302,9 @@ def test_random(N):
     print("MI: ", MI)
 
 
-def test_kinda_predictive(N):
-    zs = np.random.randn(N).reshape(-1, 1)
-    vs = np.array([0 if z < 0.0 else 1 for z in zs])
+def test_kinda_predictive(N, n_features=1):
+    zs = np.random.randn(N, n_features)
+    vs = np.array([0 if z[0] < 0.0 else 1 for z in zs])
     idxs = np.random.randint(0, len(vs), size=int(N//5))
     vs[idxs] = np.logical_not(vs[idxs]).astype(int)
     clf = LogisticRegression(random_state=10, class_weight="balanced",
@@ -317,9 +316,9 @@ def test_kinda_predictive(N):
     print("MI: ", MI)
 
 
-def test_predictive(N):
-    zs = np.random.randn(N).reshape(-1, 1)
-    vs = [0 if z < 0.0 else 1 for z in zs]
+def test_predictive(N, n_features=1):
+    zs = np.random.randn(N, n_features)
+    vs = [0 if z[0] < 0.0 else 1 for z in zs]
     clf = LogisticRegression(random_state=10, class_weight="balanced",
                              penalty="none").fit(zs, vs)
     print("LR accuracy: ", clf.score(zs, vs))
@@ -332,7 +331,7 @@ def test_predictive(N):
 def test_bijective(N, predictive=False):
     zs = np.random.binomial(1, 0.5, N)
     if predictive is True:
-        vs = [0 if z == 1 else 1 for z in zs]
+        vs = [0 if z[0] == 1 else 1 for z in zs]
     else:
         vs = np.random.binomial(1, 0.5, N)
     zs = zs.reshape(-1, 1)
@@ -455,13 +454,14 @@ def summarize_preds(preds_df):
 
 if __name__ == "__main__":
     args = parse_args()
+    n_feats = 1
     if args.test is True:
         print("RANDOM")
-        test_random(args.N)
+        test_random(args.N, n_feats)
         print("KINDA PREDICTIVE")
-        test_kinda_predictive(args.N)
+        test_kinda_predictive(args.N, n_feats)
         print("PREDICTIVE")
-        test_predictive(args.N)
+        test_predictive(args.N, n_feats)
         print()
         print("BIJECTIVE ORACLE")
         print("  random")

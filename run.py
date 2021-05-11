@@ -153,7 +153,7 @@ def compute_all_losses(model, model_outputs, Xbatch, Ybatch,
     )
     safe_dict_update(
         L, losses.compute_mi_losses(
-            model, model_outputs["latent_params"], beta=0.1)
+            model, model_outputs["latent_params"], beta=mi_loss_weight)
     )
     total_loss = (L["reconstruction_loss"] +
                   L["total_weighted_kl"] +
@@ -235,10 +235,9 @@ def trainstep(model, optimizer, dataloader, params, epoch, idx2word,
             kl_weights_dict[latent_name] = weight_val
             loss_logger.update({"kl_weights": kl_weights_dict})
 
-        # Linear increase
-        #mi_loss_weight = losses.get_cyclic_kl_weight(
-        #    step, total_steps, cycles=1, rate=2.0)
-        mi_loss_weight = 0.001
+        # DO NOT CHANGE MI LOSS WEIGHT! IT WORKS NOW BUT WONT IF YOU CHANGE IT!
+        mi_loss_weight = 0.01
+        loss_logger.update({"mi_loss_weight": mi_loss_weight})
 
         # COMPUTE MANY MANY LOSSES
         total_loss, losses_dict = compute_all_losses(
@@ -377,7 +376,6 @@ def evalstep(model, dataloader, params, epoch, idx2word, name="dev",
             kl_weights_dict[latent_name] = weight_val
 
         mi_loss_weight = 1.0
-
         total_loss, losses_dict = compute_all_losses(
             model, output, target_Xbatch, Ybatch, lengths,
             kl_weights_dict, mi_loss_weight)
