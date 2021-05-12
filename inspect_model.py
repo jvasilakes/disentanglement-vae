@@ -38,8 +38,10 @@ def encode(sentence, vae, SOS, EOS, lowercase, doc2tensor_fn):
 
 
 def decode(z, vae, idx2word, eos_idx):
-    out_logits = vae.sample(z)
-    pred_idxs = out_logits.argmax(-1).squeeze()
+    # output = {"decoder_logits": [1, 30, vocab_size],
+    #           "token_predictions": [1, 30]}
+    output = vae.sample(z)
+    pred_idxs = output["token_predictions"][0]
     tokens = utils.tensor2text(pred_idxs, idx2word, eos_idx)
     return tokens
 
@@ -172,7 +174,7 @@ def sample(n, polz, uncz, vae, idx2word):
                 z = d.sample().unsqueeze(0).to(vae.device)
             zs_dict[name] = z
         all_zs.append(zs_dict)
-        z_values = [torch.tensor(z) for z in zs_dict.values()]
+        z_values = [z for z in zs_dict.values()]
         z = torch.cat(z_values, dim=1)
         # Remove <EOS> token
         decoded_tokens = decode(z, vae, idx2word, vae.eos_token_idx)[:-1]

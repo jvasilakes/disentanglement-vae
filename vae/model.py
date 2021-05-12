@@ -450,18 +450,24 @@ class VariationalSeq2Seq(nn.Module):
         input_lengths = [1]
         # Placeholder for predictions
         vocab_size = self.decoder.vocab_size
-        decoder_output = torch.zeros(
+        out_logits = torch.zeros(
                 1, max_length, vocab_size).to(self.device)
-        decoder_output[:, 0, self.sos_token_idx] = 1.0
+        out_logits[:, 0, self.sos_token_idx] = 1.0
+        predictions = torch.zeros(batch_size, max_length, dtype=int)
+        predictions[:, 0] = self.sos_token_idx
         for i in range(max_length):
             # logits: [batch_size, 1, vocab_size]
             logits, decoder_hidden = self.decoder(
                     decoder_input, input_lengths, decoder_hidden)
             logits = logits.squeeze()
-            decoder_output[:, i, :] = logits
+            out_logits[:, i, :] = logits
             probs = torch.softmax(logits, dim=-1)
             decoder_input = torch.multinomial(probs, 1).unsqueeze(0)
-        return decoder_output
+            predictions[:, i] = decoder_input
+
+        output = {"decoder_logits": out_logits,
+                  "token_predictions": predictions}
+        return output
 
 
 def build_vae(params, vocab_size, emb_matrix, label_dims, device,
