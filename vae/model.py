@@ -355,13 +355,6 @@ class VariationalSeq2Seq(nn.Module):
                 z = mu
             z = mu + torch.randn_like(logvar) * torch.exp(logvar)
             latent_params[name] = Params(z, mu, logvar)
-        #     print("==========================")
-        #     print("z ", name, torch.max(torch.abs(z)))
-        #     print("--------------------------")
-        #     print("mu ", name, torch.max(torch.abs(mu)))
-        #     print("--------------------------")
-        #     print("sig ", name, torch.max(torch.abs(logvar)))
-        # input()
 
         return latent_params
 
@@ -399,6 +392,8 @@ class VariationalSeq2Seq(nn.Module):
             alogits = adv(latent_params[latent_name].z)
             adv_logits[name] = alogits
 
+        # TODO: it only is consistent because I set the random seed.
+        #       sort latent_params by key, but always putting content last.
         zs = [param.z for param in latent_params.values()]
         z = torch.cat(zs, dim=1)
         decoder_hidden = self.compute_hidden(z, batch_size)
@@ -444,26 +439,30 @@ class VariationalSeq2Seq(nn.Module):
         return output
 
     def sample(self, z, max_length=30):
-        batch_size = 1
+        batch_size = z.size(0)
         decoder_hidden = self.compute_hidden(z, batch_size)
-        decoder_input = torch.LongTensor([[self.sos_token_idx]]).to(self.device)  # noqa
-        input_lengths = [1]
+        decoder_input = torch.LongTensor(
+            [[self.sos_token_idx]]).to(self.device)
+        decoder_input = decoder_input.repeat(batch_size, 1)
+        input_lengths = [1] * batch_size
         # Placeholder for predictions
         vocab_size = self.decoder.vocab_size
         out_logits = torch.zeros(
-                1, max_length, vocab_size).to(self.device)
+                batch_size, max_length, vocab_size).to(self.device)
         out_logits[:, 0, self.sos_token_idx] = 1.0
         predictions = torch.zeros(batch_size, max_length, dtype=int)
         predictions[:, 0] = self.sos_token_idx
-        for i in range(max_length):
+        for i in range(1, max_length):
             # logits: [batch_size, 1, vocab_size]
             logits, decoder_hidden = self.decoder(
                     decoder_input, input_lengths, decoder_hidden)
             logits = logits.squeeze()
             out_logits[:, i, :] = logits
             probs = torch.softmax(logits, dim=-1)
-            decoder_input = torch.multinomial(probs, 1).unsqueeze(0)
-            predictions[:, i] = decoder_input
+            decoder_input = torch.multinomial(probs, 1)
+            if len(decoder_input.size()) == 1:
+                decoder_input = decoder_input.unsqueeze(0)
+            predictions[:, i] = decoder_input.squeeze()
 
         output = {"decoder_logits": out_logits,
                   "token_predictions": predictions}

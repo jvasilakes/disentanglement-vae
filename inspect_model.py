@@ -143,7 +143,7 @@ def reconstruct(sentence, polz, uncz, vae, do_lowercase,
         all_zs.append(d)
         zs = list(d.values())
         z = torch.cat(zs, dim=1)
-        decoded_tokens = decode(z, vae, idx2word, vae.eos_token_idx)[:-1]
+        decoded_tokens = decode(z, vae, idx2word, vae.eos_token_idx)[1:-1]
         all_decoded_tokens.append(decoded_tokens)
     return all_decoded_tokens, all_zs
 
@@ -176,8 +176,8 @@ def sample(n, polz, uncz, vae, idx2word):
         all_zs.append(zs_dict)
         z_values = [z for z in zs_dict.values()]
         z = torch.cat(z_values, dim=1)
-        # Remove <EOS> token
-        decoded_tokens = decode(z, vae, idx2word, vae.eos_token_idx)[:-1]
+        # Remove <SOS> <EOS> tokens
+        decoded_tokens = decode(z, vae, idx2word, vae.eos_token_idx)[1:-1]
         all_decoded_tokens.append(decoded_tokens)
     return all_decoded_tokens, all_zs
 
@@ -236,7 +236,7 @@ def transfer(source, target, latent_names, vae, do_lowercase,
         all_zs.append(trg_d)
         zs = list(trg_d.values())
         z = torch.cat(zs, dim=1)
-        decoded_tokens = decode(z, vae, idx2word, vae.eos_token_idx)[:-1]
+        decoded_tokens = decode(z, vae, idx2word, vae.eos_token_idx)[1:-1]
         all_decoded_tokens.append(decoded_tokens)
     return all_decoded_tokens, all_zs
 
