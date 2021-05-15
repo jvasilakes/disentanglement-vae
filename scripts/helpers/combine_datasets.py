@@ -64,7 +64,9 @@ def merge_datasets(filepaths, dataset_names=[], Ns=[]):
         tmp = []
         for line in open(fpath, 'r'):
             datum = json.loads(line)
-            assert datum["id"] not in seen_ids
+            if datum["id"] in seen_ids:
+                # duplicate sentence
+                continue
             seen_ids.add(datum["id"])
             datum["source_dataset"] = name
             keys_per_dataset[fpath].update(set(datum.keys()))
