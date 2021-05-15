@@ -6,6 +6,7 @@ from glob import glob
 from itertools import combinations
 
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 
 from vae import data_utils
@@ -36,9 +37,11 @@ def main(args):
     ids = [uuid.strip() for uuid in open(ids_file)]
 
     id2labels = get_n_tokens(args.data_dir, args.dataset)
-    y = [id2labels[uuid] for uuid in ids]
+    y = np.array([id2labels[uuid] for uuid in ids])
 
     r2s = {}
+    coefs = {}
+    intercepts = {}
     for latent_names in latent_name_combos:
         Z = None
         for name in latent_names:
@@ -53,11 +56,38 @@ def main(args):
         lr = LinearRegression().fit(Z, y)
         r2 = lr.score(Z, y)
         r2s[latent_names] = r2
+        coefs[latent_names] = lr.coef_
+
+        if latent_names[0] == "content":
+            print("CONTENT SPACE")
+            print("Measuring R2 of each dimension...")
+            max_coef_dims = np.argsort(lr.coef_)[::-1]  #[:3]
+            coef_r2s = []
+            for (coef_dim, coef) in enumerate(lr.coef_):
+                zcoef = Z[:, coef_dim].reshape(-1, 1)
+                lr_coef = LinearRegression().fit(zcoef, y)
+                coef_r2 = lr_coef.score(zcoef, y)
+                coef_r2s.append(coef_r2)
+            sorted_dims_r2s = list(sorted(
+                enumerate(coef_r2s), key=lambda x: x[1], reverse=True))
+            print(f"{'dim':<5}: R2")
+            for (dim, r2) in sorted_dims_r2s:
+                if r2 > 0.5:
+                    print(f"{dim:<5}: {r2:<7.4f}")
+                # plt.scatter(Z[:, dim], y)
+                # plt.title(f"({dim}) R2: {r2:.4f}")
+                # plt.show()
+
+        intercepts[latent_names] = lr.intercept_
 
     print("RESULTS")
     for (names, r2) in r2s.items():
         name_str = '+'.join(names)
         print(f"{name_str}: R2 = {r2:.4f}")
+        sorted_coefs = sorted(enumerate(coefs[names]), key=lambda x: x[1],
+                              reverse=True)
+        print(f"  highest (dim, coef): {sorted_coefs[:3]}")
+        print(f"  intercept: {intercepts[names]}")
 
 
 def get_last_epoch(directory):
