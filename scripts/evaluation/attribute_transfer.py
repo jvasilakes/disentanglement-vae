@@ -32,7 +32,7 @@ def parse_args():
                                 help="Where to save results.")
     compute_parser.add_argument("dataset", type=str, choices=["train", "dev"],
                                 help="Which dataset to run on.")
-    # compute_parser.add_argument("--num_resamples", type=int, default=1)
+    compute_parser.add_argument("--verbose", action="store_true", default=False)
 
     summ_parser = subparsers.add_parser("summarize")
     summ_parser.set_defaults(cmd="summarize")
@@ -69,10 +69,11 @@ def get_source_examples(labs_batch, dataset, latent_name, id2labs_df):
     return batch
 
 
-def run_transfer(model, dataloader, params, id2labs_df):
+def run_transfer(model, dataloader, params, id2labs_df, verbose=False):
     model.eval()
     results = []
-    pbar = tqdm(total=len(dataloader))
+    if verbose is True:
+        pbar = tqdm(total=len(dataloader))
     for (i, batch) in enumerate(dataloader):
         in_Xbatch, out_Xbatch, Ybatch, lengths, batch_ids = batch
         batch_size = in_Xbatch.size(0)
@@ -151,8 +152,12 @@ def run_transfer(model, dataloader, params, id2labs_df):
                        "transferred": trns_texts[j],
                        "predictions": pred_data[j]}
                 results.append(row)
-        pbar.update(1)
-    pbar.close()
+        if verbose is True:
+            pbar.update(1)
+        else:
+            print(f"{i}/{len(dataloader)}", flush=True)
+    if verbose is True:
+        pbar.close()
 
     return results
 
@@ -201,10 +206,10 @@ def compute(args):
     # This redefines word2idx/idx2word
     emb_matrix = None
     if params["glove_path"] != "":
-        logging.info(f"Loading embeddings from {params['glove_path']}")
+        print(f"Loading embeddings from {params['glove_path']}")
         glove, _ = utils.load_glove(params["glove_path"])
         emb_matrix, word2idx = utils.get_embedding_matrix(vocab, glove)
-        logging.info(f"Loaded embeddings with size {emb_matrix.shape}")
+        print(f"Loaded embeddings with size {emb_matrix.shape}")
     # idx2word = {idx: word for (word, idx) in word2idx.items()}
 
     # Always load the train data since we need it to build the model
@@ -238,10 +243,10 @@ def compute(args):
         raise OSError(f"No checkpoint found at '{ckpt_dir}'!")
     vae, _, start_epoch, ckpt_fname = utils.load_latest_checkpoint(
         vae, optimizer, ckpt_dir, map_location=DEVICE)
-    logging.info(f"Loaded checkpoint from '{ckpt_fname}'")
-    logging.info(vae)
+    print(f"Loaded checkpoint from '{ckpt_fname}'")
+    print(vae)
 
-    results = run_transfer(vae, dataloader, params, labs_df)
+    results = run_transfer(vae, dataloader, params, labs_df, args.verbose)
 
     with open(args.outfile, 'w') as outF:
         for row in results:

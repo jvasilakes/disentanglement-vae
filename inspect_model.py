@@ -283,6 +283,7 @@ def main(params_file):
     utils.set_seed(params["random_seed"])
 
     logdir = os.path.join("logs", params["name"])
+    print(f"LOGDIR: {logdir}")
 
     ckpt_dir = os.path.join(params["checkpoint_dir"], params["name"])
     if not os.path.isdir(ckpt_dir):
