@@ -58,7 +58,7 @@ def main(args):
         r2s[latent_names] = r2
         coefs[latent_names] = lr.coef_
 
-        if latent_names[0] == "content":
+        if ''.join(latent_names) == "content":
             print("CONTENT SPACE")
             print("Measuring R2 of each dimension...")
             max_coef_dims = np.argsort(lr.coef_)[::-1]  #[:3]
