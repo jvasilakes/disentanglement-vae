@@ -262,7 +262,8 @@ def compute_mi(zs, vs, discrete_z=False):
     if len(zs.shape) == 1:
         zs = zs.reshape(-1, 1)
     MIs = mutual_info_classif(zs, vs, discrete_features=discrete_z)
-    return MIs.sum()
+    # Necessary to convert to regular float for JSON serialization
+    return float(MIs.sum())
 
 
 def compute_migs(mi_dict, Hvs):
@@ -279,9 +280,9 @@ def compute_migs(mi_dict, Hvs):
         sorted_lab_mis, sorted_names = zip(*sorted_pairs)
         Hv = Hvs[lab_name]
         mig_v = (sorted_lab_mis[0] - sorted_lab_mis[1]) / Hv
-        migs[lab_name] = {"top_2_latents": sorted_names[:2],
+        migs[lab_name] = {"sorted_latents": sorted_names,
                           "MIG": mig_v,
-                          "top_2_MIs": sorted_lab_mis[:2],
+                          "sorted_MIs": sorted_lab_mis,
                           "label_entropy": Hv}
     return migs
 
@@ -396,8 +397,8 @@ def summarize_migs(migs_data):
             if label_name == "sample_num":
                 continue
             migs[label_name].append(datum[label_name]["MIG"])
-            mi = datum[label_name]["top_2_MIs"]
-            names = datum[label_name]["top_2_latents"]
+            mi = datum[label_name]["sorted_MIs"]
+            names = datum[label_name]["sorted_latents"]
             for (latent_name, latent_mi) in zip(names, mi):
                 mis[label_name][latent_name].append(latent_mi)
                 mis_rows.append({"sample_num": i, "label_name": label_name,
