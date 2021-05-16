@@ -52,8 +52,8 @@ def main(args):
     zipped = list(zip(latent_names, z_files, mu_files, logvar_files))
     for i in trange(args.num_resamples):
         for (latent_name, zfile, mufile, logvarfile) in zipped:
-            for lab_name in labels_set:
-                if lab_name == latent_name:
+            for vary_label in labels_set:
+                if vary_label == latent_name:
                     continue
                 # Predict lab_name from z_latent_name
                 mus = np.loadtxt(mufile, delimiter=',')
@@ -62,31 +62,35 @@ def main(args):
                 zs = sample_from_latent(mus, logvars).numpy()
                 # print(f"{latent_name} |-> {lab_name}")
 
-                label_values = set(Vs[lab_name])
-                zs_per_label_val = {}
-                for label_val in label_values:
-                    mask = np.array(Vs[lab_name]) == label_val
-                    zs_vals = zs[mask]
-                    zs_per_label_val[label_val] = zs_vals
-                    row = [i, latent_name, lab_name, label_val,
-                           zs_vals.mean(), zs_vals.std()]
-                    rows.append(row)
+                static_label = latent_name
+                if static_label == "content":
+                    continue
 
-    colnames = ["sample_num", "latent", "label",
-                "label_val", "z_mean", "z_std"]
+                for static_label_val in set(Vs[static_label]):
+                    static_mask = np.array(Vs[static_label]) == static_label_val  # noqa
+                    for vary_label_val in set(Vs[vary_label]):
+                        vary_mask = np.array(Vs[vary_label]) == vary_label_val
+                        mask = np.logical_and(static_mask, vary_mask)
+                        zs_vals = zs[mask]
+                        row = [i, latent_name, static_label, static_label_val,
+                               vary_label, vary_label_val, zs_vals.mean(),
+                               zs_vals.std()]
+                        rows.append(row)
+
+    colnames = ["sample_num", "latent", "static_label", "static_label_val",
+                "vary_label", "vary_label_val", "z_mean", "z_std"]
     df = pd.DataFrame(rows, columns=colnames)
     summarize(df)
 
 
 def summarize(df):
-    grouped = df.groupby(["latent", "label", "label_val"])
+    grouped = df.groupby(["latent", "static_label", "static_label_val",
+                          "vary_label", "vary_label_val"])
     summ = grouped.agg("mean").drop("sample_num", axis="columns")
-    diffs = summ.groupby(["latent", "label"]).diff()
-    diffs = diffs.droplevel("label_val").dropna(axis=0, how="all").abs()
+    diffs = summ.groupby(["latent", "static_label", "static_label_val",
+                          "vary_label"]).diff()
+    diffs = diffs.droplevel("vary_label_val").dropna(axis=0, how="all").abs()
     diffs.columns = ["z_mean_diff", "z_std_diff"]
-    print("""For each latent, measures the absolute difference of the mean
-    and standard deviation of the z values between the different
-    values of label.""")
     print(diffs)
 
 
