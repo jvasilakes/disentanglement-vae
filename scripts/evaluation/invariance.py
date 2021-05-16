@@ -110,19 +110,24 @@ def make_plot(zs_log):
     N = len(zs_log)  # number of static labels
     fig, axs = plt.subplots(1, N)
 
-    colors = ["#ef8a62", "#67a9cf"]
     n = 0
     for (static_label, vary_label_dict) in zs_log.items():
+        colors = ["#ef8a62", "#67a9cf"]
+        if "certain" in static_label:
+            colors = ["#af8dc3", "#7fbf7b"]
         for (vary_label, vals_dict) in vary_label_dict.items():
             ci = 0
             for (vary_label_val, zs) in vals_dict.items():
-                label = f"{vary_label}: {vary_label_val}"
-                sns.kdeplot(zs, alpha=0.2, color=colors[ci], fill=True,
-                            label=label, ax=axs[n])
+                sns.kdeplot(zs, alpha=0.5, color=colors[ci], fill=True,
+                            label=vary_label_val, ax=axs[n])
                 ci += 1
             axs[n].set_title(static_label)
             axs[n].legend()
+            axs[n].set_xticks([])
+            axs[n].set_yticks([])
+            axs[n].set_ylabel('')
         n += 1
+    plt.tight_layout()
     plt.show()
 
 
