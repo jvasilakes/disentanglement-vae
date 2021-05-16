@@ -28,6 +28,7 @@ def plot_migs(args):
         all_mig_dfs.append(mig_df)
     plot = plot_mis_migs(all_mi_dfs, all_mig_dfs, args.model_names)
     plt.show()
+    # plt.savefig(args.outfile)
 
 
 def get_mi_dataframe(mig_data):
@@ -65,7 +66,7 @@ def plot_mis_migs(mi_dfs, mig_dfs, names):
     num_subplots = len(mi_dfs)
     fig, axs = plt.subplots(2, num_subplots)
 
-    colors = ["tab:red", "tab:cyan"]
+    colors = ["#ef8a62", "#67a9cf"]
 
     i = 0
     for (mig_df, model_name) in zip(mig_dfs, names):
@@ -75,6 +76,7 @@ def plot_mis_migs(mi_dfs, mig_dfs, names):
         for (patch, color) in zip(box["boxes"], colors):
             patch.set_facecolor(color)
         axs[0, i].set_title(model_name)
+        axs[0, i].set_ylim(0.0, 0.81)
         if i == 0:
             axs[0, i].set_ylabel("MIG")
         if i > 0:
