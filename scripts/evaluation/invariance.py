@@ -11,6 +11,9 @@ import pandas as pd
 import torch.distributions as D
 from tqdm import trange
 
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -49,6 +52,7 @@ def main(args):
             Vs[lab_name].append(val)
 
     rows = []
+    zs_log = defaultdict(dict)
     zipped = list(zip(latent_names, z_files, mu_files, logvar_files))
     for i in trange(args.num_resamples):
         for (latent_name, zfile, mufile, logvarfile) in zipped:
@@ -68,10 +72,17 @@ def main(args):
 
                 for static_label_val in set(Vs[static_label]):
                     static_mask = np.array(Vs[static_label]) == static_label_val  # noqa
-                    for vary_label_val in set(Vs[vary_label]):
+                    for (ci, vary_label_val) in enumerate(set(Vs[vary_label])):
                         vary_mask = np.array(Vs[vary_label]) == vary_label_val
                         mask = np.logical_and(static_mask, vary_mask)
                         zs_vals = zs[mask]
+
+                        try:
+                            zs_log[static_label_val][vary_label][vary_label_val] = zs_vals  # noqa
+                        except KeyError:
+                            zs_log[static_label_val][vary_label] = {}
+                            zs_log[static_label_val][vary_label][vary_label_val] = zs_vals  # noqa
+
                         row = [i, latent_name, static_label, static_label_val,
                                vary_label, vary_label_val, zs_vals.mean(),
                                zs_vals.std()]
@@ -81,6 +92,7 @@ def main(args):
                 "vary_label", "vary_label_val", "z_mean", "z_std"]
     df = pd.DataFrame(rows, columns=colnames)
     summarize(df)
+    make_plot(zs_log)
 
 
 def summarize(df):
@@ -92,6 +104,26 @@ def summarize(df):
     diffs = diffs.droplevel("vary_label_val").dropna(axis=0, how="all").abs()
     diffs.columns = ["z_mean_diff", "z_std_diff"]
     print(diffs)
+
+
+def make_plot(zs_log):
+    N = len(zs_log)  # number of static labels
+    fig, axs = plt.subplots(1, N)
+
+    colors = ["#ef8a62", "#67a9cf"]
+    n = 0
+    for (static_label, vary_label_dict) in zs_log.items():
+        for (vary_label, vals_dict) in vary_label_dict.items():
+            ci = 0
+            for (vary_label_val, zs) in vals_dict.items():
+                label = f"{vary_label}: {vary_label_val}"
+                sns.kdeplot(zs, alpha=0.2, color=colors[ci], fill=True,
+                            label=label, ax=axs[n])
+                ci += 1
+            axs[n].set_title(static_label)
+            axs[n].legend()
+        n += 1
+    plt.show()
 
 
 def get_last_epoch(directory):
