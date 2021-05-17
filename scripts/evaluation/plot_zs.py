@@ -81,8 +81,10 @@ def plot_negation(zs, labels, axis):
     ci = 0
     for lab_val in set(labels):
         mask = np.array(labels) == lab_val
-        sns.histplot(zs[mask], color=colors[ci], ax=axis)
+        sns.histplot(zs[mask], color=colors[ci], alpha=0.8,
+                     ax=axis, label=lab_val, linewidth=0)
         ci += 1
+    axis.legend()
 
 
 def plot_uncertainty(zs, labels, axis):
@@ -90,8 +92,10 @@ def plot_uncertainty(zs, labels, axis):
     ci = 0
     for lab_val in set(labels):
         mask = np.array(labels) == lab_val
-        sns.histplot(zs[mask], color=colors[ci], alpha=0.5, ax=axis)
+        sns.histplot(zs[mask], color=colors[ci], alpha=0.8,
+                     ax=axis, label=lab_val, linewidth=0)
         ci += 1
+    axis.legend()
 
 
 def plot_content(zs, labels_dict, axis):
@@ -101,7 +105,7 @@ def plot_content(zs, labels_dict, axis):
                        "negation": labels_dict["polarity"],
                        "uncertainty": labels_dict["uncertainty"]})
     colors = ["#ef8a62", "#67a9cf"]
-    sns.scatterplot(data=df, x="z0", y="z1", hue="negation",
+    sns.scatterplot(data=df, x="z0", y="z1", hue="negation", alpha=0.8,
                     style="uncertainty", palette=colors, ax=axis)
 
 
