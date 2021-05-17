@@ -16,7 +16,6 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("metadata_dir", type=str)
     parser.add_argument("data_dir", type=str)
-    parser.add_argument("outfile", type=str)
     parser.add_argument("--data_split", type=str,
                         choices=["train", "dev", "test"])
     parser.add_argument("--epoch", type=int, default=-1)
@@ -24,7 +23,6 @@ def parse_args():
 
 
 def main(args):
-    os.makedirs(args.outdir, exist_ok=True)
     zs_dir = os.path.join(args.metadata_dir, 'z')
     if args.epoch == -1:
         epoch = get_last_epoch(zs_dir)
