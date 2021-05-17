@@ -99,19 +99,20 @@ def compute(args):
         collate_fn=utils.pad_sequence_denoising)
 
     # Optionally load dev/test dataset
-    if args.dataset == "dev":
-        dev_file = os.path.join(params["data_dir"], "dev.jsonl")
+    if args.dataset in ["dev", "test"]:
+        eval_file = os.path.join(params["data_dir"], f"{args.dataset}.jsonl")
+        logging.info(f"Evaluating on {eval_file}")
         tmp = data_utils.get_sentences_labels(
-            dev_file, N=params["num_train_examples"])
-        dev_sents, dev_labs, dev_ids, dev_lab_counts = tmp
-        dev_sents = data_utils.preprocess_sentences(dev_sents, SOS, EOS)
-        dev_labs, _ = data_utils.preprocess_labels(
-            dev_labs, label_encoders=label_encoders)
-        dev_data = data_utils.DenoisingTextDataset(
-            dev_sents, dev_sents, dev_labs, dev_ids,
+            eval_file, N=-1)
+        eval_sents, eval_labs, eval_ids, eval_lab_counts = tmp
+        eval_sents = data_utils.preprocess_sentences(eval_sents, SOS, EOS)
+        eval_labs, _ = data_utils.preprocess_labels(
+            eval_labs, label_encoders=label_encoders)
+        eval_data = data_utils.DenoisingTextDataset(
+            eval_sents, eval_sents, eval_labs, eval_ids,
             word2idx, label_encoders)
         dataloader = torch.utils.data.DataLoader(
-            dev_data, shuffle=False, batch_size=params["batch_size"],
+            eval_data, shuffle=False, batch_size=params["batch_size"],
             collate_fn=utils.pad_sequence_denoising)
 
     # Get word embeddings if specified
