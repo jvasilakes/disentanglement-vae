@@ -463,9 +463,10 @@ def run(params_file, verbose=False):
     tmp = data_utils.get_sentences_labels(
         train_file, N=params["num_train_examples"], label_keys=label_keys)
     train_sents, train_labs, train_ids, train_lab_counts = tmp
-    logging.info("Train label counts:")
-    for (labname, values) in train_lab_counts.items():
-        logging.info(f"  {labname}: {values}")
+    if params["train"] is True:
+        logging.info("Train label counts:")
+        for (labname, values) in train_lab_counts.items():
+            logging.info(f"  {labname}: {values}")
     train_sents = data_utils.preprocess_sentences(train_sents, SOS, EOS)
     train_labs, label_encoders = data_utils.preprocess_labels(train_labs)
 
@@ -643,8 +644,9 @@ def run(params_file, verbose=False):
 
     # TEST
     if params["test"] is True:
-        evalstep(vae, test_dataloader, params, start_epoch, idx2word,
-                 verbose=verbose, summary_writer=test_writer, logdir=logdir)
+        evalstep(vae, test_dataloader, params, start_epoch,
+                 idx2word, verbose=verbose, summary_writer=test_writer,
+                 logdir=logdir, name="test")
         utils.log_reconstructions(vae, test_data, idx2word,
                                   "test", start_epoch, logdir, n=30)
 
