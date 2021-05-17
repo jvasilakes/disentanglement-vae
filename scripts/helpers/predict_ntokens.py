@@ -72,8 +72,7 @@ def main(args):
                 enumerate(coef_r2s), key=lambda x: x[1], reverse=True))
             print(f"{'dim':<5}: R2")
             for (dim, r2) in sorted_dims_r2s:
-                if r2 > 0.5:
-                    print(f"{dim:<5}: {r2:<7.4f}")
+                print(f"{dim:<5}: {r2:<7.4f}")
                 # plt.scatter(Z[:, dim], y)
                 # plt.title(f"({dim}) R2: {r2:.4f}")
                 # plt.show()
