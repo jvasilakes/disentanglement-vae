@@ -1,54 +1,138 @@
 import os
+import re
+import json
 import argparse
+from glob import glob
+from collections import defaultdict
+
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt  # noqa
-from glob import glob
-from collections import defaultdict
+import matplotlib.pyplot as plt
+from sklearn.manifold import TSNE
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("zs_dir", type=str)
-    parser.add_argument("data_split", type=str,
+    parser.add_argument("metadata_dir", type=str)
+    parser.add_argument("data_dir", type=str)
+    parser.add_argument("outfile", type=str)
+    parser.add_argument("--data_split", type=str,
                         choices=["train", "dev", "test"])
-    parser.add_argument("latent_name", type=str)
-    parser.add_argument("outdir", type=str)
-    parser.add_argument("-E", "--skip_epochs", type=int, default=1,
-                        help="Plot every E epochs")
+    parser.add_argument("--epoch", type=int, default=-1)
     return parser.parse_args()
 
 
 def main(args):
-    outdir = os.path.join(args.outdir, args.data_split)
-    os.makedirs(outdir, exist_ok=True)
-    z_files = glob(os.path.join(
-        args.zs_dir, f"{args.data_split}_{args.latent_name}*"))
-    if z_files == []:
-        raise ValueError(f"No z files found at '{args.zs_dir}/*_{args.data_split}_{args.latent_name}'")  # noqa
+    os.makedirs(args.outdir, exist_ok=True)
+    zs_dir = os.path.join(args.metadata_dir, 'z')
+    if args.epoch == -1:
+        epoch = get_last_epoch(zs_dir)
+    else:
+        epoch = args.epoch
 
-    dfs = defaultdict(pd.DataFrame)
-    for zf in z_files:
-        epoch = int(zf.split('_')[-1].replace(".log", ''))
-        if epoch % args.skip_epochs != 0:
-            continue
-        data = pd.read_csv(zf, header=None)
-        for dim in data.columns:
-            dfs[dim][epoch] = data[dim]
+    z_files = glob(os.path.join(zs_dir, f"{args.data_split}_*_{epoch}.log"))
+    latent_names = get_latent_names(z_files)
 
-    for (dim, df) in dfs.items():
-        df = df[df.columns.sort_values(ascending=False)]
-        df.loc[:, "N(0,1)"] = np.random.randn(len(df))
-        plot = sns.displot(data=df, kind="kde", linewidth=2, palette="flare")
-        norm_line = plot.ax.get_lines()[0]
-        norm_line.set_color("#cc0000")
-        norm_line.set_linestyle("--")
-        norm_leg = plot.legend.get_lines()[-1]
-        norm_leg.set_color("#cc0000")
-        norm_leg.set_linestyle("--")
-        plot.savefig(
-                os.path.join(outdir, f"zs_{args.latent_name}_dim{dim}.png"))
+    ids_dir = os.path.join(args.metadata_dir, "ordered_ids")
+    ids_file = os.path.join(ids_dir, f"{args.data_split}_{epoch}.log")
+    ids = [uuid.strip() for uuid in open(ids_file)]
+
+    # id2labels = {uuid: {latent_name: value for latent_name in latent_names}}
+    # But this will not include the "content" latent.
+    # labels_set = {lname for lname in latent_names if lname is a supervised latent}  # noqa
+    id2labels, labels_set = get_labels(
+        args.data_dir, args.data_split, latent_names)
+    Vs = defaultdict(list)
+    for uuid in ids:
+        labels = id2labels[uuid]
+        for (lab_name, val) in labels.items():
+            Vs[lab_name].append(val)
+
+    # Set up the subplots
+    fig = plt.figure(constrained_layout=True)
+    gs = fig.add_gridspec(2, 2, width_ratios=[0.7, 1])
+    ax_neg = fig.add_subplot(gs[0, 0])
+    ax_neg.set_title("Negation")
+    ax_neg.set_xticks([])
+    ax_neg.set_yticks([])
+    ax_unc = fig.add_subplot(gs[1, 0])
+    ax_unc.set_title("Uncertainty")
+    ax_unc.set_xticks([])
+    ax_unc.set_yticks([])
+    ax_con = fig.add_subplot(gs[:, 1])
+    ax_con.set_aspect(1)
+    ax_con.set_title("Content")
+    ax_con.set_xticks([])
+    ax_con.set_yticks([])
+
+    for (latent_name, zfile) in zip(latent_names, z_files):
+        zs = np.loadtxt(zfile, delimiter=',')
+
+        if latent_name == "polarity":
+            plot_negation(zs, Vs[latent_name], ax_neg)
+        elif latent_name == "uncertainty":
+            plot_uncertainty(zs, Vs[latent_name], ax_unc)
+        elif latent_name == "content":
+            plot_content(zs, Vs, ax_con)
+    plt.show()
+
+
+def plot_negation(zs, labels, axis):
+    colors = ["#ef8a62", "#67a9cf"]
+    ci = 0
+    for lab_val in set(labels):
+        mask = np.array(labels) == lab_val
+        sns.histplot(zs[mask], color=colors[ci], ax=axis)
+        ci += 1
+
+
+def plot_uncertainty(zs, labels, axis):
+    colors = ["#af8dc3", "#7fbf7b"]
+    ci = 0
+    for lab_val in set(labels):
+        mask = np.array(labels) == lab_val
+        sns.histplot(zs[mask], color=colors[ci], alpha=0.5, ax=axis)
+        ci += 1
+
+
+def plot_content(zs, labels_dict, axis):
+    z_emb = TSNE(n_components=2).fit_transform(zs)
+
+    df = pd.DataFrame({"z0": z_emb[:, 0], "z1": z_emb[:, 1],
+                       "negation": labels_dict["polarity"],
+                       "uncertainty": labels_dict["uncertainty"]})
+    colors = ["#ef8a62", "#67a9cf"]
+    sns.scatterplot(data=df, x="z0", y="z1", hue="negation",
+                    style="uncertainty", palette=colors, ax=axis)
+
+
+def get_last_epoch(directory):
+    files = os.listdir(directory)
+    epochs = {int(re.findall(r'.*_([0-9]+)\.log', fname)[0])
+              for fname in files}
+    return max(epochs)
+
+
+def get_latent_names(filenames):
+    latent_names = []
+    for fname in filenames:
+        name = re.findall(r'.*_(\w+)_[0-9]+.log', fname)[0]
+        latent_names.append(name)
+    return latent_names
+
+
+def get_labels(data_dir, data_split, latent_names):
+    data_file = os.path.join(data_dir, f"{data_split}.jsonl")
+    data = [json.loads(line) for line in open(data_file)]
+    id2labels = {}
+    labels_set = set()
+    for datum in data:
+        labs = {key: val for (key, val) in datum.items()
+                if key in latent_names}
+        id2labels[datum["id"]] = labs
+        labels_set.update(set(labs.keys()))
+    return id2labels, labels_set
 
 
 if __name__ == "__main__":
