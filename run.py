@@ -455,15 +455,18 @@ def run(params_file, verbose=False):
 
     label_keys = [lk for lk in params["latent_dims"].keys() if lk != "total"]
     if "combined_dataset" in params.keys():
-        label_keys.append("source_dataset")  # We need it for batching
+        # We need to know the source dataset for batching using RatioSampler
+        label_keys.append("source_dataset")
+
     # Read train data
     train_file = os.path.join(params["data_dir"], "train.jsonl")
     tmp = data_utils.get_sentences_labels(
         train_file, N=params["num_train_examples"], label_keys=label_keys)
     train_sents, train_labs, train_ids, train_lab_counts = tmp
-    logging.info("Train label counts:")
-    for (labname, values) in train_lab_counts.items():
-        logging.info(f"  {labname}: {values}")
+    if params["train"] is True:
+        logging.info("Train label counts:")
+        for (labname, values) in train_lab_counts.items():
+            logging.info(f"  {labname}: {values}")
     train_sents = data_utils.preprocess_sentences(train_sents, SOS, EOS)
     train_labs, label_encoders = data_utils.preprocess_labels(train_labs)
 
@@ -476,6 +479,16 @@ def run(params_file, verbose=False):
     dev_labs, _ = data_utils.preprocess_labels(
             dev_labs, label_encoders=label_encoders)
 
+    # Read test data
+    test_file = os.path.join(params["data_dir"], "test.jsonl")
+    tmp = data_utils.get_sentences_labels(test_file, label_keys=label_keys)
+    test_sents, test_labs, test_ids, test_lab_counts = tmp
+    test_sents = data_utils.preprocess_sentences(test_sents, SOS, EOS)
+    # Use the label encoders fit on the train set
+    test_labs, _ = data_utils.preprocess_labels(
+            test_labs, label_encoders=label_encoders)
+
+    # Get the vocabulary
     vocab_path = os.path.join(logdir, "vocab.txt")
     if params["train"] is True:
         # Get token vocabulary
@@ -493,9 +506,11 @@ def run(params_file, verbose=False):
     if params["reverse_input"] is True:
         noisy_train_sents = data_utils.reverse_sentences(train_sents)
         noisy_dev_sents = data_utils.reverse_sentences(dev_sents)
+        noisy_test_sents = data_utils.reverse_sentences(test_sents)
     else:
         noisy_train_sents = train_sents
         noisy_dev_sents = dev_sents
+        noisy_test_sents = test_sents
 
     # Load glove embeddings, if specified
     # This redefines word2idx/idx2word
@@ -522,9 +537,10 @@ def run(params_file, verbose=False):
             train_data, collate_fn=utils.pad_sequence_denoising,
             **dataloader_kwargs)
 
-    logging.info(f"Training examples: {len(train_data)}")
-    train_writer_path = os.path.join("runs", params["name"], "train")
-    train_writer = SummaryWriter(log_dir=train_writer_path)
+    if params["train"] is True:
+        logging.info(f"Training examples: {len(train_data)}")
+        train_writer_path = os.path.join("runs", params["name"], "train")
+        train_writer = SummaryWriter(log_dir=train_writer_path)
 
     if params["validate"] is True:
         dev_data = data_utils.DenoisingTextDataset(
@@ -537,6 +553,18 @@ def run(params_file, verbose=False):
         dev_writer_path = os.path.join("runs", params["name"], "dev")
         dev_writer = SummaryWriter(log_dir=dev_writer_path)
 
+    if params["test"] is True:
+        test_data = data_utils.DenoisingTextDataset(
+                noisy_test_sents, test_sents, test_labs, test_ids,
+                word2idx, label_encoders)
+        test_dataloader = torch.utils.data.DataLoader(
+                test_data, shuffle=True, batch_size=params["batch_size"],
+                collate_fn=utils.pad_sequence_denoising)
+        logging.info(f"Testing examples: {len(test_data)}")
+        test_writer_path = os.path.join("runs", params["name"], "test")
+        test_writer = SummaryWriter(log_dir=test_writer_path)
+
+    # Build the VAE
     label_dims_dict = train_data.y_dims
     sos_idx = word2idx[SOS]
     eos_idx = word2idx[EOS]
@@ -567,6 +595,7 @@ def run(params_file, verbose=False):
     with open(config_logfile, 'w') as outF:
         json.dump(params, outF, indent=2)
 
+    # TRAIN
     if params["train"] is True:
         logging.info("TRAINING")
         logging.info("Ctrl-C to interrupt and keep most recent model.")
@@ -606,11 +635,20 @@ def run(params_file, verbose=False):
                 logging.warning(f"Training interrupted at epoch {epoch}!")
                 break
 
+    # VALIDATE
     if params["validate"] is True:
         evalstep(vae, dev_dataloader, params, start_epoch, idx2word,
                  verbose=verbose, summary_writer=dev_writer, logdir=logdir)
         utils.log_reconstructions(vae, dev_data, idx2word,
                                   "dev", start_epoch, logdir, n=30)
+
+    # TEST
+    if params["test"] is True:
+        evalstep(vae, test_dataloader, params, start_epoch,
+                 idx2word, verbose=verbose, summary_writer=test_writer,
+                 logdir=logdir, name="test")
+        utils.log_reconstructions(vae, test_data, idx2word,
+                                  "test", start_epoch, logdir, n=30)
 
     now = datetime.datetime.now()
     now_str = now.strftime("%Y-%m-%d_%H:%M:%S")
