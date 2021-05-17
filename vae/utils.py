@@ -61,6 +61,7 @@ def validate_params(params):
             "hidden_dim": int,  # RNN hidden dim. unused if num_rnn_layers == 1.  # noqa
             "num_rnn_layers": int,
             "bidirectional_encoder": bool,
+            "bow_encoder": bool,  # overrides bidirectional_encoder
             "latent_dims": dict,
             "epochs": int,
             "batch_size": int,

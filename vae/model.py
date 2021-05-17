@@ -10,6 +10,45 @@ import torch.nn.functional as F
 from vae import losses
 
 
+class BOWEncoder(nn.Module):
+    def __init__(self, vocab_size, emb_dim, emb_matrix=None, dropout_rate=0.5):
+        super(BOWEncoder, self).__init__()
+        self._device = torch.device("cpu")
+        self.vocab_size = vocab_size
+        self.emb_dim = emb_dim
+        if emb_matrix is not None:
+            self.embedding = nn.Embedding.from_pretrained(
+                    torch.tensor(emb_matrix))
+            self.embedding.weight.requires_grad = False
+            self.vocab_size, self.emb_dim = emb_matrix.shape
+        else:
+            self.embedding = nn.Embedding(self.vocab_size, self.emb_dim)
+        self.dropout = nn.Dropout(dropout_rate)
+
+        # compatibility AHH!
+        self.hidden_size = emb_dim
+        self.num_layers = 1
+        self.num_directions = 1
+
+    @property
+    def device(self):
+        return self._device
+
+    def set_device(self, value):
+        assert isinstance(value, torch.device)
+        self._device = value
+        self.to(value)
+
+    # *args for compatibility with VariationalEncoder
+    def forward(self, inputs, *args):
+        # inputs: [batch_size, max(lengths)]
+        embedded = self.dropout(self.embedding(inputs))
+        # embedded: [batch_size, max(lengths), emb_dim]
+        # Max over positions in the sentence
+        max_vals, max_idxs = torch.max(embedded, 1)
+        return max_vals
+
+
 class VariationalEncoder(nn.Module):
     """
     embedding -> dropout -> LSTM
@@ -374,7 +413,11 @@ class VariationalSeq2Seq(nn.Module):
     def forward(self, inputs, lengths, teacher_forcing_prob=0.5):
         # inputs: [batch_size, max(lengths)]
         batch_size = inputs.size(0)
-        encoded, context, encoder_hidden = self.encode(inputs, lengths)
+
+        if isinstance(self.encoder, BOWEncoder):
+            context = self.encoder(inputs)
+        else:
+            encoded, context, encoder_hidden = self.encode(inputs, lengths)
 
         # params is a dict of {name: namedtuple(z, mu, logvar)} for each
         # discriminator/latent space
@@ -481,11 +524,15 @@ def build_vae(params, vocab_size, emb_matrix, label_dims, device,
     :param torch.device device: Device on which to put the model
     :param int {sos,eos}_token_idx: Index in vocab of <SOS>/<EOS> tokens
     """
-    encoder = VariationalEncoder(
+    if params["bow_encoder"] is True:
+        encoder = BOWEncoder(vocab_size, params["embedding_dim"],
+                             emb_matrix=emb_matrix,
+                             dropout_rate=params["encoder_dropout"])
+    else:
+        encoder = VariationalEncoder(
             vocab_size, params["embedding_dim"], params["hidden_dim"],
             params["num_rnn_layers"], dropout_rate=params["encoder_dropout"],
-            emb_matrix=emb_matrix,
-            bidirectional=params["bidirectional_encoder"])
+            emb_matrix=emb_matrix, bidirectional=params["bidirectional_encoder"])  # noqa
     encoder.set_device(device)
 
     decoder = VariationalDecoder(
