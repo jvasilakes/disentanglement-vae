@@ -32,8 +32,11 @@ def encode(sentence, vae, SOS, EOS, lowercase, doc2tensor_fn):
     tensorized = doc2tensor_fn(preprocessed).to(vae.device)
     tensorized = tensorized.squeeze(0)
 
-    length = torch.tensor([len(preprocessed)]).to(vae.device)
-    encoded, context, _ = vae.encode(tensorized, length)
+    if isinstance(vae.encoder, model.BOWEncoder):
+        context = vae.encoder(tensorized)
+    else:
+        length = torch.tensor([len(preprocessed)]).to(vae.device)
+        encoded, context, _ = vae.encode(tensorized, length)
     return context
 
 

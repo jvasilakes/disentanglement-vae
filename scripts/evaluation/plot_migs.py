@@ -3,7 +3,10 @@ import argparse
 from collections import defaultdict
 
 import pandas as pd
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+
+mpl.rcParams.update({"xtick.labelsize": 14})
 
 
 def parse_args():
@@ -75,10 +78,11 @@ def plot_mis_migs(mi_dfs, mig_dfs, names):
                              widths=0.75)
         for (patch, color) in zip(box["boxes"], colors):
             patch.set_facecolor(color)
-        axs[0, i].set_title(model_name)
-        axs[0, i].set_ylim(0.0, 0.81)
+        axs[0, i].set_title(model_name, fontsize=16)
+        axs[0, i].set_ylim(0.0, 0.8)
+        axs[0, i].set_xticklabels(["Neg", "Unc"])
         if i == 0:
-            axs[0, i].set_ylabel("MIG")
+            axs[0, i].set_ylabel("MIG", fontsize=14)
         if i > 0:
             axs[0, i].axes.yaxis.set_ticklabels([])
         i += 1
@@ -102,7 +106,7 @@ def plot_mis_migs(mi_dfs, mig_dfs, names):
         axs[1, i].axes.xaxis.set_ticklabels(xlabs)
         axs[1, i].set_xlabel('')
         if i == 0:
-            axs[1, i].set_ylabel("MI\n(b/n latent and label)")
+            axs[1, i].set_ylabel("MI\n(b/n latent and label)", fontsize=13)
         if i > 0:
             axs[1, i].axes.yaxis.set_ticklabels([])
         i += 1
