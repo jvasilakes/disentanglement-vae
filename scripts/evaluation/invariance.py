@@ -111,23 +111,31 @@ def make_plot(zs_log):
     fig, axs = plt.subplots(1, N)
 
     n = 0
-    for (static_label, vary_label_dict) in zs_log.items():
-        colors = ["#ef8a62", "#67a9cf"]
+    ordered_keys = ["positive", "negative", "certain", "uncertain"]
+    for static_label in ordered_keys:
+        vary_label_dict = zs_log[static_label]
+        colors = ["#af8dc3", "#7fbf7b"]
         if "certain" in static_label:
-            colors = ["#af8dc3", "#7fbf7b"]
+            colors = ["#ef8a62", "#67a9cf"]
         for (vary_label, vals_dict) in vary_label_dict.items():
             ci = 0
             for (vary_label_val, zs) in vals_dict.items():
+                lab = vary_label_val.capitalize()
                 sns.kdeplot(zs, alpha=0.5, color=colors[ci], fill=True,
-                            label=vary_label_val, ax=axs[n])
+                            label=lab, ax=axs[n])
                 ci += 1
-            axs[n].set_title(static_label)
-            axs[n].legend()
+            title = static_label.capitalize()
+            axs[n].set_title(title, fontsize=16)
+            loc = "lower right"
+            if static_label == "uncertain":
+                loc = "lower left"
+            axs[n].legend(loc=loc)
             axs[n].set_xticks([])
             axs[n].set_yticks([])
             axs[n].set_ylabel('')
         n += 1
-    plt.tight_layout()
+    # plt.tight_layout()
+    fig.subplots_adjust(wspace=0.1)
     plt.show()
 
 

@@ -77,22 +77,20 @@ def main(args):
 
 
 def plot_negation(zs, labels, axis):
-    colors = ["#ef8a62", "#67a9cf"]
-    ci = 0
+    colors = {"positive": "#ef8a62", "negative": "#67a9cf"}
     for lab_val in set(labels):
         mask = np.array(labels) == lab_val
-        sns.histplot(zs[mask], color=colors[ci], alpha=0.8,
+        sns.histplot(zs[mask], color=colors[lab_val], alpha=0.8,
                      ax=axis, label=lab_val, linewidth=0)
-        ci += 1
     axis.legend()
 
 
 def plot_uncertainty(zs, labels, axis):
-    colors = ["#af8dc3", "#7fbf7b"]
+    colors = {"certain": "#af8dc3", "uncertain": "#7fbf7b"}
     ci = 0
     for lab_val in set(labels):
         mask = np.array(labels) == lab_val
-        sns.histplot(zs[mask], color=colors[ci], alpha=0.8,
+        sns.histplot(zs[mask], color=colors[lab_val], alpha=0.8,
                      ax=axis, label=lab_val, linewidth=0)
         ci += 1
     axis.legend()
