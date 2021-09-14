@@ -97,6 +97,7 @@ def read_xml(file, attrs={}):
                 was_split = True
             datum = {"sentence": sent_txt,
                      "was_split": was_split,
+                     "n_tokens": len(words),
                      **sent_attr, **attrs}
 
             out_sentences.append(datum)
