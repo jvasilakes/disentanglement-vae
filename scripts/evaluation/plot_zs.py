@@ -49,20 +49,25 @@ def main(args):
 
     # Set up the subplots
     fig = plt.figure(constrained_layout=True)
-    gs = fig.add_gridspec(2, 2, width_ratios=[0.7, 1])
-    ax_neg = fig.add_subplot(gs[0, 0])
+    gs = fig.add_gridspec(ncols=4, nrows=1, width_ratios=[1, 1, 1, 1])
+    ax_neg = fig.add_subplot(gs[0])
     ax_neg.set_title("Negation")
     ax_neg.set_xticks([])
     ax_neg.set_yticks([])
-    ax_unc = fig.add_subplot(gs[1, 0])
+    ax_unc = fig.add_subplot(gs[1])
     ax_unc.set_title("Uncertainty")
     ax_unc.set_xticks([])
     ax_unc.set_yticks([])
-    ax_con = fig.add_subplot(gs[:, 1])
-    ax_con.set_aspect(1)
-    ax_con.set_title("Content")
-    ax_con.set_xticks([])
-    ax_con.set_yticks([])
+    ax_con_neg = fig.add_subplot(gs[2])
+    ax_con_neg.set_aspect(1)
+    ax_con_neg.set_title("Content - Negation")
+    ax_con_neg.set_xticks([])
+    ax_con_neg.set_yticks([])
+    ax_con_unc = fig.add_subplot(gs[3])
+    ax_con_unc.set_aspect(1)
+    ax_con_unc.set_title("Content - Uncertainty")
+    ax_con_unc.set_xticks([])
+    ax_con_unc.set_yticks([])
 
     for (latent_name, zfile) in zip(latent_names, z_files):
         zs = np.loadtxt(zfile, delimiter=',')
@@ -72,7 +77,8 @@ def main(args):
         elif latent_name == "uncertainty":
             plot_uncertainty(zs, Vs[latent_name], ax_unc)
         elif latent_name == "content":
-            plot_content(zs, Vs, ax_con)
+            plot_content(zs, Vs, ax_con_neg, variable="negation")
+            plot_content(zs, Vs, ax_con_unc, variable="uncertainty")
     plt.show()
 
 
@@ -96,7 +102,7 @@ def plot_uncertainty(zs, labels, axis):
     axis.legend()
 
 
-def plot_content(zs, labels_dict, axis):
+def plot_content_old(zs, labels_dict, axis):
     z_emb = TSNE(n_components=2).fit_transform(zs)
 
     df = pd.DataFrame({"z0": z_emb[:, 0], "z1": z_emb[:, 1],
@@ -105,6 +111,20 @@ def plot_content(zs, labels_dict, axis):
     colors = ["#ef8a62", "#67a9cf"]
     sns.scatterplot(data=df, x="z0", y="z1", hue="negation", alpha=0.8,
                     style="uncertainty", palette=colors, ax=axis)
+
+
+def plot_content(zs, labels_dict, axis, variable="negation"):
+    z_emb = TSNE(n_components=2).fit_transform(zs)
+
+    key = variable
+    colors = {"certain": "#af8dc3", "uncertain": "#7fbf7b"}
+    if variable == "negation":
+        key = "polarity"
+        colors = {"positive": "#ef8a62", "negative": "#67a9cf"}
+    df = pd.DataFrame({"z0": z_emb[:, 0], "z1": z_emb[:, 1],
+                       variable: labels_dict[key]})
+    sns.scatterplot(data=df, x="z0", y="z1", hue=variable,
+                    hue_order=labels_dict[key][::-1], palette=colors, ax=axis)
 
 
 def get_last_epoch(directory):
