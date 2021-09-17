@@ -181,6 +181,8 @@ def log_params(params_dict, example_ids, logdir, dataset_name, epoch):
         for i in example_ids:
             outF.write(f"{i}\n")
 
+    # params_dict created as
+    #   all_latent_params[l_name][param_name].extend(param_batch)
     for latent_name in params_dict.keys():
         for (param_name, values) in params_dict[latent_name].items():
             param_dir = os.path.join(metadata_dir, param_name)

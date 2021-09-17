@@ -164,7 +164,10 @@ def compute_kl_divergence_losses(model, latent_params, kl_weights_dict):
     # tensor scalar for backward pass
     total_weighted_kl = torch.tensor(0.0).to(model.device)
     for (latent_name, latent_params) in latent_params.items():
-        kl = kl_divergence(latent_params.mu, latent_params.logvar)
+        # kl = kl_divergence(latent_params.mu, latent_params.logvar)
+        # TODO: clean this up!
+        args = {k: v for (k, v) in latent_params._asdict().items() if k != 'z'}
+        kl = model.distributions[latent_name].kl_divergence(**args)
         idv_kls[latent_name] = kl.item()
         total_kl += kl.item()
         try:

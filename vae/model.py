@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from vae import losses
+from vae import losses, my_distributions
 
 
 class BOWEncoder(nn.Module):
@@ -193,7 +193,8 @@ class Discriminator(nn.Module):
         self.to(value)
 
     def forward(self, inputs):
-        return self.linear(inputs)
+        return inputs
+        #return self.linear(inputs)
 
     # TODO: add parameter to pass label weights for balancing
     def compute_loss(self, logits, targets):
@@ -202,11 +203,16 @@ class Discriminator(nn.Module):
         return self.loss_fn(logits, targets)
 
     def predict(self, logits):
-        probs = self.activation(logits, *self.activation_args)
+        #probs = self.activation(logits, *self.activation_args)
+        probs = logits
         if probs.size(1) == 1:
             preds = (probs > 0.5).long().squeeze()
         else:
             preds = probs.argmax(-1).squeeze()
+        print(self.name)
+        print(probs)
+        print(preds)
+        input()
         return preds
 
     def compute_accuracy(self, logits, targets):
@@ -277,6 +283,7 @@ class VariationalSeq2Seq(nn.Module):
         self.latent_dim = latent_dim
         self.discriminators = nn.ModuleDict()  # Name: Discriminator
         self.context2params = nn.ModuleDict()  # Name: (mu,logvar) linear layer
+        self.distributions = dict()            # Name: torch.Distribution
 
         # Classifier heads
         # Total latent dimensions of the discriminators
@@ -291,6 +298,8 @@ class VariationalSeq2Seq(nn.Module):
                     # 2 for mu, logvar
                     linear_insize, 2 * dsc.latent_dim)
             self.context2params[dsc.name] = params_layer
+            #self.distributions[dsc.name] = my_distributions.LogparamNormal
+            self.distributions[dsc.name] = my_distributions.LogparamBeta
         assert self.dsc_latent_dim <= self.latent_dim
 
         # Left over latent dims are treated as a generic "content" space
@@ -299,6 +308,7 @@ class VariationalSeq2Seq(nn.Module):
             leftover_layer = nn.Linear(
                 linear_insize, 2 * leftover_latent_dim)
             self.context2params["content"] = leftover_layer
+            self.distributions["content"] = my_distributions.LogparamNormal
             assert self.dsc_latent_dim + leftover_latent_dim == self.latent_dim
 
         # Adversarial heads
@@ -383,18 +393,13 @@ class VariationalSeq2Seq(nn.Module):
 
     def compute_latent_params(self, context):
         latent_params = dict()
-        Params = namedtuple("Params", ["z", "mu", "logvar"])
         for (name, layer) in self.context2params.items():
             params = layer(context)
-            mu, logvar = params.chunk(2, dim=1)
-            logvar = torch.tanh(logvar)
-            if self.training is True:
-                z = mu + torch.randn_like(logvar) * torch.exp(logvar)
-            else:
-                z = mu
-            z = mu + torch.randn_like(logvar) * torch.exp(logvar)
-            latent_params[name] = Params(z, mu, logvar)
-
+            d = self.distributions[name].from_params(params)
+            z = d.rsample()
+            Params = namedtuple("Params", ["z", *d.param_names])
+            params2log = [d.__dict__[pname] for pname in d.param_names]
+            latent_params[name] = Params(z, *params2log)
         return latent_params
 
     def compute_hidden(self, z, batch_size):
@@ -427,6 +432,10 @@ class VariationalSeq2Seq(nn.Module):
         dsc_logits = {}
         for (name, dsc) in self.discriminators.items():
             dlogits = dsc(latent_params[name].z)
+            #print(name)
+            #print(latent_params[name].z)
+            #print(dlogits)
+            #input()
             dsc_logits[name] = dlogits
 
         adv_logits = {}
