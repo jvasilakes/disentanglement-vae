@@ -226,7 +226,6 @@ def get_sentences_labels(path, label_keys=None, N=-1, shuffle=True):
     sentence_ids = []
     sentences = []
     labels = []
-    label_counts = defaultdict(lambda: defaultdict(int))
     with open(path, 'r') as inF:
         for (i, line) in enumerate(inF):
             data = json.loads(line)
@@ -239,7 +238,7 @@ def get_sentences_labels(path, label_keys=None, N=-1, shuffle=True):
             for (key, value) in data.items():
                 if key not in label_keys:
                     continue
-                label_counts[key][value] += 1
+                #label_counts[key][value] += 1
                 labs[key] = value
             labels.append(labs)
     if shuffle is True:
@@ -248,6 +247,10 @@ def get_sentences_labels(path, label_keys=None, N=-1, shuffle=True):
         sentences, labels, sentence_ids = zip(*tmp)
     if N == -1:
         N = len(sentences)
+    label_counts = defaultdict(lambda: defaultdict(int))
+    for example_labs in labels[:N]:
+        for (key, value) in example_labs.items():
+            label_counts[key][value] += 1
     return sentences[:N], labels[:N], sentence_ids[:N], label_counts
 
 
