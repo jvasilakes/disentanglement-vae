@@ -207,12 +207,11 @@ class Discriminator(nn.Module):
         probs = logits
         if probs.size(1) == 1:
             preds = (probs > 0.5).long().squeeze()
+            #print(self.name)
+            #print("probs: ", probs)
+            #print("preds: ", preds)
         else:
             preds = probs.argmax(-1).squeeze()
-        print(self.name)
-        print(probs)
-        print(preds)
-        input()
         return preds
 
     def compute_accuracy(self, logits, targets):
@@ -298,8 +297,8 @@ class VariationalSeq2Seq(nn.Module):
                     # 2 for mu, logvar
                     linear_insize, 2 * dsc.latent_dim)
             self.context2params[dsc.name] = params_layer
-            #self.distributions[dsc.name] = my_distributions.LogparamNormal
-            self.distributions[dsc.name] = my_distributions.LogparamBeta
+            self.distributions[dsc.name] = my_distributions.LogparamNormal
+            #self.distributions[dsc.name] = my_distributions.LogparamBeta
         assert self.dsc_latent_dim <= self.latent_dim
 
         # Left over latent dims are treated as a generic "content" space
@@ -404,7 +403,6 @@ class VariationalSeq2Seq(nn.Module):
 
     def compute_hidden(self, z, batch_size):
         # hidden: [batch_size, 2 * hidden_size * decoder.num_layers]
-        # TODO: why am I using tanh? Try with no activation.
         hidden = torch.tanh(self.z2hidden(z))
         # state, cell: [batch_size, hidden_size * decoder.num_layers]
         state, cell = hidden.chunk(2, dim=1)
@@ -423,6 +421,7 @@ class VariationalSeq2Seq(nn.Module):
             context = self.encoder(inputs)
         else:
             encoded, context, encoder_hidden = self.encode(inputs, lengths)
+        context = torch.tanh(context)
 
         # params is a dict of {name: namedtuple(z, mu, logvar)} for each
         # discriminator/latent space
@@ -432,10 +431,6 @@ class VariationalSeq2Seq(nn.Module):
         dsc_logits = {}
         for (name, dsc) in self.discriminators.items():
             dlogits = dsc(latent_params[name].z)
-            #print(name)
-            #print(latent_params[name].z)
-            #print(dlogits)
-            #input()
             dsc_logits[name] = dlogits
 
         adv_logits = {}

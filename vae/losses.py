@@ -191,6 +191,9 @@ def compute_discriminator_losses(model, discriminator_logits, Ybatch):
         targets = Ybatch[dsc_name].to(model.device)
         dsc_loss = dsc.compute_loss(dsc_logits, targets)
         dsc_acc = dsc.compute_accuracy(dsc_logits, targets)
+        #print(dsc_loss)
+        #print(dsc_acc)
+        #input()
         idv_dsc_losses[dsc_name] = dsc_loss.item()
         idv_dsc_accs[dsc_name] = dsc_acc.item()
         total_dsc_loss += dsc_loss

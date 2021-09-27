@@ -42,7 +42,13 @@ def main(args):
     id2labels, labels_set = get_labels(
         args.data_dir, args.data_split, latent_names)
     Vs = defaultdict(list)
-    for uuid in ids:
+    seen_ids = set()
+    keeprows = []
+    for (i, uuid) in enumerate(ids):
+        if uuid in seen_ids:
+            continue
+        seen_ids.add(uuid)
+        keeprows.append(i)
         labels = id2labels[uuid]
         for (lab_name, val) in labels.items():
             Vs[lab_name].append(val)
@@ -71,10 +77,11 @@ def main(args):
 
     for (latent_name, zfile) in zip(latent_names, z_files):
         zs = np.loadtxt(zfile, delimiter=',')
+        zs = zs[keeprows]
 
         if latent_name == "polarity":
             plot_negation(zs, Vs[latent_name], ax_neg)
-        elif latent_name == "uncertainty":
+        if latent_name == "uncertainty":
             plot_uncertainty(zs, Vs[latent_name], ax_unc)
         elif latent_name == "content":
             plot_content(zs, Vs, ax_con_neg, variable="negation")
@@ -83,11 +90,13 @@ def main(args):
 
 
 def plot_negation(zs, labels, axis):
+    #colors = {1: "#ef8a62", 0: "#67a9cf"}
     colors = {"positive": "#ef8a62", "negative": "#67a9cf"}
     for lab_val in set(labels):
         mask = np.array(labels) == lab_val
+        num_bins = int(np.floor(np.sum(mask) / 10))
         sns.histplot(zs[mask], color=colors[lab_val], alpha=0.8,
-                     ax=axis, label=lab_val, linewidth=0)
+                     ax=axis, label=lab_val, linewidth=0, bins=num_bins)
     axis.legend()
 
 
@@ -96,21 +105,11 @@ def plot_uncertainty(zs, labels, axis):
     ci = 0
     for lab_val in set(labels):
         mask = np.array(labels) == lab_val
+        num_bins = int(np.floor(np.sum(mask) / 10))
         sns.histplot(zs[mask], color=colors[lab_val], alpha=0.8,
-                     ax=axis, label=lab_val, linewidth=0)
+                     ax=axis, label=lab_val, linewidth=0, bins=num_bins)
         ci += 1
     axis.legend()
-
-
-def plot_content_old(zs, labels_dict, axis):
-    z_emb = TSNE(n_components=2).fit_transform(zs)
-
-    df = pd.DataFrame({"z0": z_emb[:, 0], "z1": z_emb[:, 1],
-                       "negation": labels_dict["polarity"],
-                       "uncertainty": labels_dict["uncertainty"]})
-    colors = ["#ef8a62", "#67a9cf"]
-    sns.scatterplot(data=df, x="z0", y="z1", hue="negation", alpha=0.8,
-                    style="uncertainty", palette=colors, ax=axis)
 
 
 def plot_content(zs, labels_dict, axis, variable="negation"):
@@ -121,10 +120,12 @@ def plot_content(zs, labels_dict, axis, variable="negation"):
     if variable == "negation":
         key = "polarity"
         colors = {"positive": "#ef8a62", "negative": "#67a9cf"}
+        #colors = {1: "#ef8a62", 0: "#67a9cf"}
     df = pd.DataFrame({"z0": z_emb[:, 0], "z1": z_emb[:, 1],
                        variable: labels_dict[key]})
     sns.scatterplot(data=df, x="z0", y="z1", hue=variable,
-                    hue_order=labels_dict[key][::-1], palette=colors, ax=axis)
+                    hue_order=labels_dict[key][::-1], palette=colors,
+                    alpha=0.75, ax=axis)
 
 
 def get_last_epoch(directory):
