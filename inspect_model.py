@@ -78,10 +78,10 @@ def parse_input(input_args):
     rec_parser.set_defaults(cmd="reconstruct")
     rec_parser.add_argument("sentence", type=str,
                             help="sentence to reconstruct")
-    rec_parser.add_argument("--polz", type=float, required=False,
-                            help="scalar z value for polarity latent")
-    rec_parser.add_argument("--uncz", type=float, required=False,
-                            help="scalar z value for uncertainty latent")
+    rec_parser.add_argument("--latent_values", type=json.loads, required=False,
+                            default={},
+                            help="""Set latent values using json string.
+                                    E.g., --latent_values '{"polarity": 1.0}'""")  # noqa
     rec_parser.add_argument("-n", type=int, required=False, default=1,
                             help="Number of reconstructions to output.")
 
@@ -130,8 +130,8 @@ def parse_input(input_args):
     return args
 
 
-def reconstruct(sentence, polz, uncz, vae, do_lowercase,
-                doc2tensor_fn, idx2word, n=5):
+def reconstruct(sentence, vae, do_lowercase, doc2tensor_fn, idx2word, n=5,
+                latent_values={}):
     context = encode(sentence, vae, "<SOS>", "<EOS>",
                      do_lowercase, doc2tensor_fn)
     all_zs = []
@@ -139,10 +139,9 @@ def reconstruct(sentence, polz, uncz, vae, do_lowercase,
     for i in range(n):
         latent_params = vae.compute_latent_params(context)
         d = {name: param.z for (name, param) in latent_params.items()}
-        if polz is not None:
-            d["polarity"] = torch.tensor([[polz]]).to(vae.device)
-        if uncz is not None:
-            d["uncertainty"] = torch.tensor([[uncz]]).to(vae.device)
+        for (latent_name, val) in latent_values.items():
+            if latent_name in d.keys():
+                d[latent_name] = torch.tensor([[val]]).to(vae.device)
         all_zs.append(d)
         zs = list(d.values())
         z = torch.cat(zs, dim=1)
