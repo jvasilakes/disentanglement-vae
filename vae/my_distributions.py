@@ -99,3 +99,8 @@ class LogparamBeta(distributions.Beta):
             * torch.digamma(alpha + beta)
         # average over examples
         return kl.mean()
+
+
+lookup = {"normal": LogparamNormal,
+          "gaussian": LogparamNormal,
+          "beta": LogparamBeta}

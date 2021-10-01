@@ -265,16 +265,34 @@ class AdversarialDiscriminator(Discriminator):
 
 class VariationalSeq2Seq(nn.Module):
     """
-    total_latent_dim = 5
-    polarity_dsc = Discriminator("polarity", 1, 1)
-    modality_dsc = Discriminator("modality", 2, 5)
-    # vae will have a 2-dimensional leftover "content" latent space
-    vae = VariationalSeq2Seq(encoder, decoder, total_latent_dim,
-                             [polarity_dsc, modality_dsc], sos, eos)
+    :param VariationalEncoder encoder:
+    :param VariationalDecoder decoder:
+    :param list discriminators: list of Discriminator instances
+    :param dict distributions: mapping from latent_names to distributions in
+                               vae.my_distributions
+    :param int latent_dim: total number of latent dimensions
+    :param int sos_token_idx: start of sentence token index
+    :param int eos_token_idx: end of sentence token index
+    :param bool adversarial_loss: whether to use adversarial losses
+                                  for each discriminator
+    :param bool mi_loss: whether to use mutual information losses for
+                         each discriminator
+
+
+    Example usage:
+    >>> total_latent_dim = 5
+    >>> polarity_dsc = Discriminator("polarity", 1, 1)
+    >>> modality_dsc = Discriminator("modality", 2, 5)
+    >>> discs = [polarity_dsc, modality_dsc]
+    >>> dists = {"default": LogparamNormal,
+    ...          "polarity": LogParamBeta, "uncertainty": LogParamBeta}
+    >>> # vae will have a 2-dimensional leftover "content" latent space
+    >>> vae = VariationalSeq2Seq(encoder, decoder, discs, dists,
+    ...                          sos_token_idx, eos_token_idx)
     """
-    def __init__(self, encoder, decoder, discriminators, latent_dim,
-                 sos_token_idx, eos_token_idx, adversarial_loss=False,
-                 mi_loss=False):
+    def __init__(self, encoder, decoder, discriminators, distributions,
+                 latent_dim, sos_token_idx, eos_token_idx,
+                 adversarial_loss=False, mi_loss=False):
         super(VariationalSeq2Seq, self).__init__()
         self._device = torch.device("cpu")
         self.encoder = encoder
@@ -282,7 +300,7 @@ class VariationalSeq2Seq(nn.Module):
         self.latent_dim = latent_dim
         self.discriminators = nn.ModuleDict()  # Name: Discriminator
         self.context2params = nn.ModuleDict()  # Name: (mu,logvar) linear layer
-        self.distributions = dict()            # Name: torch.Distribution
+        self.distributions = dict()            # Name: my_distributions
 
         # Classifier heads
         # Total latent dimensions of the discriminators
@@ -297,8 +315,10 @@ class VariationalSeq2Seq(nn.Module):
                     # 2 for mu, logvar
                     linear_insize, 2 * dsc.latent_dim)
             self.context2params[dsc.name] = params_layer
-            self.distributions[dsc.name] = my_distributions.LogparamNormal
-            #self.distributions[dsc.name] = my_distributions.LogparamBeta
+            key = dsc.name
+            if key not in distributions.keys():
+                key = "default"
+            self.distributions[dsc.name] = distributions[key]
         assert self.dsc_latent_dim <= self.latent_dim
 
         # Left over latent dims are treated as a generic "content" space
@@ -307,7 +327,7 @@ class VariationalSeq2Seq(nn.Module):
             leftover_layer = nn.Linear(
                 linear_insize, 2 * leftover_latent_dim)
             self.context2params["content"] = leftover_layer
-            self.distributions["content"] = my_distributions.LogparamNormal
+            self.distributions["content"] = distributions["default"]
             assert self.dsc_latent_dim + leftover_latent_dim == self.latent_dim
 
         # Adversarial heads
@@ -554,7 +574,16 @@ def build_vae(params, vocab_size, emb_matrix, label_dims, device,
         dsc.set_device(device)
         discriminators.append(dsc)
 
-    vae = VariationalSeq2Seq(encoder, decoder, discriminators,
+    distributions = {}
+    for (latent_name, dist_name) in params["latent_distributions"].items():
+        try:
+            dist = my_distributions.lookup[dist_name.lower()]
+        except KeyError as e:
+            print(f"Unsupported latent distribution '{dist_name.lower()}'")
+            raise e
+        distributions[latent_name] = dist
+
+    vae = VariationalSeq2Seq(encoder, decoder, discriminators, distributions,
                              params["latent_dims"]["total"],
                              sos_token_idx, eos_token_idx,
                              adversarial_loss=params["adversarial_loss"],
