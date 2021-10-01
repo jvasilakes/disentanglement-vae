@@ -104,9 +104,11 @@ def run_transfer(model, dataloader, params, id2labs_df, verbose=False):
             src_output = model(src_Xbatch, src_lengths, teacher_forcing_prob=0.0)  # noqa
 
             # Transfer the latent
-            trg_output["latent_params"][latent_name] = src_output["latent_params"][latent_name]  # noqa
             zs = [param.z for param in trg_output["latent_params"].values()]
-            z = torch.cat(zs, dim=1)
+            trg_params = {latent_name: param.z.clone() for (latent_name, param)
+                          in trg_output["latent_params"].items()}
+            trg_params[latent_name] = src_output["latent_params"][latent_name].z.clone()  # noqa
+            z = torch.cat(list(trg_params.values()), dim=1)
             # Decode from it
             max_length = in_Xbatch.size(-1)
             trans_output = model.sample(z, max_length=max_length)
