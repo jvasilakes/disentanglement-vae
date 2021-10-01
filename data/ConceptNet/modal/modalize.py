@@ -2,6 +2,7 @@ import re
 import json
 import random
 import argparse
+from hashlib import md5
 
 
 def parse_args():
@@ -143,7 +144,16 @@ def modalize(datum):
         print(f"ALERT! No rule found for modalizing '{sentence}'")
     new_datum = dict(datum)
     new_datum["sentence"] = new_sent
+    new_id = md5(new_sent.encode()).hexdigest()
+    new_datum["id"] = new_id
+    new_datum["n_tokens"] = len(tokenize(new_sent))
     return new_datum
+
+
+def tokenize(string):
+    string = re.sub(r"([.!?])", r" \1", string)
+    string = re.sub(r"[^a-zA-Z.!?]+", r" ", string)
+    return string.split()
 
 
 if __name__ == "__main__":
