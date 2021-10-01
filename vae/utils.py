@@ -63,6 +63,7 @@ def validate_params(params):
             "bidirectional_encoder": bool,
             "bow_encoder": bool,  # overrides bidirectional_encoder
             "latent_dims": dict,
+            "latent_distributions": dict,  # {latent_name: distribution_name}
             "epochs": int,
             "batch_size": int,
             "learn_rate": float,
@@ -77,7 +78,7 @@ def validate_params(params):
             "test": bool}
     for (key, val) in valid_params.items():
         if key not in params.keys():
-            raise ValueError(f"parameter file missing '{key}'")
+            raise ValueError(f"parameter file missing '{key}: {val}'")
         if not isinstance(params[key], val):
             param_type = type(params[key])
             raise ValueError(f"Parameter '{key}' of incorrect type!")
