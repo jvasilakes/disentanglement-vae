@@ -90,7 +90,6 @@ def main(args):
 
 
 def plot_negation(zs, labels, axis):
-    #colors = {1: "#ef8a62", 0: "#67a9cf"}
     colors = {"positive": "#ef8a62", "negative": "#67a9cf"}
     for lab_val in set(labels):
         mask = np.array(labels) == lab_val
@@ -120,7 +119,6 @@ def plot_content(zs, labels_dict, axis, variable="negation"):
     if variable == "negation":
         key = "polarity"
         colors = {"positive": "#ef8a62", "negative": "#67a9cf"}
-        #colors = {1: "#ef8a62", 0: "#67a9cf"}
     df = pd.DataFrame({"z0": z_emb[:, 0], "z1": z_emb[:, 1],
                        variable: labels_dict[key]})
     sns.scatterplot(data=df, x="z0", y="z1", hue=variable,
