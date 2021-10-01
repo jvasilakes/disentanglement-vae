@@ -44,7 +44,7 @@ def parse_args():
                                 required=False,
                                 help="""Number of times to resample Z and
                                         decode for a given input example.""")
-    compute_parser.add_argument("--verbose", action="store_true", default=False,
+    compute_parser.add_argument("--verbose", action="store_true", default=False,  # noqa
                                 help="""Show a progress bar.""")
 
     summ_parser = subparsers.add_parser("summarize")

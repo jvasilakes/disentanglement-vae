@@ -268,7 +268,6 @@ def compute_mi(zs, vs, discrete_z=False):
 
 def compute_migs(mi_dict, Hvs):
     migs = defaultdict(dict)
-    print(mi_dict.keys())
     for lab_name in mi_dict.keys():
         lab_mis = []
         latent_names = []
