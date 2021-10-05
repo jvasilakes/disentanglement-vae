@@ -104,7 +104,6 @@ def run_transfer(model, dataloader, params, id2labs_df, verbose=False):
             src_output = model(src_Xbatch, src_lengths, teacher_forcing_prob=0.0)  # noqa
 
             # Transfer the latent
-            zs = [param.z for param in trg_output["latent_params"].values()]
             trg_params = {latent_name: param.z.clone() for (latent_name, param)
                           in trg_output["latent_params"].items()}
             trg_params[latent_name] = src_output["latent_params"][latent_name].z.clone()  # noqa
