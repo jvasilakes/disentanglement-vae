@@ -35,6 +35,8 @@ def parse_args():
                                 help="Which dataset to run on.")
     compute_parser.add_argument("--verbose", action="store_true",
                                 default=False)
+    compute_parser.add_argument("--add_padding_token", action="store_true",
+                                default=False)
 
     summ_parser = subparsers.add_parser("summarize")
     summ_parser.set_defaults(cmd="summarize")
@@ -165,6 +167,23 @@ def run_transfer(model, dataloader, params, id2labs_df, verbose=False):
     return results
 
 
+def add_word_to_sentences(sents, labels):
+    ext_sents = []
+    word = "unk"
+    for (sent, lab) in zip(sents, labels):
+        add_word = False
+        if lab["polarity"] == "positive":
+            add_word = True
+        if lab["uncertainty"] == "certain":
+            add_word = True
+        if add_word is False:
+            ext_sents.append(sent)
+        else:
+            sent.insert(-2, word)  # insert before EOS and presumed punctuation
+            ext_sents.append(sent)
+    return ext_sents
+
+
 def compute(args):
     logging.basicConfig(level=logging.INFO)
 
@@ -189,6 +208,8 @@ def compute(args):
         train_file, N=params["num_train_examples"], label_keys=label_keys)
     train_sents, train_labs, train_ids, train_lab_counts = tmp
     train_sents = data_utils.preprocess_sentences(train_sents, SOS, EOS)
+    if args.add_padding_token is True:
+        train_sents = add_word_to_sentences(train_sents, train_labs)
     train_labs, label_encoders = data_utils.preprocess_labels(train_labs)
 
     # Read validation data
@@ -198,6 +219,8 @@ def compute(args):
         tmp = data_utils.get_sentences_labels(eval_file, label_keys=label_keys)
         eval_sents, eval_labs, eval_ids, eval_lab_counts = tmp
         eval_sents = data_utils.preprocess_sentences(eval_sents, SOS, EOS)
+        if args.add_padding_token is True:
+            eval_sents = add_word_to_sentences(eval_sents, eval_labs)
         # Use the label encoders fit on the train set
         eval_labs, _ = data_utils.preprocess_labels(
                 eval_labs, label_encoders=label_encoders)
