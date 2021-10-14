@@ -154,7 +154,7 @@ def get_last_epoch(directory):
 def get_latent_names(filenames):
     latent_names = []
     for fname in filenames:
-        name = re.findall(r'.*_(\w+)_[0-9]+.log', fname)[0]
+        name = re.findall(r'.*?_(\w+)_[0-9]+.log', fname)[0]
         latent_names.append(name)
     return latent_names
 
