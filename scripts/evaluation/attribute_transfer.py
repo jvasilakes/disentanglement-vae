@@ -76,17 +76,18 @@ def get_source_examples(labs_batch, dataset, latent_name, id2labs_df):
 def get_source_examples_by_length(labs_batch, lens_batch, dataset,
                                   latent_name, id2labs_df):
     labs = labs_batch[latent_name].flatten().numpy().astype(int)
+    labs = dataset.label_encoders[latent_name].inverse_transform(labs)
     lengths = lens_batch.flatten().numpy().astype(int)
 
     samples = []
     for (lab, length) in zip(labs, lengths):
         opposites = id2labs_df[id2labs_df[latent_name] != lab]
         examples = [dataset.get_by_id(uuid) for uuid in opposites.index]
-        examples_same_len = [example for example in examples
-                             if abs(len(example[0].flatten()) - length) <= 3]
-        sample_idx = np.random.randint(len(examples_same_len))
-        sample = examples_same_len[sample_idx]
-        samples.append(sample)
+        np.random.shuffle(examples)  # shuffle so we don't overuse examples
+        for example in examples:
+            if abs(len(example[0].flatten()) - length) <= 3:
+                samples.append(example)
+                break
     batch = utils.pad_sequence_denoising(samples)
     return batch
 
