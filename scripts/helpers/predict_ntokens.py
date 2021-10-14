@@ -18,12 +18,16 @@ def parse_args():
     parser.add_argument("data_dir", type=str)
     parser.add_argument("--dataset", type=str, required=True,
                         choices=["train", "dev", "test"])
+    parser.add_argument("--epoch", type=int, default=-1)
     return parser.parse_args()
 
 
 def main(args):
     zs_dir = os.path.join(args.metadata_dir, 'z')
-    epoch = get_last_epoch(zs_dir)
+    if args.epoch == -1:
+        epoch = get_last_epoch(zs_dir)
+    else:
+        epoch = args.epoch
     z_files = glob(os.path.join(zs_dir, f"{args.dataset}_*_{epoch}.log"))
     latent_names = get_latent_names(z_files)
     latent_2_zfile = dict(zip(latent_names, z_files))

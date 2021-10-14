@@ -126,15 +126,15 @@ def make_plot(zs_log):
                 ci += 1
             title = static_label.capitalize()
             axs[n].set_title(title, fontsize=16)
-            loc = "lower right"
+            loc = "upper left"
             if static_label == "uncertain":
-                loc = "lower left"
+                loc = "upper left"
             axs[n].legend(loc=loc)
             axs[n].set_xticks([])
             axs[n].set_yticks([])
             axs[n].set_ylabel('')
         n += 1
-    # plt.tight_layout()
+    plt.tight_layout()
     fig.subplots_adjust(wspace=0.1)
     plt.show()
 

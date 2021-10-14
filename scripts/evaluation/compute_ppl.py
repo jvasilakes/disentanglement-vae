@@ -6,7 +6,7 @@ from tqdm import tqdm
 from collections import defaultdict
 
 import torch
-from transformers import GPT2TokenizerFast, GPT2LMHeadModel
+from transformers import GPT2Tokenizer, GPT2LMHeadModel
 
 import vae.model as vae_model
 from vae import utils, data_utils
@@ -46,10 +46,9 @@ def main(data_dir, params_json, logfile, max_n=-1, verbose=False):
                                         N=max_n, verbose=verbose)
 
     logging.info("Loading GPT2...")
-    device = "cuda"
-    model_id = "gpt2-large"
-    tokenizer = GPT2TokenizerFast.from_pretrained(model_id)
-    model = GPT2LMHeadModel.from_pretrained(model_id).to(device)
+    model_id = "gpt2"
+    tokenizer = GPT2Tokenizer.from_pretrained(model_id)
+    model = GPT2LMHeadModel.from_pretrained(model_id).to(DEVICE)
 
     logging.info("Computing PPLs...")
     for (dataset_name, sents) in data.items():
@@ -69,19 +68,19 @@ def main(data_dir, params_json, logfile, max_n=-1, verbose=False):
 
 
 def compute_ppl(sentences, tokenizer, model, stride=512, verbose=False):
-    encodings = tokenizer("\n\n".join(sentences), return_tensors='pt')
+    encodings = tokenizer.encode("\n\n".join(sentences), return_tensors='pt')
     max_length = model.config.n_positions
 
     nlls = []
     if verbose is True:
-        pbar = tqdm(total=len(range(0, encodings.input_ids.size(1), stride)))
-    for i in range(0, encodings.input_ids.size(1), stride):
+        pbar = tqdm(total=len(range(0, encodings.size(1), stride)))
+    for i in range(0, encodings.size(1), stride):
         begin_loc = max(i + stride - max_length, 0)
-        end_loc = min(i + stride, encodings.input_ids.size(1))
+        end_loc = min(i + stride, encodings.size(1))
         trg_len = end_loc - i
-        input_ids = encodings.input_ids[:, begin_loc:end_loc].to(model.device)
+        input_ids = encodings[:, begin_loc:end_loc].to(DEVICE)
         target_ids = input_ids.clone()
-        target_ids[:, :-trg_len] = -100
+        #target_ids[:, :-trg_len] = -100
 
         with torch.no_grad():
             outputs = model(input_ids, labels=target_ids)
@@ -89,6 +88,9 @@ def compute_ppl(sentences, tokenizer, model, stride=512, verbose=False):
         nlls.append(nll)
         if verbose is True:
             pbar.update(1)
+        else:
+            if i % 10 == 0:
+                logging.info(f"{i}/{len(range(0, encodings.size(1), stride))}")
     ppl = torch.exp(torch.stack(nlls).sum() / end_loc)
     return ppl
 
@@ -163,7 +165,7 @@ def reconstruct_with_model(data, params_json, N=-1, num_resamples=1,
     if not os.path.isdir(ckpt_dir):
         raise OSError(f"No checkpoint found at '{ckpt_dir}'!")
     vae, optimizer, start_epoch, ckpt_fname = utils.load_latest_checkpoint(
-            vae, optimizer, ckpt_dir)
+            vae, optimizer, ckpt_dir, map_location=torch.device(DEVICE))
     logging.info(f"Loaded checkpoint from '{ckpt_fname}'")
     logging.info(f"Successfully loaded model {params['name']}")
     logging.info(vae)
@@ -196,9 +198,12 @@ def reconstruct_with_model(data, params_json, N=-1, num_resamples=1,
                 reconstructed_sentences[name].extend(recons)
             if verbose is True:
                 pbar.update(1)
+            else:
+                if i % 10 == 0:
+                    logging.info(f"({name}) {i}/{len(dataloader)}")
     return reconstructed_sentences
 
 
 if __name__ == "__main__":
     args = parse_args()
-    main(args.data_dir, args.params_json, args.logfile, max_n=args.N)
+    main(args.data_dir, args.params_json, args.logfile, max_n=args.N, verbose=args.verbose)

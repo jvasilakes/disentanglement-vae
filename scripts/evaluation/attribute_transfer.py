@@ -77,7 +77,7 @@ def get_source_examples_by_length(labs_batch, lens_batch, dataset,
                                   latent_name, id2labs_df):
     labs = labs_batch[latent_name].flatten().numpy().astype(int)
     labs = dataset.label_encoders[latent_name].inverse_transform(labs)
-    lengths = lens_batch.flatten().numpy().astype(int)
+    lengths = lens_batch.flatten().cpu().numpy().astype(int)
 
     samples = []
     for (lab, length) in zip(labs, lengths):
@@ -117,10 +117,10 @@ def run_transfer(model, dataloader, params, id2labs_df, verbose=False):
             trg_texts.append(' '.join(toks))
 
         for latent_name in model.discriminators.keys():
-            #src_batch = get_source_examples(
-            #    Ybatch, dataloader.dataset, latent_name, id2labs_df)
-            src_batch = get_source_examples_by_length(
-                Ybatch, lengths, dataloader.dataset, latent_name, id2labs_df)
+            src_batch = get_source_examples(
+                Ybatch, dataloader.dataset, latent_name, id2labs_df)
+            #src_batch = get_source_examples_by_length(
+            #    Ybatch, lengths, dataloader.dataset, latent_name, id2labs_df)
             src_Xbatch, _, src_Ybatch, src_lengths, src_batch_ids = src_batch
             src_Xbatch = src_Xbatch.to(model.device)
             src_lengths = src_lengths.to(model.device)
