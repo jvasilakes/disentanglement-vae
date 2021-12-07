@@ -30,13 +30,9 @@ def parse_args():
                                 help="Parameter file specifying model.")
     compute_parser.add_argument("outfile", type=str,
                                 help="Where to save results.")
-    compute_parser.add_argument("dataset", type=str,
-                                choices=["train", "dev", "test"],
+    compute_parser.add_argument("dataset", type=str, choices=["train", "dev"],
                                 help="Which dataset to run on.")
-    compute_parser.add_argument("--verbose", action="store_true",
-                                default=False)
-    compute_parser.add_argument("--add_padding_token", action="store_true",
-                                default=False)
+    compute_parser.add_argument("--verbose", action="store_true", default=False)
 
     summ_parser = subparsers.add_parser("summarize")
     summ_parser.set_defaults(cmd="summarize")
@@ -73,25 +69,6 @@ def get_source_examples(labs_batch, dataset, latent_name, id2labs_df):
     return batch
 
 
-def get_source_examples_by_length(labs_batch, lens_batch, dataset,
-                                  latent_name, id2labs_df):
-    labs = labs_batch[latent_name].flatten().numpy().astype(int)
-    labs = dataset.label_encoders[latent_name].inverse_transform(labs)
-    lengths = lens_batch.flatten().numpy().astype(int)
-
-    samples = []
-    for (lab, length) in zip(labs, lengths):
-        opposites = id2labs_df[id2labs_df[latent_name] != lab]
-        examples = [dataset.get_by_id(uuid) for uuid in opposites.index]
-        np.random.shuffle(examples)  # shuffle so we don't overuse examples
-        for example in examples:
-            if abs(len(example[0].flatten()) - length) <= 3:
-                samples.append(example)
-                break
-    batch = utils.pad_sequence_denoising(samples)
-    return batch
-
-
 def run_transfer(model, dataloader, params, id2labs_df, verbose=False):
     model.eval()
     results = []
@@ -117,20 +94,17 @@ def run_transfer(model, dataloader, params, id2labs_df, verbose=False):
             trg_texts.append(' '.join(toks))
 
         for latent_name in model.discriminators.keys():
-            #src_batch = get_source_examples(
-            #    Ybatch, dataloader.dataset, latent_name, id2labs_df)
-            src_batch = get_source_examples_by_length(
-                Ybatch, lengths, dataloader.dataset, latent_name, id2labs_df)
+            src_batch = get_source_examples(
+                Ybatch, dataloader.dataset, latent_name, id2labs_df)
             src_Xbatch, _, src_Ybatch, src_lengths, src_batch_ids = src_batch
             src_Xbatch = src_Xbatch.to(model.device)
             src_lengths = src_lengths.to(model.device)
             src_output = model(src_Xbatch, src_lengths, teacher_forcing_prob=0.0)  # noqa
 
             # Transfer the latent
-            trg_params = {latent_name: param.z.clone() for (latent_name, param)
-                          in trg_output["latent_params"].items()}
-            trg_params[latent_name] = src_output["latent_params"][latent_name].z.clone()  # noqa
-            z = torch.cat(list(trg_params.values()), dim=1)
+            trg_output["latent_params"][latent_name] = src_output["latent_params"][latent_name]  # noqa
+            zs = [param.z for param in trg_output["latent_params"].values()]
+            z = torch.cat(zs, dim=1)
             # Decode from it
             max_length = in_Xbatch.size(-1)
             trans_output = model.sample(z, max_length=max_length)
@@ -188,23 +162,6 @@ def run_transfer(model, dataloader, params, id2labs_df, verbose=False):
     return results
 
 
-def add_word_to_sentences(sents, labels):
-    ext_sents = []
-    word = "unk"
-    for (sent, lab) in zip(sents, labels):
-        add_word = False
-        if lab["polarity"] == "positive":
-            add_word = True
-        if lab["uncertainty"] == "certain":
-            add_word = True
-        if add_word is False:
-            ext_sents.append(sent)
-        else:
-            sent.insert(-2, word)  # insert before EOS and presumed punctuation
-            ext_sents.append(sent)
-    return ext_sents
-
-
 def compute(args):
     logging.basicConfig(level=logging.INFO)
 
@@ -229,22 +186,16 @@ def compute(args):
         train_file, N=params["num_train_examples"], label_keys=label_keys)
     train_sents, train_labs, train_ids, train_lab_counts = tmp
     train_sents = data_utils.preprocess_sentences(train_sents, SOS, EOS)
-    if args.add_padding_token is True:
-        train_sents = add_word_to_sentences(train_sents, train_labs)
     train_labs, label_encoders = data_utils.preprocess_labels(train_labs)
 
     # Read validation data
-    if args.dataset in ["dev", "test"]:
-        eval_file = os.path.join(params["data_dir"], f"{args.dataset}.jsonl")
-        print(f"Evaluating on {eval_file}")
-        tmp = data_utils.get_sentences_labels(eval_file, label_keys=label_keys)
-        eval_sents, eval_labs, eval_ids, eval_lab_counts = tmp
-        eval_sents = data_utils.preprocess_sentences(eval_sents, SOS, EOS)
-        if args.add_padding_token is True:
-            eval_sents = add_word_to_sentences(eval_sents, eval_labs)
-        # Use the label encoders fit on the train set
-        eval_labs, _ = data_utils.preprocess_labels(
-                eval_labs, label_encoders=label_encoders)
+    dev_file = os.path.join(params["data_dir"], "dev.jsonl")
+    tmp = data_utils.get_sentences_labels(dev_file, label_keys=label_keys)
+    dev_sents, dev_labs, dev_ids, dev_lab_counts = tmp
+    dev_sents = data_utils.preprocess_sentences(dev_sents, SOS, EOS)
+    # Use the label encoders fit on the train set
+    dev_labs, _ = data_utils.preprocess_labels(
+            dev_labs, label_encoders=label_encoders)
 
     vocab_path = os.path.join(logdir, "vocab.txt")
     vocab = [word.strip() for word in open(vocab_path)]
@@ -272,14 +223,14 @@ def compute(args):
 
     if args.dataset == "train":
         labs_df = pd.DataFrame(train_labs, index=train_ids)
-    elif args.dataset in ["dev", "test"]:
+    elif args.dataset == "dev":
         data = data_utils.DenoisingTextDataset(
-                eval_sents, eval_sents, eval_labs, eval_ids,
+                dev_sents, dev_sents, dev_labs, dev_ids,
                 word2idx, label_encoders)
         dataloader = torch.utils.data.DataLoader(
                 data, shuffle=True, batch_size=params["batch_size"],
                 collate_fn=utils.pad_sequence_denoising)
-        labs_df = pd.DataFrame(eval_labs, index=eval_ids)
+        labs_df = pd.DataFrame(dev_labs, index=dev_ids)
 
     sos_idx = word2idx[SOS]
     eos_idx = word2idx[EOS]
