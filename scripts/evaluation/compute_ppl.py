@@ -201,4 +201,5 @@ def reconstruct_with_model(data, params_json, N=-1, num_resamples=1,
 
 if __name__ == "__main__":
     args = parse_args()
-    main(args.data_dir, args.params_json, args.logfile, max_n=args.N)
+    main(args.data_dir, args.params_json, args.logfile,
+         max_n=args.N, verbose=args.verbose)
