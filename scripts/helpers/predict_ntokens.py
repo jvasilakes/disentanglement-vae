@@ -7,6 +7,7 @@ from itertools import combinations
 
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 from sklearn.linear_model import LinearRegression
 
 from vae import data_utils
@@ -47,7 +48,7 @@ def main(args):
     r2s = {}
     coefs = {}
     intercepts = {}
-    for latent_names in latent_name_combos:
+    for latent_names in tqdm(latent_name_combos):
         Z = None
         for name in latent_names:
             zfile = latent_2_zfile[name]
@@ -104,7 +105,7 @@ def get_last_epoch(directory):
 def get_latent_names(filenames):
     latent_names = []
     for fname in filenames:
-        name = re.findall(r'.*_(\w+)_[0-9]+.log', fname)[0]
+        name = re.findall(r'.*?_(\w+)_[0-9]+.log', fname)[0]
         latent_names.append(name)
     return latent_names
 
