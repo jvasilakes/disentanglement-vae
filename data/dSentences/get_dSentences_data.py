@@ -5,11 +5,16 @@ import numpy as np
 from tqdm import tqdm
 from hashlib import md5
 
+from sklearn.model_selection import train_test_split
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("infile", type=str, help="path to dSentences.npz")
     parser.add_argument("outdir", type=str, help="where to save result")
+    parser.add_argument("--split_on", type=str,
+                        choices=["content", "factors", "random"],
+                        help="How to split into train/dev/test.")
     return parser.parse_args()
 
 
@@ -19,8 +24,8 @@ def main(args):
     labels = dataset["latents_classes"]
     # Don't use dataset["metadata"] to get the latent names,
     #    as they are out of order there.
-    latent_names = ["verb_obj_tuple", "obj_sing_pl", "gender",
-                    "subj_sing_pl", "sent_type", "nr_person",
+    latent_names = ["verb_obj_tuple", "obj_sing_pl", "sent_type",
+                    "gender", "subj_sing_pl", "nr_person",
                     "pos_neg_verb", "verb_tense", "verb_style"]
 
     examples = []
@@ -37,16 +42,46 @@ def main(args):
     metadata = dataset['metadata'][()]
     latents_sizes = metadata['latent_sizes']
     n_syntaxes = np.product(latents_sizes[1:])
-    # original dataset processing code splits up the generative factors,
-    #    but I split by sentence content
-    n_chunks = len(sents) / n_syntaxes
-    n_train_chunks = int(n_chunks * train_split)
-    n_train_sents = n_train_chunks * n_syntaxes
-    n_dev_chunks = int((n_chunks - n_train_chunks) / 2)
-    n_dev_sents = n_dev_chunks * n_syntaxes
-    trainset = examples[:n_train_sents]
-    devset = examples[n_train_sents:(n_train_sents+n_dev_sents)]
-    testset = examples[n_train_sents+n_dev_sents:]
+    if args.split_on == "content":
+        n_chunks = len(examples) / n_syntaxes
+        n_train_chunks = int(n_chunks * train_split)
+        train_idxs = list(range(n_train_chunks * n_syntaxes))
+        n_dev_chunks = int((n_chunks - n_train_chunks) / 2)
+        dev_start_idx = train_idxs[-1] + 1
+        dev_end_idx = dev_start_idx + (n_dev_chunks * n_syntaxes)
+        dev_idxs = list(range(dev_start_idx, dev_end_idx))
+        test_start_idx = dev_idxs[-1] + 1
+        test_idxs = list(range(test_start_idx, len(examples)))
+
+        trainset = [examples[i] for i in train_idxs]
+        devset = [examples[i] for i in dev_idxs]
+        testset = [examples[i] for i in test_idxs]
+
+    elif args.split_on == "factors":
+        raise NotImplementedError("Still working on it...")
+        train_chunksize = int(np.floor(n_syntaxes * train_split))
+        dev_chunksize = int((n_syntaxes - train_chunksize) / 2)
+        test_chunksize = n_syntaxes - train_chunksize - dev_chunksize
+        train_idxs = []
+        dev_idxs = []
+        test_idxs = []
+        for i in range(0, len(examples), n_syntaxes):
+            train_idxs.extend(list(range(i, i + train_chunksize)))
+            dev_idxs.extend(list(range(i + train_chunksize,
+                                       i + train_chunksize + dev_chunksize)))
+            test_idxs.extend(list(range(
+                i + train_chunksize + dev_chunksize,
+                i + train_chunksize + dev_chunksize + test_chunksize)))
+        trainset = [examples[i] for i in train_idxs]
+        devset = [examples[i] for i in dev_idxs]
+        testset = [examples[i] for i in test_idxs]
+
+    elif args.split_on == "random":
+        trainset, eval_tmp = train_test_split(
+            examples, train_size=train_split, shuffle=True, random_state=0)
+        devset, testset = train_test_split(
+            eval_tmp, train_size=0.5, shuffle=True, random_state=0)
+
     print(f"Train: {len(trainset)}, Dev: {len(devset)}, Test: {len(testset)}")
     print("Total: ", len(trainset) + len(devset) + len(testset))
 
