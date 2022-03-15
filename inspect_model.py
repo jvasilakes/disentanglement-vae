@@ -285,12 +285,13 @@ def main(params_file):
     utils.set_seed(params["random_seed"])
 
     logdir = os.path.join("logs", params["name"])
-    print(f"LOGDIR: {logdir}")
+    logging.info(f"LOGDIR: {logdir}")
 
     ckpt_dir = os.path.join(params["checkpoint_dir"], params["name"])
     if not os.path.isdir(ckpt_dir):
         raise OSError(f"No model found at {params['checkpoint_dir']}")
 
+    logging.info(f"DATADIR: {params['data_dir']}")
     # Load the train data so we can fully specify the model
     train_file = os.path.join(params["data_dir"], "train.jsonl")
     tmp = data_utils.get_sentences_labels(
@@ -327,11 +328,11 @@ def main(params_file):
     ckpt_dir = os.path.join(params["checkpoint_dir"], params["name"])
     if not os.path.isdir(ckpt_dir):
         raise OSError(f"No checkpoint found at '{ckpt_dir}'!")
+    logging.info(f"Getting latest checkpoint at '{ckpt_dir}'")
     vae, optimizer, start_epoch, ckpt_fname = utils.load_latest_checkpoint(
             vae, optimizer, ckpt_dir, map_location=DEVICE)
     logging.info(f"Loaded checkpoint from '{ckpt_fname}'")
 
-    logging.info(f"Successfully loaded model {params['name']}")
     logging.info(vae)
     vae.eval()
 

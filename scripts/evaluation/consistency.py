@@ -44,7 +44,7 @@ def parse_args():
                                 required=False,
                                 help="""Number of times to resample Z and
                                         decode for a given input example.""")
-    compute_parser.add_argument("--verbose", action="store_true", default=False,
+    compute_parser.add_argument("--verbose", action="store_true", default=False,  # noqa
                                 help="""Show a progress bar.""")
 
     summ_parser = subparsers.add_parser("summarize")
@@ -79,11 +79,17 @@ def compute(args):
         raise OSError(f"No model found at {params['checkpoint_dir']}")
 
     # Load the train data so we can fully specify the model
+    logging.info("Loading train dataset")
     train_file = os.path.join(params["data_dir"], "train.jsonl")
     N = params["num_train_examples"]
     if args.dataset in ["dev", "test"]:
         N = -1
-    tmp = data_utils.get_sentences_labels(train_file, N=N)
+    # Only load the generative factors modeled
+    label_keys = [key for key in params["latent_dims"].keys()
+                  if key != "total"]
+    logging.info(f"Measuring model consistency on the following factors: \n {label_keys}")  # noqa
+    tmp = data_utils.get_sentences_labels(
+        train_file, N=N, label_keys=label_keys)
     train_sents, train_labs, train_ids, train_lab_counts = tmp
     train_sents = data_utils.preprocess_sentences(train_sents, SOS, EOS)
     train_labs, label_encoders = data_utils.preprocess_labels(train_labs)
@@ -103,7 +109,7 @@ def compute(args):
         eval_file = os.path.join(params["data_dir"], f"{args.dataset}.jsonl")
         logging.info(f"Evaluating on {eval_file}")
         tmp = data_utils.get_sentences_labels(
-            eval_file, N=-1)
+            eval_file, N=-1, label_keys=label_keys)
         eval_sents, eval_labs, eval_ids, eval_lab_counts = tmp
         eval_sents = data_utils.preprocess_sentences(eval_sents, SOS, EOS)
         eval_labs, _ = data_utils.preprocess_labels(
@@ -147,7 +153,9 @@ def compute(args):
 
     true_labels = defaultdict(list)
     list_fn = lambda: [[] for _ in range(args.num_resamples)]  # noqa
+    # predictions given the input
     latent_predictions = defaultdict(list_fn)
+    # predictions given the re-encoded input
     latent_predictions_hat = defaultdict(list_fn)
     bleus = list_fn()
     if args.verbose is True:

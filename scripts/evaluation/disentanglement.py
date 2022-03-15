@@ -26,8 +26,12 @@ def parse_args():
 
     test_parser = subparsers.add_parser("test")
     test_parser.set_defaults(test=True, compute=False, summarize=False)
-    test_parser.add_argument("-N", type=int, default=100000, required=False,
-                             help="""Number of samples to use.""")
+    test_parser.add_argument("-N", type=int, default=100000,
+                             help="Number of samples to use.")
+    test_parser.add_argument("-K", type=int, default=2,
+                             help="Number of classes.")
+    test_parser.add_argument("--n_features", type=int, default=1,
+                             help="Number of features.")
 
     compute_parser = subparsers.add_parser("compute")
     compute_parser.set_defaults(test=False, compute=True, summarize=False)
@@ -251,8 +255,8 @@ def compute_entropy_oracle(xs):
 
 
 def compute_joint_entropy_oracle(zs, vs):
-    zs = zs.flatten()
-    df = pd.DataFrame(np.array(list(zip(zs, vs))))
+    vs = vs.reshape(-1, 1)
+    df = pd.DataFrame(np.concatenate((zs, vs), axis=1))
     probs = df.groupby(list(df.columns)).size().div(len(df))
     H = -np.sum(probs.values * np.log(probs.values))
     return H
@@ -291,50 +295,84 @@ def compute_migs(mi_dict, Hvs):
 #    Testing functions
 # ===========================
 
-def test_random(N, n_features=1):
+def test_random(N, K, n_features=1):
     zs = np.random.randn(N, n_features)
-    vs = np.random.binomial(1, 0.5, size=N)
-    clf = LogisticRegression(random_state=10, class_weight="balanced",
-                             penalty="none").fit(zs, vs)
-    print("LR accuracy: ", clf.score(zs, vs))
-    Hv = compute_entropy_freq(vs)
-    print("H[v]: ", Hv)
-    MI = compute_mi(zs, vs, discrete_z=False)
-    print("MI: ", MI)
-
-
-def test_kinda_predictive(N, n_features=1):
-    zs = np.random.randn(N, n_features)
-    vs = np.array([0 if z[0] < 0.0 else 1 for z in zs])
-    idxs = np.random.randint(0, len(vs), size=int(N//5))
-    vs[idxs] = np.logical_not(vs[idxs]).astype(int)
-    clf = LogisticRegression(random_state=10, class_weight="balanced",
-                             penalty="none").fit(zs, vs)
-    print("LR accuracy: ", clf.score(zs, vs))
-    Hv = compute_entropy_freq(vs)
-    print("H[v]: ", Hv)
-    MI = compute_mi(zs, vs, discrete_z=False)
-    print("MI: ", MI)
-
-
-def test_predictive(N, n_features=1):
-    zs = np.random.randn(N, n_features)
-    vs = [0 if z[0] < 0.0 else 1 for z in zs]
-    clf = LogisticRegression(random_state=10, class_weight="balanced",
-                             penalty="none").fit(zs, vs)
-    print("LR accuracy: ", clf.score(zs, vs))
-    Hv = compute_entropy_freq(vs)
-    print("H[v]: ", Hv)
-    MI = compute_mi(zs, vs, discrete_z=False)
-    print("MI: ", MI)
-
-
-def test_bijective(N, predictive=False):
-    zs = np.random.binomial(1, 0.5, N)
-    if predictive is True:
-        vs = [0 if z[0] == 1 else 1 for z in zs]
+    if K < 2:
+        raise ValueError("K must be >1")
+    elif K == 2:
+        vs = np.random.binomial(1, 0.5, size=N)
     else:
-        vs = np.random.binomial(1, 0.5, N)
+        vs = np.random.dirichlet([0.5]*K, size=N).argmax(axis=1)
+    clf = LogisticRegression(random_state=10, class_weight="balanced",
+                             penalty="none").fit(zs, vs)
+    print("LR accuracy: ", clf.score(zs, vs))
+    Hv = compute_entropy_freq(vs)
+    print("H[v]: ", Hv)
+    MI = compute_mi(zs, vs, discrete_z=False)
+    print("MI: ", MI)
+
+
+def test_kinda_predictive(N, K, n_features=1):
+    if K < 2:
+        raise ValueError("K must be >1")
+    zs = np.random.uniform(-K, K, size=(N, n_features))
+
+    # For simplicitly, only use the first dimension for classification
+    zs_d0 = zs[:, 0]
+    stepsize = (zs_d0.max() - zs_d0.min()) / K
+    thresholds = [zs_d0.min() + stepsize * (i+1) for i in range(K)]
+    thresholds[-1] = zs_d0.max()
+    vs = []
+    for z in zs_d0:
+        for i in range(K):
+            if z <= thresholds[i]:
+                break
+        vs.append(i)
+    vs = np.array(vs)
+
+    idxs = np.random.randint(0, len(vs), size=int(N//5))
+    vs[idxs] = np.random.randint(0, K, size=int(N//5))
+    clf = LogisticRegression(random_state=10, class_weight="balanced",
+                             penalty="none").fit(zs, vs)
+    print("LR accuracy: ", clf.score(zs, vs))
+    Hv = compute_entropy_freq(vs)
+    print("H[v]: ", Hv)
+    MI = compute_mi(zs, vs, discrete_z=False)
+    print("MI: ", MI)
+
+
+def test_predictive(N, K, n_features=1):
+    if K < 2:
+        raise ValueError("K must be >1")
+    zs = np.random.uniform(-K, K, size=(N, n_features))
+    zs_d0 = zs[:, 0]
+    stepsize = (zs_d0.max() - zs_d0.min()) / K
+    thresholds = [zs_d0.min() + stepsize * (i+1) for i in range(K)]
+    thresholds[-1] = zs_d0.max()
+    vs = []
+    for z in zs_d0:
+        for i in range(K):
+            if z <= thresholds[i]:
+                break
+        vs.append(i)
+    vs = np.array(vs)
+    clf = LogisticRegression(random_state=10, class_weight="balanced",
+                             penalty="none").fit(zs, vs)
+    print("LR accuracy: ", clf.score(zs, vs))
+    Hv = compute_entropy_freq(vs)
+    print("H[v]: ", Hv)
+    MI = compute_mi(zs, vs, discrete_z=False)
+    print("MI: ", MI)
+
+
+def test_bijective(N, K, n_features=1, predictive=False):
+    if K < 2:
+        raise ValueError("K must be >1")
+    vs = np.random.randint(0, K, size=N)
+    if predictive is True:
+        zs = vs
+    else:
+        zs = np.random.randint(0, K, size=N)
     zs = zs.reshape(-1, 1)
     clf = LogisticRegression(random_state=10, class_weight="balanced",
                              penalty="none").fit(zs, vs)
@@ -345,12 +383,14 @@ def test_bijective(N, predictive=False):
     print("MI: ", MI)
 
 
-def test_bijective_oracle(N, predictive=False):
-    zs = np.random.binomial(1, 0.5, N)
+def test_bijective_oracle(N, K, n_features=1, predictive=False):
+    if K < 2:
+        raise ValueError("K must be >1")
+    vs = np.random.randint(0, K, size=N)
     if predictive is True:
-        vs = [0 if z == 1 else 1 for z in zs]
+        zs = vs.reshape(-1, 1).repeat(n_features, axis=1)
     else:
-        vs = np.random.binomial(1, 0.5, N)
+        zs = np.random.randint(0, K, size=(N, n_features))
     Hz = compute_entropy_oracle(zs)
     Hv = compute_entropy_oracle(vs)
     Hvz = compute_joint_entropy_oracle(zs, vs)
@@ -455,26 +495,26 @@ def summarize_preds(preds_df):
 
 if __name__ == "__main__":
     args = parse_args()
-    n_feats = 1
     if args.test is True:
-        print("RANDOM")
-        test_random(args.N, n_feats)
-        print("KINDA PREDICTIVE")
-        test_kinda_predictive(args.N, n_feats)
-        print("PREDICTIVE")
-        test_predictive(args.N, n_feats)
-        print()
         print("BIJECTIVE ORACLE")
         print("  random")
-        test_bijective_oracle(args.N)
+        test_bijective_oracle(args.N, args.K, args.n_features)
         print("  predictive")
-        test_bijective_oracle(args.N, predictive=True)
+        test_bijective_oracle(args.N, args.K, args.n_features, predictive=True)
         print()
         print("BIJECTIVE")
         print("  random")
-        test_bijective(args.N)
+        test_bijective(args.N, args.K)
         print("  predictive")
-        test_bijective(args.N, predictive=True)
+        test_bijective(args.N, args.K, predictive=True)
+        print()
+        print()
+        print("RANDOM")
+        test_random(args.N, args.K, args.n_features)
+        print("KINDA PREDICTIVE")
+        test_kinda_predictive(args.N, args.K, args.n_features)
+        print("PREDICTIVE")
+        test_predictive(args.N, args.K, args.n_features)
         print()
     elif args.compute is True:
         compute(args)
