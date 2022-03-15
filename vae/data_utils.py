@@ -187,7 +187,7 @@ class DenoisingTextDataset(torch.utils.data.Dataset):
         return self[idx]
 
     def __len__(self):
-        return len(self.orig_Xs)
+        return len(self.orig_docs)
 
     @property
     def y_dims(self):
