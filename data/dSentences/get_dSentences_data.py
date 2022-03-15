@@ -110,7 +110,7 @@ def get_verb_object_annotations(examples, object_tokens):
     """
     The default dSentences annotations lump the verb and object together into
     a single annotation, which makes it impossible to model them separately.
-    This script generates separate annoatations for verb and object.
+    This function generates separate annoatations for verb and object.
 
     :param dict examples: full dataset in JSON format
     :param list object_tokens: list of object strings
