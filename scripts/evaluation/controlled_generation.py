@@ -2,11 +2,13 @@ import os
 import json
 import logging
 import argparse
+import warnings
 from collections import Counter, defaultdict
 
 import torch
 import numpy as np
 from tqdm import tqdm
+from sklearn.metrics import precision_recall_fscore_support, accuracy_score
 
 from vae import utils, data_utils, model
 
@@ -45,52 +47,6 @@ def parse_args():
     return parser.parse_args()
 
 
-def get_source_examples(labs_batch, dataset, latent_name, id2labs_df):
-    labs = labs_batch[latent_name].flatten().numpy().astype(int)
-    labs_decoded = dataset.label_encoders[latent_name].inverse_transform(labs)
-    encoded_value_counts = Counter(labs_decoded)
-
-    idx2example = {}
-    for (value, count) in encoded_value_counts.items():
-        encoded_value = dataset.label_encoders[latent_name].transform([value])[0]  # noqa
-        # Get the idxs of the examples in the batch that we need to
-        #   find source examples for.
-        idxs = np.argwhere(labs == encoded_value).flatten()
-        # Get the IDs of the corresponding number of source examples
-        #  with a different value than the target.
-        samples = id2labs_df[id2labs_df[latent_name] != value].sample(count)
-        # Get the processed examples corresponding to those IDs.
-        examples = [dataset.get_by_id(uuid) for uuid in samples.index]
-        for (idx, ex) in zip(idxs, examples):
-            idx2example[idx] = ex
-
-    # When the above for loop is finished, we should have an example for each
-    # index.
-    ordered_examples = [idx2example[i] for i in range(len(idx2example))]
-    # So we just have to turn it into a batch that can be fed into the model.
-    batch = utils.pad_sequence_denoising(ordered_examples)
-    return batch
-
-
-def get_source_examples_by_length(labs_batch, lens_batch, dataset,
-                                  latent_name, id2labs_df):
-    labs = labs_batch[latent_name].flatten().numpy().astype(int)
-    labs = dataset.label_encoders[latent_name].inverse_transform(labs)
-    lengths = lens_batch.flatten().numpy().astype(int)
-
-    samples = []
-    for (lab, length) in zip(labs, lengths):
-        opposites = id2labs_df[id2labs_df[latent_name] != lab]
-        examples = [dataset.get_by_id(uuid) for uuid in opposites.index]
-        np.random.shuffle(examples)  # shuffle so we don't overuse examples
-        for example in examples:
-            if abs(len(example[0].flatten()) - length) <= 3:
-                samples.append(example)
-                break
-    batch = utils.pad_sequence_denoising(samples)
-    return batch
-
-
 def run_generation(vae, dataloader, params, mean_zs, verbose=False):
     """
     mean_zs is a dict {latent_name: {encoded_label: mean_z_value}}
@@ -105,11 +61,11 @@ def run_generation(vae, dataloader, params, mean_zs, verbose=False):
         in_Xbatch = in_Xbatch.to(vae.device)
         out_Xbatch = out_Xbatch.to(vae.device)
         lengths = lengths.to(vae.device)
-        # trg_output = {"decoder_logits": [batch_size, target_length, vocab_size]  # noqa
-        #           "latent_params": [Params(z, mu, logvar)] * batch_size
-        #           "dsc_logits": {latent_name: [batch_size, n_classes]}
-        #           "adv_logits": {latent_name-label_name: [batch_size, n_classes]}  # noqa
-        #           "token_predictions": [batch_size, target_length]
+        # trg_output = {"decoder_logits": [batch_size, target_length, vocab_size]
+        #               "latent_params": [Params(z, mu, logvar)] * batch_size
+        #               "dsc_logits": {latent_name: [batch_size, n_classes]}
+        #               "adv_logits": {latent_name-label_name: [batch_size, n_classes]}
+        #               "token_predictions": [batch_size, target_length]
         trg_output = vae(in_Xbatch, lengths, teacher_forcing_prob=0.0)
 
         trg_texts = []
@@ -160,8 +116,12 @@ def run_generation(vae, dataloader, params, mean_zs, verbose=False):
                     true_labs = Ybatch[lat_name].flatten().int().tolist()
                 # Log the predictions
                 for j in range(batch_size):
-                    pred_data[j][lat_name] = {"target": true_labs[j],
-                                              "output": preds[j]}
+                    dec_trg = dataloader.dataset.label_encoders[lat_name].inverse_transform([true_labs[j]])
+                    dec_prd = dataloader.dataset.label_encoders[lat_name].inverse_transform([preds[j]])
+                    #pred_data[j][lat_name] = {"target": true_labs[j],
+                    #                          "output": preds[j]}
+                    pred_data[j][lat_name] = {"target": dec_trg[0],
+                                              "output": dec_prd[0]}
             for j in range(batch_size):
                 row = {"transferred_latent": latent_name,
                        "input": trg_texts[j],
@@ -223,6 +183,10 @@ def compute(args):
     if args.add_padding_token is True:
         train_sents = add_word_to_sentences(train_sents, train_labs)
     train_labs, label_encoders = data_utils.preprocess_labels(train_labs)
+    print("LABEL ENCODING")
+    for (latent, enc) in label_encoders.items():
+        print(latent)
+        print(list(zip(enc.classes_, enc.transform(enc.classes_))))
 
     # Read validation data
     if args.dataset in ["dev", "test"]:
@@ -280,6 +244,8 @@ def compute(args):
         raise OSError(f"No checkpoint found at '{ckpt_dir}'!")
     vae, _, start_epoch, ckpt_fname = utils.load_latest_checkpoint(
         vae, optimizer, ckpt_dir, map_location=DEVICE)
+    if ckpt_fname is None:
+        raise OSError(f"No checkpoints found in {ckpt_dir}")
     print(f"Loaded checkpoint from '{ckpt_fname}'")
     print(vae)
 
@@ -321,25 +287,39 @@ def summarize(args):
 
     predictions = defaultdict(lambda: defaultdict(list))
     for result in results:
-        # The latent that was transferred
-        latent = result["latent"]
+        latent = result["transferred_latent"]
         for (label_type, preds) in result["predictions"].items():
-            true = preds["true"]
-            pred = preds["pred"]
-            predictions[latent][label_type].append(true == pred)
+            true = preds["target"]
+            pred = preds["output"]
+            predictions[latent][label_type].append((true, pred))
 
     print()
     for (trns_latent, label_type_preds) in predictions.items():
         print(f"   Transfering {trns_latent}")
-        print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        print("|  Prediction  |  Accuracy  |")
-        print("|---------------------------|")
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        print("|    Prediction      |   P   |   R   |   F   |  Acc  |")
+        print("|----------------------------------------------------|")
         for (label_type, preds) in label_type_preds.items():
-            acc = sum(preds) / len(preds)
-            print(f"|{label_type:^14}|{acc:^12.4f}|")
-        print(" --------------------------- ")
+            y = np.array([p[0] for p in preds])
+            y_hat = np.array([p[1] for p in preds])
+            accs = []
+            for l in [0, 1]:
+                idxs = np.where(y == l)
+                y_ = y[idxs]
+                y_hat_ = y_hat[idxs]
+                accs.append(accuracy_score(y_, y_hat_))
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                ps, rs, fs, _ = precision_recall_fscore_support(y, y_hat, average=None, labels=[0, 1])
+            for (p, r, f, a, l) in zip(ps, rs, fs, accs, [0, 1]):
+                # l is the true label. That is, what we want to change the input *to*.
+                if label_type == trns_latent:
+                    lab = f"{label_type}_{abs(1-l)}->{l}"
+                else:
+                    lab = f"{label_type}_{l}"
+                print(f"|{lab:^20}|{p:^7.3f}|{r:^7.3f}|{f:^7.3f}|{a:^7.3f}|")
+        print("------------------------------------------------------")
         print()
-
 
 if __name__ == "__main__":
     args = parse_args()

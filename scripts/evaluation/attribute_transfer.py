@@ -104,9 +104,6 @@ def run_transfer(model, dataloader, params, id2labs_df, verbose=False):
             src_output = model(src_Xbatch, src_lengths, teacher_forcing_prob=0.0)  # noqa
 
             # Transfer the latent
-            # trg_output["latent_params"][latent_name] = src_output["latent_params"][latent_name]  # noqa
-            # zs = [param.z for param in trg_output["latent_params"].values()]
-            # z = torch.cat(zs, dim=1)
             trg_params = {latent_name: param.z.clone() for (latent_name, param)
                           in trg_output["latent_params"].items()}
             trg_params[latent_name] = src_output["latent_params"][latent_name].z.clone()  # noqa
@@ -267,23 +264,26 @@ def summarize(args):
 
     predictions = defaultdict(lambda: defaultdict(list))
     for result in results:
-        # The latent that was transferred
         latent = result["latent"]
         for (label_type, preds) in result["predictions"].items():
             true = preds["true"]
             pred = preds["pred"]
+            if label_type == latent:
+                label_type = f"{label_type}: {str(true)}->{str(abs(1-true))}"
+            else:
+                label_type = f"{label_type}: {str(true)}"
             predictions[latent][label_type].append(true == pred)
 
     print()
     for (trns_latent, label_type_preds) in predictions.items():
         print(f"   Transfering {trns_latent}")
-        print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        print("|  Prediction  |  Accuracy  |")
-        print("|---------------------------|")
+        print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        print("|    Prediction      |  Accuracy  |")
+        print("|---------------------------------|")
         for (label_type, preds) in label_type_preds.items():
             acc = sum(preds) / len(preds)
-            print(f"|{label_type:^14}|{acc:^12.4f}|")
-        print(" --------------------------- ")
+            print(f"|{label_type:^20}|{acc:^12.4f}|")
+        print(" --------------------------------- ")
         print()
 
 

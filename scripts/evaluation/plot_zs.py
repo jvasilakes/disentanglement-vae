@@ -51,21 +51,21 @@ def main(args):
     fig = plt.figure(constrained_layout=True)
     gs = fig.add_gridspec(ncols=2, nrows=2, width_ratios=[1, 1], height_ratios=[1, 1])
     ax_neg = fig.add_subplot(gs[0, 0])
-    ax_neg.set_title("Negation")
+    ax_neg.set_title("Negation", fontdict={"fontsize": 18})
     #ax_neg.set_xticks([])
     ax_neg.set_yticks([])
     ax_unc = fig.add_subplot(gs[0, 1])
-    ax_unc.set_title("Uncertainty")
+    ax_unc.set_title("Uncertainty", fontdict={"fontsize": 18})
     #ax_unc.set_xticks([])
     ax_unc.set_yticks([])
     ax_con_neg = fig.add_subplot(gs[1, 0])
     ax_con_neg.set_aspect(1)
-    ax_con_neg.set_title("Content - Negation")
+    ax_con_neg.set_title("Content - Negation", fontdict={"fontsize": 18})
     ax_con_neg.set_xticks([])
     ax_con_neg.set_yticks([])
     ax_con_unc = fig.add_subplot(gs[1, 1])
     ax_con_unc.set_aspect(1)
-    ax_con_unc.set_title("Content - Uncertainty")
+    ax_con_unc.set_title("Content - Uncertainty", fontdict={"fontsize": 18})
     ax_con_unc.set_xticks([])
     ax_con_unc.set_yticks([])
 
@@ -88,7 +88,7 @@ def plot_negation(zs, labels, axis):
         mask = np.array(labels) == lab_val
         sns.histplot(zs[mask], color=colors[lab_val], alpha=0.8,
                      ax=axis, label=lab_val, linewidth=0)
-    axis.legend()
+    axis.legend(fontsize=14)
 
 
 def plot_uncertainty(zs, labels, axis):
@@ -99,7 +99,7 @@ def plot_uncertainty(zs, labels, axis):
         sns.histplot(zs[mask], color=colors[lab_val], alpha=0.8,
                      ax=axis, label=lab_val, linewidth=0)
         ci += 1
-    axis.legend()
+    axis.legend(fontsize=14)
 
 
 def plot_content_old(zs, labels_dict, axis):
@@ -125,6 +125,7 @@ def plot_content(zs, labels_dict, axis, variable="negation"):
                        variable: labels_dict[key]})
     sns.scatterplot(data=df, x="z0", y="z1", hue=variable,
                     hue_order=labels_dict[key][::-1], palette=colors, ax=axis)
+    axis.get_legend().remove()
 
 
 def get_last_epoch(directory):
