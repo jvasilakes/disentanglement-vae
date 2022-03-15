@@ -6,6 +6,7 @@ from collections import defaultdict
 
 # External packages
 import torch
+from tqdm import tqdm
 from sklearn.preprocessing import LabelEncoder
 
 
@@ -170,13 +171,16 @@ class DenoisingTextDataset(torch.utils.data.Dataset):
         self.word2idx = word2idx
         self.idx2word = {idx: word for (word, idx) in self.word2idx.items()}
         self.label_encoders = label_encoders
-        self.noisy_Xs = [self.doc2tensor(doc) for doc in self.noisy_docs]
-        self.orig_Xs = [self.doc2tensor(doc) for doc in self.orig_docs]
-        self.Ys = [self.label2tensor(lab) for lab in self.labels]
+        #self.noisy_Xs = [self.doc2tensor(doc) for doc in self.noisy_docs]
+        #self.orig_Xs = [self.doc2tensor(doc) for doc in self.orig_docs]
+        #self.Ys = [self.label2tensor(lab) for lab in self.labels]
 
     def __getitem__(self, idx):
-        return (self.noisy_Xs[idx], self.orig_Xs[idx],
-                self.Ys[idx], self.ids[idx])
+        noiseX = self.doc2tensor(self.noisy_docs[idx])
+        origX = self.doc2tensor(self.orig_docs[idx])
+        Y = self.label2tensor(self.labels[idx])
+        #return (self.noisy_Xs[idx], self.orig_Xs[idx],
+        return (noiseX, origX, Y[idx], self.ids[idx])
 
     def get_by_id(self, uuid):
         idx = self.ids.index(uuid)
@@ -222,13 +226,17 @@ class DenoisingTextDataset(torch.utils.data.Dataset):
         return tensorized
 
 
-def get_sentences_labels(path, label_keys=None, N=-1, shuffle=True):
+def get_sentences_labels(path, label_keys=None, N=-1,
+                         shuffle=True, prog_bar=False):
     sentence_ids = []
     sentences = []
     labels = []
     label_counts = defaultdict(lambda: defaultdict(int))
     with open(path, 'r') as inF:
-        for (i, line) in enumerate(inF):
+        dataiterator = enumerate(inF)
+        if prog_bar is True:
+            dataiterator = tqdm(dataiterator)
+        for (i, line) in dataiterator:
             data = json.loads(line)
             sentence_ids.append(data["id"])
             sentences.append(data["sentence"])
@@ -251,9 +259,13 @@ def get_sentences_labels(path, label_keys=None, N=-1, shuffle=True):
     return sentences[:N], labels[:N], sentence_ids[:N], label_counts
 
 
-def preprocess_sentences(sentences, SOS=None, EOS=None, lowercase=True):
+def preprocess_sentences(sentences, SOS=None, EOS=None,
+                         lowercase=True, prog_bar=False):
     sents = []
-    for sent in sentences:
+    dataiterator = sentences
+    if prog_bar is True:
+        dataiterator = tqdm(dataiterator)
+    for sent in dataiterator:
         sent = sent.strip()
         if lowercase is True:
             sent = sent.lower()
@@ -271,7 +283,7 @@ def reverse_sentences(sentences):
     return [sent[::-1] for sent in sentences]
 
 
-def preprocess_labels(labels, label_encoders={}):
+def preprocess_labels(labels, label_encoders={}, prog_bar=False):
     raw_labels_by_name = defaultdict(list)
     for label_dict in labels:
         for (label_name, lab) in label_dict.items():
@@ -279,7 +291,10 @@ def preprocess_labels(labels, label_encoders={}):
 
     label_encoders = dict()
     enc_labels_by_name = dict()
-    for (label_name, labs) in raw_labels_by_name.items():
+    dataiterator = raw_labels_by_name.items()
+    if prog_bar is True:
+        dataiterator = tqdm(dataiterator)
+    for (label_name, labs) in dataiterator:
         if label_name in label_encoders.keys():
             # We're passing in an already fit encoder
             le = label_encoders[label_name]
