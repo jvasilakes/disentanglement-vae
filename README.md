@@ -7,10 +7,11 @@ See `requirements.txt`.
 ### Installation
 
 ```
+git clone https://github.com/jvasilakes/disentanglement-vae.git
 python setup.py develop
 ```
 
-An example config file is at `config_example.json`. Check out `utils.validate_params()` for more documentation.
+An example config file is at `config_example.json`. Check out `vae.utils.validate_params()` for more documentation.
 Some things to note, the value of the `latent_dims` parameter is a mapping from label names (in the training data)
 to latent dimensions. The overall dimensionality of the model is specified using the `total` key. All other keys
 should match label names in the dataset. The number left over after subtracting the dimensionality of all labeled
@@ -38,13 +39,7 @@ tensorboard --logdir runs
 You can generate plots of the latent spaces using
 
 ```
-python scripts/evaluation/plot_zs.py zs_dir dataset latent_name outdir
-```
-
-For example, if your experiment is named `experiment1`,
-
-```
-python scripts/evaluation/plot_zs.py logs/experiment1/metadata/zs train polarity logs/experiment1/metadata/plots
+python scripts/evaluation/plot_zs.py --data_split {train,dev,test} /path/to/logdir/metadata/ /path/to/datadir/
 ```
 
 This produces a plot of the aggregated approximate posterior ∫q(z|x)p(x)dx for each dimension of the specified latent space.
@@ -72,17 +67,15 @@ python run.py experiment1_configs/config_epoch30.json --verbose
 ```
 
 
-### Sampling
+### Inspecting a model
 
 Once a model has been trained, you can inspect it using the interactive sampling script.
 
 ```
-python sample.py config.json
+python inspect_model.py /path/to/config.json
 ```
 
-Type a sentence at the prompt to get a few reconstructions, the norm of their representations,
-and the latent space classifiers' predictions given these representations.
-Press ENTER with no input to generate a few sentences randomly from the latent space.
+See the documentation within the script for more information.
 
 
 ### Measuring Disentanglement
