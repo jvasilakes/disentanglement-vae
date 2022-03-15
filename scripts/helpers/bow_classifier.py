@@ -62,24 +62,31 @@ def estimate(args):
     tmp = data_utils.get_sentences_labels(dev_path)
     dev_sents, dev_labels, sent_ids, _ = tmp
 
+    test_path = os.path.join(args.data_dir, "test.jsonl")
+    tmp = data_utils.get_sentences_labels(test_path)
+    test_sents, test_labels, sent_ids, _ = tmp
+
     vectorizer = CountVectorizer(stop_words=None, ngram_range=(1, 1),
                                  binary=True, preprocessor=None,
                                  tokenizer=tokenizer)
     X = {}
     X["train"] = vectorizer.fit_transform(train_sents)
     X["dev"] = vectorizer.transform(dev_sents)
+    X["test"] = vectorizer.transform(test_sents)
 
     for lab_name in label_counts.keys():
         if lab_name not in ["uncertainty", "polarity"]:
             continue
         y_train = [train_labels[i][lab_name] for i in range(len(train_sents))]
         y_dev = [dev_labels[i][lab_name] for i in range(len(dev_sents))]
+        y_test = [test_labels[i][lab_name] for i in range(len(test_sents))]
 
         # Checking k in the range(2, 30) found that 20 performs best.
         k = 20
         feature_selector = SelectKBest(f_classif, k=k)
         X_train = feature_selector.fit_transform(X["train"], y_train)
         X_dev = feature_selector.transform(X["dev"])
+        X_test = feature_selector.transform(X["test"])
 
         support = feature_selector.get_support()
         names = np.array(vectorizer.get_feature_names())
@@ -95,7 +102,8 @@ def estimate(args):
             outF.write(str(chosen_features) + '\n')
             outF.write(f"{'':<10} {'precision':<10} {'recall':<10} {'F1':<10}\n")  # noqa
             for (dataname, xs, y) in [("train", X_train, y_train),
-                                      ("dev", X_dev, y_dev)]:
+                                      ("dev", X_dev, y_dev),
+                                      ("test", X_test, y_test)]:
                 preds = model.predict(xs)
                 p, r, f, _ = precision_recall_fscore_support(
                     y, preds, average="macro")
