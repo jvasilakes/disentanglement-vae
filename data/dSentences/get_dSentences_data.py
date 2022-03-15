@@ -5,9 +5,8 @@ import numpy as np
 from tqdm import tqdm
 from hashlib import md5
 
+import spacy
 from sklearn.model_selection import train_test_split
-
-from verb_object_annotations import get_verb_object_annotations
 
 
 def parse_args():
@@ -106,6 +105,43 @@ def main(args):
             for datum in dset:
                 json.dump(datum, outF)
                 outF.write('\n')
+
+
+def get_verb_object_annotations(examples, object_tokens):
+    """
+    The default dSentences annotations lump the verb and object together into
+    a single annotation, which makes it impossible to model them separately.
+    This script generates separate annoatations for verb and object.
+
+    :param dict examples: full dataset in JSON format
+    :param list object_tokens: list of object strings
+    """
+    nlp = spacy.load("en_core_web_sm", disable=["parser", "ner"])
+
+    # Map root form of each object to a unique id
+    obj2idx = {}
+    lemma2idx = {}
+    for obj in object_tokens:
+        obj_processed = nlp(obj)[0]
+        lemma = obj_processed.lemma_
+        try:
+            idx = lemma2idx[lemma]
+        except KeyError:
+            idx = len(lemma2idx)
+            lemma2idx[lemma] = idx
+        obj2idx[obj] = idx
+
+    new_examples = []
+    for ex in examples:
+        # There is new verb every 10 indices in the raw data.
+        verb_idx = ex["verb_obj_tuple"] // 10
+        obj_text = ex["sentence"].split()[-1]
+        obj_idx = obj2idx[obj_text]
+        ex["verb"] = verb_idx
+        ex["object"] = obj_idx
+        new_examples.append(ex)
+
+    return new_examples
 
 
 if __name__ == "__main__":
