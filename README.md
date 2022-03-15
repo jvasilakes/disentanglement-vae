@@ -88,12 +88,21 @@ The script above will also, as a side-effect, compute self-BLEU scores (table 3)
 
 #### Invariance
 
-*TBD*
+*Details TBD, but the relevant latent parameters for computing correlations are logged under `logs/{model_name}/metadata/`*
+
 
 #### Generation
-*TBD*
+*Details TBD*
+```
+python scripts/evaluation/compute_ppl.py
+```
+self-BLEUs at `logs/{model_name}/evaluation/self_bleus_*.csv`.
+
 
 **Controlled Generation**
+```
+python scripts/evaluation/controlled_generation.py
+```
 
 For computing the regression models over the latent spaces (like table 12)
 ```
