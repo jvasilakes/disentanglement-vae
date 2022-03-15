@@ -1,4 +1,6 @@
-# Learning Disentangled and Informative Representations of Negation and Uncertainty
+# Learning Disentangled Representations of Negation and Uncertainty
+
+This is the official repository for the long paper accepted at ACL 2022.
 
 
 ## Installation
