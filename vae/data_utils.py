@@ -180,7 +180,7 @@ class DenoisingTextDataset(torch.utils.data.Dataset):
         origX = self.doc2tensor(self.orig_docs[idx])
         Y = self.label2tensor(self.labels[idx])
         #return (self.noisy_Xs[idx], self.orig_Xs[idx],
-        return (noiseX, origX, Y[idx], self.ids[idx])
+        return (noiseX, origX, Y, self.ids[idx])
 
     def get_by_id(self, uuid):
         idx = self.ids.index(uuid)
