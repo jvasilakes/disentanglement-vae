@@ -1,0 +1,41 @@
+{
+  "name": "combined/sfu_amazon_100k/vae_advloss",
+  "random_seed": 10,
+  "data_dir": "data/combined/sfu_amazon_100k",
+  "combined_dataset": true,
+  "dataset_minibatch_ratios": {
+    "sfu": 0.5,
+    "amazon": 0.5
+  },
+  "checkpoint_dir": "model_checkpoints/",
+  "glove_path": "",
+  "num_train_examples": -1,
+  "lowercase": true,
+  "reverse_input": false,
+  "embedding_dim": 256,
+  "hidden_dim": 256,
+  "num_rnn_layers": 2,
+  "bidirectional_encoder": true,
+  "bow_encoder": false,
+  "latent_dims": {
+    "total": 64,
+    "polarity": 1,
+    "uncertainty": 1
+  },
+  "epochs": 20,
+  "batch_size": 128,
+  "learn_rate": 0.0003,
+  "encoder_dropout": 0.5,
+  "decoder_dropout": 0.5,
+  "teacher_forcing_prob": 0.5,
+  "lambdas": {
+    "default": 0.01,
+    "polarity": 0.005,
+    "uncertainty": 0.005
+  },
+  "adversarial_loss": true,
+  "mi_loss": false,
+  "train": true,
+  "validate": true,
+  "test": false
+}
