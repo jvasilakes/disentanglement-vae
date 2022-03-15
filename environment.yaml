@@ -1,4 +1,4 @@
-name: pytorch2
+name: dvae
 channels:
   - huggingface
   - pytorch
@@ -149,4 +149,3 @@ dependencies:
   - pip:
     - mypy-extensions==0.4.3
     - sentencepiece==0.1.91
-prefix: /mnt/iusers01/nactem01/u14498jv/.conda/envs/pytorch2

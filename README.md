@@ -1,15 +1,107 @@
 # Learning Disentangled and Informative Representations of Negation and Uncertainty
 
-### Requirements
 
-See `requirements.txt`.
-
-### Installation
+## Installation
 
 ```
 git clone https://github.com/jvasilakes/disentanglement-vae.git
-python setup.py develop
+conda env create -f environment.yaml  # Install dependencies
+conda activate dvae
+python setup.py develop  # Install code under vae/
 ```
+
+## Reproducing experiments from the paper
+
+### Data
+
+Tarballs of the raw data are stored in `data/tars/`. Follow the instructions in the associated READMEs (e.g. `data/SFU/README.md`) to preprocess them.
+
+#### Combined SFU+Amazon
+Unpack the SFU tarball at `data/tars/sfu_all.tar.gz` into `data/SFU/` and follow the instructions at `data/SFU/README.md`.
+Unpack the Amazon tarball at `data/tars/amazon.tar.gz` into `data/Amazon/` and follow the instructions at `data/Amazon/README.md`.
+
+Train the BOW negation and uncertainty classifiers on SFU.
+```
+python scripts/helpers/bow_classifier.py estimate data/SFU/processed data/SFU/bow_classifier_logs
+```
+Apply these models to the Amazon data to generate weak labels.
+```
+python scripts/helpers/bow_classifier.py apply data/SFU/bow_classifier_logs data/Amazon/processed data/Amazon/neg_unc_labels
+```
+
+Combine SFU with the labeled Amazon data
+```
+python scripts/helpers/combine_datasets.py --data_dirs data/SFU/processed data/Amazon/neg_unc_labels/ --dataset_names sfu amazon --Ns -1 100000 --outdir data/combined/sfu_amazon_100k/
+```
+
+`data/combined/sfu_amazon_100k/{train,dev,test}.jsonl` are now ready for training!
+Make sure to set `"combined_dataset": true` and `"dataset_minibatch_ratios": {"sfu": float, "amazon": float}` (where the floats sum to 1) in the config file. The `dataset_minibatch_ratios` parameter specifies the percentage of examples in each minibatch that should be
+taken from each dataset.
+
+
+#### Combined SFU+Yelp
+The process is the same as above using `data/tars/yelp.tar.gz` instead of the Amazon data.
+
+
+
+### Model Training
+
+Config files for each model reported in the paper are in `reproduction_configs`.
+
+```
+python run.py reproduction_configs/{model}.json [--verbose]
+```
+
+This command will train the model, run validation at every epoch, and run testing at the final epoch.
+Log files, model checkpoints, and tensorboard files are by default saved to `$CWD/{logs,model_checkpoints,runs}/name/`
+where `name` is whatever is set as the `name` field in the config file passed to `run.py`.
+
+### Model Evaluation
+
+All evaluation scripts are in `scripts/evaluation/`.
+
+#### Disentanglement
+using the combined SFU+Amazon dataset
+
+```
+# Compute the necessary statistics
+python scripts/evaluation/disentanglement.py compute --num_resamples 30 logs/combined/sfu_amazon_100k/{model_name}/metadata/ data/combined/sfu_amazon_100k/ test logs/combined/sfu_amazon_100k/{model_name}/evaluation/
+
+# Output the numbers, like table 1
+python scripts/evaluation/disentanglement.py summarize test logs/combined/sfu_amazon_100k/{model_name}/evaluation/
+
+# Plots MIG box plots, like figure 5
+python scripts/evaluation/plot_migs.py logs/combined/sfu_amazon_100k/{first_model_name}/evaluation/MIGS_test.jsonl logs/combined/sfu_amazon_100k/{next_model_name}/evaluation/MIGS_test.jsonl ... outfile
+```
+
+#### Consistency
+```
+# Compute the necessary statistics.
+python scripts/evaluation/consistency.py compute --num_resamples 30 logs/{model_name}/config_epoch0.json logs/{model_name}/evaluation/ test
+
+Summarize the numbers, like table 4
+python scripts/evaluation/consistency.py summarize logs/{model_name}/evaluation/ test
+```
+
+The script above will also, as a side-effect, compute self-BLEU scores (table 3) for each resample from the latent space. They are saved to `logs/{model_name}/evaluation/self_bleus_test.csv`. 
+
+
+#### Invariance
+
+*TBD*
+
+#### Generation
+*TBD*
+
+**Controlled Generation**
+
+For computing the regression models over the latent spaces (like table 12)
+```
+python scripts/helpers/predict_ntokens.py --dataset test logs/{model_name}/metadata data/{dataset_name}/processed/
+```
+
+
+## Running your own experiments
 
 An example config file is at `config_example.json`. Check out `vae.utils.validate_params()` for more documentation.
 Some things to note, the value of the `latent_dims` parameter is a mapping from label names (in the training data)
@@ -46,26 +138,6 @@ This produces a plot of the aggregated approximate posterior ∫q(z|x)p(x)dx for
 Warning, this plots all dimensions separately, so its only adviseable to run this for small latents.
 
 
-### Reproducing Experiments
-
-For every experiment run, the config file passed to `run.py` is logged to `logs/<experiment_name>/config_epoch<start_epoch>.json`.
-You can use these config files directly to recreate an experiment. Besides some imprecision introduced by GPU computing,
-and barring any fiddling with the source code, the experiments should recreate exactly. We recommend the following steps
-to recreate an experiment named `experiment1`.
-
-```
-mkdir experiment1_configs/
-cp logs/experiment1/config_*.json experiment1_configs/
-vim experiment1_configs/*  # edit the "name" of each to be something like "experiment1_reprod"
-# Run the experiments in order of `start_epoch`.
-python run.py experiment1_configs/config_epoch0.json --verbose
-.
-.
-.
-python run.py experiment1_configs/config_epoch30.json --verbose
-# etc.
-```
-
 
 ### Inspecting a model
 
@@ -76,79 +148,3 @@ python inspect_model.py /path/to/config.json
 ```
 
 See the documentation within the script for more information.
-
-
-### Measuring Disentanglement
-
-The first script will estimate the Mutual Information Gap (MIG) for each latent space by sampling multiple
-times from each space. It will then compute the mutual information between the latents and the ground truth generative factor values
-(i.e. the labels). The second command will then summarize these results, printing out some stats and saving
-some plots to `logs/<model_name>/evaluation`.
-
-```
-python scripts/evaluation/disentanglement.py compute logs/<model_name>/metadata data/<dataset>/processed {train,dev,test} logs/<model_name>/evaluation
-python scripts/evaluation/disentanglement.py summarize {train,dev,test} logs/<model_name>/evaluation
-```
-
-### Encoder - Decoder Consistency
-Consistency of the decoder and the encoder can be computed and measured with the following script.
-Again, plots and detailed stats are saved to the evaluation directory.
-
-```
-python scripts/evaluation/decoding.py compute logs/<model_name>/<config_file>.json logs/<model_name>/evaluation {train,dev,test}
-python scripts/evaluation/decoding.py summarize logs/<model_name>/evaluation {train,dev,test}
-```
-
-### Weak Supervision of Negation and Uncertainty
-
-Since sentence level negation and uncertainty annotations are fairly straightforward, we leverage a simple Naive Bayes classifier
-with BOW features to automatically annotate Amazon reviews. First, train and evaluate the classifier on SFU,
-
-```
-python scripts/helpers/bow_classifier.py estimate data/SFU/processed data/SFU/bow_classifier_logs
-```
-
-The models are saved at `data/SFU/bow_classifier_logs/models/`. The evaluation results are
-
-```
-$> cat data/SFU/bow_classifier_logs/results.log
-
-uncertainty
-Features:
-['be' 'can' 'could' 'either' 'i' 'if' 'may' 'maybe' 'might' 'must' 'or'
- 'perhaps' 'probably' 'seem' 'seemed' 'seems' 'should' 'think' 'would'
- 'you']
-           precision  recall     F1        
-train      0.9515     0.9414     0.9464    
-dev        0.9585     0.9526     0.9555    
-
-polarity
-Features:
-['any' 'but' 'ca' 'cannot' 'did' 'do' 'does' 'dont' 'either' 'even' 'have'
- 'i' 'it' "n't" 'need' 'never' 'no' 'not' 'without' 'wo']
-           precision  recall     F1        
-train      0.9377     0.9018     0.9187    
-dev        0.9422     0.8766     0.9060    
-
-```
-
-Then apply this model on the Amazon data
-
-```
-python scripts/helpers/bow_classifier.py apply data/SFU/bow_classifier_logs data/Amazon/processed data/Amazon/neg_unc_labels
-```
-
-This command updates the Amazon dataset with labels and probabilities predicted by the classifier trained on SFU.
-
-Now, since SFU and Amazon both have annotations for negation and uncertainty, we can combined them into a single dataset to
-use in training. The following command puts all the SFU data and 100k examples from Amazon into a new dataset
-at `data/combined/sfu_amazon_100k/`.
-
-```
-python scripts/helpers/combine_datasets.py --data_dirs data/SFU/processed data/Amazon/neg_unc_labels/ --dataset_names sfu amazon --Ns -1 100000 --outdir data/combined/sfu_amazon_100k/
-```
-
-Now we can train a VAE on the combined dataset by setting `"combined_dataset": true` and
-`"dataset_minibatch_ratios": {"sfu": float, "amazon": float}` (where the floats sum to 1) in the config file.
-The `dataset_minibatch_ratios` parameter specifies the percentage of examples in each minibatch that should be
-taken from each dataset.
