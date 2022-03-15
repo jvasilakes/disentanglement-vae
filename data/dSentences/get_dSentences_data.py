@@ -7,6 +7,8 @@ from hashlib import md5
 
 from sklearn.model_selection import train_test_split
 
+from verb_object_annotations import get_verb_object_annotations
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -15,6 +17,10 @@ def parse_args():
     parser.add_argument("--split_on", type=str,
                         choices=["content", "factors", "random"],
                         help="How to split into train/dev/test.")
+    parser.add_argument("--object_tokens_file", type=str, default=None,
+                        help="""If specified, get separate annotations
+                                for each verb and object, in contrast to
+                                the original verb_obj_tuple annotations.""")
     return parser.parse_args()
 
 
@@ -36,6 +42,11 @@ def main(args):
         labs_dict = {k: int(v) for (k, v) in labs_dict.items()}
         d = {"id": sent_hash, "sentence": sent, **labs_dict}
         examples.append(d)
+
+    if args.object_tokens_file is not None:
+        object_tokens = [token.strip() for token
+                         in open(args.object_tokens_file)]
+        examples = get_verb_object_annotations(examples, object_tokens)
 
     # train_split value from 'main_beta_vae.py'
     train_split = 0.75
@@ -86,6 +97,7 @@ def main(args):
     print("Total: ", len(trainset) + len(devset) + len(testset))
 
     print(f"Saving to {args.outdir}")
+    os.makedirs(args.outdir, exist_ok=True)
     zipped = zip([trainset, devset, testset], ["train", "dev", "test"])
     for (dset, setname) in zipped:
         outfile = os.path.join(args.outdir, f"{setname}.jsonl")
