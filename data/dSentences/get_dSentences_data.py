@@ -14,6 +14,7 @@ def parse_args():
 
 
 def main(args):
+    os.makedirs(args.outdir, exist_ok=False)
     dataset = np.load(args.infile, encoding="latin1", allow_pickle=True)
     sents = dataset["sentences_array"]
     labels = dataset["latents_classes"]
